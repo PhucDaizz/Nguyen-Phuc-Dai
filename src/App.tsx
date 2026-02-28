@@ -7,17 +7,18 @@ import { Suspense, useState, useEffect } from 'react';
 import { Loader } from './components/Loader';
 
 function App() {
-  const [pages, setPages] = useState(5.5);
+  const [pages, setPages] = useState(7.5);
 
   useEffect(() => {
     const handleResize = () => {
       // Because fields stack vertically on smaller screens, they take up more 'vh'.
+      // Total content is ~7+ pages on desktop (Hero 1 + Identity 1.5 + Projects 1.5 + Expertise 1.5 + Contact 1 + padding)
       if (window.innerWidth <= 768) {
-        setPages(8.5); // Extend scrolling area for mobile
+        setPages(12); // Extend scrolling area for mobile (all columns stack vertically)
       } else if (window.innerWidth <= 1024) {
-        setPages(7); // Extend scrolling area for tablet
+        setPages(9); // Extend scrolling area for tablet
       } else {
-        setPages(5.5); // Default for desktop
+        setPages(7.5); // Default for desktop
       }
     };
 
