@@ -1,0 +1,424 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --accent: #ffffff;
+  --panel-bg: rgba(10, 10, 10, 0.4);
+  --panel-border: rgba(255, 255, 255, 0.08);
+
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+
+  --transition-smooth: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  cursor: none;
+  /* Custom cursor everywhere */
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Background Noise overlay for premium texture */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-size: clamp(3rem, 10vw, 8rem);
+  line-height: 0.9;
+  font-weight: 300;
+}
+
+h2 {
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  margin-bottom: 2rem;
+  line-height: 1;
+}
+
+p {
+  line-height: 1.7;
+  color: var(--text-secondary);
+  font-size: 1.15rem;
+  font-weight: 300;
+}
+
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 4vw;
+}
+
+/* Premium Glass Panel */
+.glass-panel {
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.4) 0%, rgba(5, 5, 5, 0.2) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 3rem;
+  transition: var(--transition-smooth);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+}
+
+.glass-panel:hover {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.5) 0%, rgba(10, 10, 10, 0.3) 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-5px);
+}
+
+/* Micro Interactions */
+.interactive-element {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.interactive-element::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--text-primary);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.interactive-element:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Specific Section Styles */
+.hero-section {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hero-content {
+  pointer-events: auto;
+  max-width: 1200px;
+}
+
+/* Grid layout for structural look */
+.architectural-layout {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2rem;
+}
+
+.col-span-12 {
+  grid-column: span 12;
+}
+
+.col-span-8 {
+  grid-column: span 8;
+}
+
+.col-span-7 {
+  grid-column: span 7;
+}
+
+.col-span-6 {
+  grid-column: span 6;
+}
+
+.col-span-5 {
+  grid-column: span 5;
+}
+
+.col-span-4 {
+  grid-column: span 4;
+}
+
+.expertise-panel {
+  padding: 5rem 4rem;
+}
+
+.expertise-col {
+  padding: 0 2rem;
+  border-right: 1px solid var(--panel-border);
+}
+
+.expertise-col:first-child {
+  padding-left: 0;
+}
+
+.expertise-col:last-child {
+  padding-right: 0;
+  border-right: none;
+}
+
+.identity-layout {
+  gap: 4rem;
+  align-items: center;
+}
+
+.contact-links {
+  display: flex;
+  gap: 3rem;
+}
+
+.site-footer {
+  margin-top: 8rem;
+  border-top: 1px solid var(--panel-border);
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 1024px) {
+
+  .col-span-8,
+  .col-span-7,
+  .col-span-6,
+  .col-span-5,
+  .col-span-4 {
+    grid-column: span 12;
+  }
+
+  .architectural-layout {
+    gap: 2rem !important;
+  }
+
+  .identity-layout {
+    gap: 2rem;
+    /* When stacked vertically, center the image column */
+    justify-items: center;
+  }
+
+  .identity-image-col {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .glass-panel {
+    padding: 2rem;
+  }
+
+  .expertise-panel {
+    padding: 2rem;
+  }
+
+  .expertise-col {
+    padding: 2rem 0;
+    border-right: none;
+    border-bottom: 1px solid var(--panel-border);
+  }
+
+  .expertise-col:first-child {
+    padding-top: 0;
+  }
+
+  .expertise-col:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  h1 {
+    font-size: clamp(3rem, 12vw, 5rem);
+  }
+
+  h2 {
+    font-size: clamp(2rem, 8vw, 3.5rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-links {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .site-footer {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+    margin-top: 5rem;
+  }
+
+  .premium-image-container {
+    height: 320px !important;
+  }
+}
+
+/* Project Cards */
+.project-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 2.5rem;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1.5rem;
+}
+
+.tag {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  color: var(--text-secondary);
+  transition: var(--transition-smooth);
+}
+
+.project-card:hover .tag {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--text-primary);
+}
+
+/* Subtle, ultra-modern button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  transition: var(--transition-smooth);
+  text-transform: uppercase;
+  cursor: none;
+}
+
+.btn:hover {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
+}
+
+/* Canvas container */
+#canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.reveal-text span {
+  display: inline-block;
+}
+
+/* Image styling */
+.premium-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: var(--transition-smooth);
+}
+
+.premium-image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.premium-image-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  opacity: 0.5;
+  transition: var(--transition-smooth);
+}
+
+.premium-image-container:hover .premium-image {
+  transform: scale(1.05);
+}
+
+.premium-image-container:hover::after {
+  opacity: 0.1;
+}
