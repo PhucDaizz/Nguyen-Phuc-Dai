@@ -18,18 +18,33 @@ export const HTMLContent = () => {
     useEffect(() => {
         async function loadProjects() {
             try {
-                const response = await fetch('https://api.github.com/search/repositories?q=user:phucdaizz&sort=stars&order=desc&per_page=6');
-                const data = await response.json();
-                const topRepos = data.items || [];
-                setProjects(topRepos.map((repo: any) => ({
+                // Hardcoded list of pinned repositories to ensure they match the GitHub profile exactly.
+                // Note: GitHub REST API does not have a "pinned" endpoint, so we fetch them by name.
+                const pinnedRepoNames = [
+                    'CarbonTC',
+                    'E-commerce-FE',
+                    'E-commerce-BE',
+                    'WordWise-BE',
+                    'WordWise',
+                    'LicensePlateRecognitionVNAPI'
+                ];
+
+                const fetchPromises = pinnedRepoNames.map(repoName =>
+                    fetch(`https://api.github.com/repos/PhucDaizz/${repoName}`).then(res => res.json())
+                );
+
+                const reposData = await Promise.all(fetchPromises);
+                const validRepos = reposData.filter(repo => repo && !repo.message);
+
+                setProjects(validRepos.map((repo: any) => ({
                     title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
                     description: repo.description,
                     liveLink: repo.homepage,
                     githubLink: repo.html_url,
-                    tags: repo.topics.length > 0 ? repo.topics : (repo.language ? [repo.language] : []),
+                    tags: repo.topics && repo.topics.length > 0 ? repo.topics : (repo.language ? [repo.language] : []),
                 })));
             } catch (error) {
-                console.error("Error fetching", error);
+                console.error("Error fetching projects", error);
             }
         }
         loadProjects();
@@ -287,7 +302,7 @@ export const HTMLContent = () => {
 
                     <motion.footer variants={itemVariants} className="site-footer">
                         <span>© {new Date().getFullYear()} NGUYEN PHUC DAI.</span>
-                        <span>SYSTEM CONSTRUCTED TO PERFECTION.</span>
+                        <span>CRAFTING RELIABLE SOFTWARE.</span>
                     </motion.footer>
                 </motion.div>
             </section>

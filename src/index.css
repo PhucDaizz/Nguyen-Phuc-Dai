@@ -19,8 +19,6 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  cursor: none;
-  /* Custom cursor everywhere */
 }
 
 body {
@@ -367,7 +365,7 @@ a:hover {
   letter-spacing: 0.1em;
   transition: var(--transition-smooth);
   text-transform: uppercase;
-  cursor: none;
+  cursor: pointer;
 }
 
 .btn:hover {

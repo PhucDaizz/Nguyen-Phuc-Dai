@@ -2,7 +2,6 @@ import { Canvas } from '@react-three/fiber';
 import { ScrollControls } from '@react-three/drei';
 import { Scene } from './components/Scene';
 import { HTMLContent } from './components/HTMLContent';
-import { Cursor } from './components/Cursor';
 import { Suspense, useState, useEffect } from 'react';
 import { Loader } from './components/Loader';
 
@@ -29,13 +28,13 @@ function App() {
 
   return (
     <>
-      <Cursor />
       <Loader />
       <div id="canvas-container">
         <Canvas
           camera={{ position: [0, 0, 5], fov: 75 }}
-          dpr={[1, 2]} // Performance: pixel ratio cap
-          gl={{ antialias: false, powerPreference: "high-performance" }} // Performance optimization
+          dpr={[1, 1.5]} // Performance: limit pixel ratio cap to 1.5 (down from 2, huge FPS improvement on retinal screens)
+          gl={{ antialias: false, powerPreference: "high-performance", alpha: false }} // alpha: false helps performance
+          performance={{ min: 0.5 }} // Allows fiber to scale down resolution if frame drops
         >
           <color attach="background" args={['#000000']} />
           <Suspense fallback={null}>

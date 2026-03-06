@@ -181,6 +181,7 @@ const AbstractGlassStructure = () => {
                 color="#ffffff"
                 attenuationDistance={2}
                 attenuationColor="#ffffff"
+                resolution={256} // Boosts performance significantly by rendering refraction to lower resolution texture
             />
         </mesh>
     );
