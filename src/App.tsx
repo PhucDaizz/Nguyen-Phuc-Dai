@@ -38,7 +38,7 @@ function App() {
         >
           <color attach="background" args={['#000000']} />
           <Suspense fallback={null}>
-            <ScrollControls pages={pages} damping={0.2}>
+            <ScrollControls pages={pages} damping={0.1}>
               {/* The 3D world that moves automatically as you scroll */}
               <Scene />
 
