@@ -21,12 +21,12 @@ export const HTMLContent = () => {
                 // Hardcoded list of pinned repositories to ensure they match the GitHub profile exactly.
                 // Note: GitHub REST API does not have a "pinned" endpoint, so we fetch them by name.
                 const pinnedRepoNames = [
+                    'AI-Fitness-Coach',
                     'CarbonTC',
                     'E-commerce-FE',
                     'E-commerce-BE',
                     'WordWise-BE',
-                    'WordWise',
-                    'LicensePlateRecognitionVNAPI'
+                    'WordWise'
                 ];
 
                 const fetchPromises = pinnedRepoNames.map(repoName =>
@@ -95,14 +95,22 @@ export const HTMLContent = () => {
 
                     <motion.div variants={itemVariants}>
                         <p style={{ maxWidth: '700px', marginTop: '3rem', fontSize: '1.4rem' }}>
-                            Crafting immersive, performance-driven digital environments.
-                            Treating code like architecture—building scalable foundations and seamless micro-interactions.
+                            Building robust, performance-driven web systems and APIs.
+                            Focusing on scalable architectures, clean code, and delivering real value to users.
                         </p>
                     </motion.div>
 
                     <motion.div variants={itemVariants} style={{ marginTop: '4rem', display: 'flex', gap: '2rem' }}>
-                        <a href="#about" className="interactive-element" style={{ paddingBottom: '0.2rem', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
-                            Discover Paradigm <ArrowUpRight size={16} style={{ display: 'inline', marginLeft: '0.5rem', marginBottom: '-2px' }} />
+                        <a 
+                            href="#about" 
+                            className="interactive-element" 
+                            style={{ paddingBottom: '0.2rem', borderBottom: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer' }}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                        >
+                            About Me <ArrowUpRight size={16} style={{ display: 'inline', marginLeft: '0.5rem', marginBottom: '-2px' }} />
                         </a>
                     </motion.div>
                 </motion.div>
@@ -117,34 +125,33 @@ export const HTMLContent = () => {
                     viewport={{ once: true, margin: "-100px" }}
                 >
                     <motion.h2 variants={itemVariants} style={{ marginBottom: '4rem' }}>
-                        Structured<br /><span style={{ color: 'var(--text-secondary)' }}>Identity</span>
+                        About<br /><span style={{ color: 'var(--text-secondary)' }}>Me</span>
                     </motion.h2>
 
                     <div className="architectural-layout">
                         <motion.div variants={itemVariants} className="col-span-12 glass-panel" style={{ marginBottom: '3rem' }}>
                             <div className="architectural-layout identity-layout">
                                 <div className="col-span-5 premium-image-container identity-image-col" style={{ height: '500px' }}>
-                                    <img src="https://iili.io/FFwH7hF.md.jpg" alt="Portrait" className="premium-image" />
+                                    <img src="https://github.com/PhucDaizz.png" alt="Portrait" className="premium-image" />
                                 </div>
                                 <div className="col-span-7">
-                                    <h3 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 300 }}>Architect of Digital Spaces.</h3>
+                                    <h3 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 300 }}>Full-Stack Software Developer</h3>
                                     <p style={{ marginBottom: '2rem', fontSize: '1.2rem' }}>
-                                        I am a software engineer focused on building robust, resilient, and structurally sound solutions.
-                                        Beyond just raw code, I engineer systems with an emphasis on spatial design principles, ensuring every interface feels tactile, alive, and intuitive.
+                                        I am Nguyen Phuc Dai, a software developer passionate about building robust web systems and APIs on the .NET platform. My expertise spans ASP.NET Core, Entity Framework Core, SQL Server, Docker, and ReactJS.
                                     </p>
                                     <p style={{ marginBottom: '2rem', fontSize: '1.2rem' }}>
-                                        Bridging backend resilience with frontend hyper-immersion, my mission is to elevate the baseline quality of web applications.
+                                        I am always seeking opportunities to learn, improve my skills, and build high-quality software products that deliver real value to users.
                                     </p>
                                     <div style={{ padding: '2rem 0', borderTop: '1px solid var(--panel-border)', borderBottom: '1px solid var(--panel-border)' }}>
-                                        <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', marginBottom: '1rem' }}>CORE DIRECTIVE</h4>
-                                        <p style={{ color: 'var(--text-primary)' }}>Constructing sophisticated frameworks that scale effortlessly while retaining uncompromising aesthetics.</p>
+                                        <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', marginBottom: '1rem' }}>CORE MISSION</h4>
+                                        <p style={{ color: 'var(--text-primary)' }}>Building reliable, high-performance web systems and writing clean, maintainable code.</p>
                                     </div>
                                 </div>
                             </div>
                         </motion.div>
 
                         <motion.div variants={itemVariants} className="col-span-12 glass-panel">
-                            <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', marginBottom: '3rem', textAlign: 'center' }}>SYSTEM METRICS</h4>
+                            <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', marginBottom: '3rem', textAlign: 'center' }}>GITHUB STATISTICS</h4>
                             <div className="architectural-layout" style={{ gap: '2rem', alignItems: 'center' }}>
                                 <div className="col-span-6 interactive-element" style={{ width: '100%' }}>
                                     <img
@@ -161,13 +168,13 @@ export const HTMLContent = () => {
                                     />
                                 </div>
                             </div>
-                            <div style={{ marginTop: '2rem', textAlign: 'center' }} className="interactive-element">
+                            {/* <div style={{ marginTop: '2rem', textAlign: 'center' }} className="interactive-element">
                                 <img
                                     src="https://github-readme-activity-graph.vercel.app/graph?username=PhucDaizz&theme=github-dark-dimmed&bg_color=0a0a0a&hide_border=true&color=a1a1aa&line=555555&point=ffffff"
                                     alt="Graph"
                                     style={{ width: '100%', borderRadius: '8px' }}
                                 />
-                            </div>
+                            </div> */}
                         </motion.div>
                     </div>
                 </motion.div>
@@ -182,7 +189,7 @@ export const HTMLContent = () => {
                     viewport={{ once: true, margin: "-100px" }}
                 >
                     <motion.h2 variants={itemVariants} style={{ marginBottom: '4rem', textAlign: 'right' }}>
-                        Constructed<br /><span style={{ color: 'var(--text-secondary)' }}>Prototypes</span>
+                        Featured<br /><span style={{ color: 'var(--text-secondary)' }}>Projects</span>
                     </motion.h2>
 
                     <div className="architectural-layout" style={{ gap: '3rem' }}>
@@ -226,7 +233,7 @@ export const HTMLContent = () => {
                     viewport={{ once: true, margin: "-100px" }}
                 >
                     <motion.h2 variants={itemVariants} style={{ marginBottom: '4rem' }}>
-                        Technical<br /><span style={{ color: 'var(--text-secondary)' }}>Subsystems</span>
+                        Technical<br /><span style={{ color: 'var(--text-secondary)' }}>Skills</span>
                     </motion.h2>
 
                     <motion.div variants={itemVariants} className="glass-panel architectural-layout expertise-panel">

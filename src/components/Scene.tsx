@@ -1,6 +1,6 @@
 import { useRef, useMemo, Suspense } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useScroll, MeshTransmissionMaterial, Float, Environment, Sparkles, Text } from '@react-three/drei';
+import { useScroll, Float, Environment, Sparkles, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
 // ─── SKILL GALAXY ────────────────────────────────────────────────────────────
@@ -147,43 +147,78 @@ const SkillOrbit = () => {
 
 // ─── GLASS STRUCTURE ─────────────────────────────────────────────────────────
 
-const AbstractGlassStructure = () => {
+const AbstractGlassStructure = ({ isMobile = false }: { isMobile?: boolean }) => {
     const meshRef = useRef<THREE.Mesh>(null);
+    const wireRef = useRef<THREE.Mesh>(null);
     const scroll = useScroll();
-    const geometry = useMemo(() => new THREE.IcosahedronGeometry(2.5, 4), []);
+    
+    // Low detail on mobile (2 subdivisions) for maximum CPU/GPU efficiency, desktop can use 3.
+    const geometry = useMemo(() => new THREE.IcosahedronGeometry(2.5, isMobile ? 2 : 3), [isMobile]);
 
-    useFrame((state, delta) => {
+    useFrame((state) => {
         if (!meshRef.current) return;
-        meshRef.current.rotation.y += delta * 0.1;
-        meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.2) * 0.2;
 
+        // Base continuous rotation
+        const baseRotation = state.clock.elapsedTime * 0.05;
         const offset = scroll.offset;
-        meshRef.current.rotation.y += offset * Math.PI;
+
+        // Corrected: Set the rotation absolute to offset, preventing compounding high-speed rotation on scroll.
+        meshRef.current.rotation.y = baseRotation + offset * Math.PI;
+        meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.15) * 0.15;
+
+        if (wireRef.current) {
+            // Counter rotation for parallax depth effect
+            wireRef.current.rotation.y = -state.clock.elapsedTime * 0.08;
+        }
 
         const breathe = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
-        meshRef.current.scale.setScalar(1 + offset * 1.5 + breathe);
+        const scale = (isMobile ? 0.8 : 1) * (1 + offset * 1.5 + breathe); // slightly smaller on mobile
+
+        meshRef.current.scale.setScalar(scale);
         meshRef.current.position.y = -offset * 15;
         meshRef.current.position.z = offset * 5;
     });
 
+    if (isMobile) {
+        return (
+            <group ref={meshRef}>
+                {/* Extremely lightweight single-pass wireframe sphere for mobile devices */}
+                <mesh geometry={geometry}>
+                    <meshBasicMaterial
+                        color="#ffffff"
+                        wireframe
+                        transparent
+                        opacity={0.08}
+                    />
+                </mesh>
+            </group>
+        );
+    }
+
     return (
-        <mesh ref={meshRef} geometry={geometry}>
-            <MeshTransmissionMaterial
-                backside
-                backsideThickness={1.5}
-                thickness={1.5}
-                ior={1.2}
-                chromaticAberration={0.06}
-                anisotropy={0.3}
-                distortion={0.5}
-                distortionScale={0.5}
-                temporalDistortion={0.1}
-                color="#ffffff"
-                attenuationDistance={2}
-                attenuationColor="#ffffff"
-                resolution={256} // Boosts performance significantly by rendering refraction to lower resolution texture
-            />
-        </mesh>
+        <group>
+            {/* Core mesh with high performance physical material instead of heavy transmission material */}
+            <mesh ref={meshRef} geometry={geometry}>
+                <meshPhysicalMaterial
+                    color="#111111"
+                    roughness={0.1}
+                    metalness={0.8}
+                    clearcoat={1.0}
+                    clearcoatRoughness={0.1}
+                    transparent
+                    opacity={0.4}
+                />
+                {/* Sleek outer wireframe for a digital/system vibe */}
+                <mesh ref={wireRef} geometry={geometry} scale={1.01}>
+                    <meshBasicMaterial
+                        color="#ffffff"
+                        wireframe
+                        transparent
+                        opacity={0.12}
+                    />
+                </mesh>
+            </mesh>
+        </group>
     );
 };
 
@@ -231,7 +266,7 @@ const Fragments = () => {
 
 // ─── MAIN SCENE ──────────────────────────────────────────────────────────────
 
-export const Scene = () => {
+export const Scene = ({ isMobile = false }: { isMobile?: boolean }) => {
     return (
         <>
             <color attach="background" args={['#000000']} />
@@ -239,10 +274,14 @@ export const Scene = () => {
             <ambientLight intensity={0.2} />
             <directionalLight position={[10, 20, 10]} intensity={1.5} color="#ffffff" />
             <directionalLight position={[-10, -20, -10]} intensity={0.5} color="#4444ff" />
-            <Sparkles count={300} scale={20} size={1} speed={0.4} opacity={0.2} color="#ffffff" />
+            
+            {/* Optimized particle count for mobile */}
+            <Sparkles count={isMobile ? 80 : 300} scale={20} size={1} speed={0.4} opacity={0.2} color="#ffffff" />
 
-            <AbstractGlassStructure />
-            <Fragments />
+            <AbstractGlassStructure isMobile={isMobile} />
+            
+            {/* Completely hide floating debris/fragments on mobile for massive performance gains */}
+            {!isMobile && <Fragments />}
 
             {/* Skill galaxy — Fade in on Technical Subsystems scroll range */}
             <SkillOrbit />
