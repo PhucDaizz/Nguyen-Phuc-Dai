@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Scroll } from '@react-three/drei';
-import { Github, ExternalLink, Linkedin, Mail, ArrowUpRight, Star, GitFork, BookOpen, Code2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Github, ExternalLink, Linkedin, Mail, ArrowUpRight, Star, GitFork, BookOpen, Code2, Copy, Check, ArrowUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import portfolioData from '../data/portfolioData.json';
 
@@ -24,6 +24,30 @@ interface UserStats {
 export const HTMLContent = () => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [userStats, setUserStats] = useState<UserStats | null>(null);
+    const [emailCopied, setEmailCopied] = useState(false);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 400) {
+                setShowScrollTop(true);
+            } else {
+                setShowScrollTop(false);
+            }
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const handleCopyEmail = () => {
+        navigator.clipboard.writeText(portfolioData.contact.email);
+        setEmailCopied(true);
+        setTimeout(() => setEmailCopied(false), 2000);
+    };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     useEffect(() => {
         async function loadGithubData() {
@@ -108,6 +132,15 @@ export const HTMLContent = () => {
             opacity: 1,
             y: 0,
             transition: { type: 'spring', stiffness: 100, damping: 20 }
+        }
+    };
+
+    const getDotColor = (categoryId: string) => {
+        switch (categoryId) {
+            case '01': return '#a855f7'; // Backend - Purple
+            case '02': return '#3b82f6'; // Database - Blue
+            case '03': return '#10b981'; // Frontend/DevOps - Emerald
+            default: return '#ffffff';
         }
     };
 
@@ -280,7 +313,7 @@ export const HTMLContent = () => {
             </section>
 
             {/* 3. PROJECTS SECTION */}
-            <section className="container" style={{ minHeight: '100vh', paddingTop: '20vh' }}>
+            <section id="projects" className="container" style={{ minHeight: '100vh', paddingTop: '20vh' }}>
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
@@ -295,6 +328,14 @@ export const HTMLContent = () => {
                         {projects.map((project: Project, i: number) => (
                             <motion.div key={i} variants={itemVariants} className="col-span-6 glass-panel project-card">
                                 <div style={{ flexGrow: 1 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                                        <span style={{ fontSize: '0.7rem', letterSpacing: '0.15em', fontFamily: 'var(--font-display)', color: 'var(--text-secondary)' }}>
+                                            PROJECT 0{i + 1}
+                                        </span>
+                                        <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.6rem', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.03)' }}>
+                                            FEATURED
+                                        </span>
+                                    </div>
                                     <h3 style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>{project.title}</h3>
                                     <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)' }}>
                                         {project.description || 'System architected for optimal performance.'}
@@ -324,7 +365,7 @@ export const HTMLContent = () => {
             </section>
 
             {/* 4. EXPERTISE SECTION */}
-            <section className="container" style={{ minHeight: '100vh', paddingTop: '20vh' }}>
+            <section id="skills" className="container" style={{ minHeight: '100vh', paddingTop: '20vh' }}>
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
@@ -341,13 +382,28 @@ export const HTMLContent = () => {
                                 <h4 style={{ fontSize: '1rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
                                     {exp.id} // {exp.category}
                                 </h4>
-                                <ul style={{ listStyle: 'none', lineHeight: '2.5', fontSize: '1.2rem', fontWeight: 300 }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                                     {exp.skills.map((skill, index) => (
-                                        <li key={index} className="interactive-element" style={{ display: 'block' }}>
-                                            {skill}
-                                        </li>
+                                        <div
+                                            key={index}
+                                            className="interactive-element"
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.8rem',
+                                                padding: '0.7rem 1rem',
+                                                background: 'rgba(255, 255, 255, 0.03)',
+                                                border: '1px solid rgba(255, 255, 255, 0.06)',
+                                                borderRadius: '8px',
+                                                fontSize: '1.05rem',
+                                                fontWeight: 300
+                                            }}
+                                        >
+                                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: getDotColor(exp.id) }} />
+                                            <span>{skill}</span>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
                             </div>
                         ))}
                     </motion.div>
@@ -355,7 +411,7 @@ export const HTMLContent = () => {
             </section>
 
             {/* 5. CONTACT SECTION */}
-            <section className="container" style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: '10vh' }}>
+            <section id="contact" className="container" style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: '10vh' }}>
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
@@ -370,9 +426,25 @@ export const HTMLContent = () => {
                         <div className="col-span-6 glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <Mail size={32} style={{ color: 'var(--text-secondary)' }} />
                             <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginTop: '1rem' }}>PRIMARY COMMUNICATION CHANNEL</h4>
-                            <a href={`mailto:${portfolioData.contact.email}`} className="interactive-element" style={{ fontSize: '1.8rem', fontWeight: 300 }}>
-                                {portfolioData.contact.email}
-                            </a>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                                <a href={`mailto:${portfolioData.contact.email}`} className="interactive-element" style={{ fontSize: '1.8rem', fontWeight: 300 }}>
+                                    {portfolioData.contact.email}
+                                </a>
+                                <button
+                                    onClick={handleCopyEmail}
+                                    className="btn"
+                                    style={{
+                                        padding: '0.4rem 0.8rem',
+                                        fontSize: '0.75rem',
+                                        background: emailCopied ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                                        borderColor: emailCopied ? '#22c55e' : 'rgba(255, 255, 255, 0.15)',
+                                        color: emailCopied ? '#4ade80' : 'var(--text-primary)'
+                                    }}
+                                >
+                                    {emailCopied ? <Check size={14} /> : <Copy size={14} />}
+                                    <span>{emailCopied ? 'Copied' : 'Copy'}</span>
+                                </button>
+                            </div>
                         </div>
 
                         <div className="col-span-6 glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -395,7 +467,42 @@ export const HTMLContent = () => {
                 </motion.div>
             </section>
 
+            {/* Scroll To Top Floating Button */}
+            <AnimatePresence>
+                {showScrollTop && (
+                    <motion.button
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        onClick={scrollToTop}
+                        style={{
+                            position: 'fixed',
+                            bottom: '2rem',
+                            right: '2rem',
+                            zIndex: 1000,
+                            width: '45px',
+                            height: '45px',
+                            borderRadius: '50%',
+                            background: 'rgba(20, 20, 25, 0.8)',
+                            backdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            color: '#fff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                            transition: 'all 0.3s ease'
+                        }}
+                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                    >
+                        <ArrowUp size={20} />
+                    </motion.button>
+                )}
+            </AnimatePresence>
+
         </Scroll>
     );
 };
+
 

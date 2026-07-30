@@ -2,6 +2,7 @@ import { Canvas } from '@react-three/fiber';
 import { ScrollControls } from '@react-three/drei';
 import { Scene } from './components/Scene';
 import { HTMLContent } from './components/HTMLContent';
+import { HeaderNav } from './components/HeaderNav';
 import { Suspense, useState, useEffect } from 'react';
 import { Loader } from './components/Loader';
 
@@ -32,6 +33,7 @@ function App() {
   return (
     <>
       <Loader />
+      <HeaderNav />
       <div id="canvas-container">
         <Canvas
           camera={{ position: [0, 0, 5], fov: 75 }}
@@ -56,3 +58,4 @@ function App() {
 }
 
 export default App;
+
