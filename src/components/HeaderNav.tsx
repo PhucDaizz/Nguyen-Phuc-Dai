@@ -1,11 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Code, FolderGit2, Mail, Copy, Check } from 'lucide-react';
 import portfolioData from '../data/portfolioData.json';
 
-
 export const HeaderNav: React.FC = () => {
     const [copied, setCopied] = useState(false);
+    const [activeSection, setActiveSection] = useState<string>('hero');
+
+    useEffect(() => {
+        const sectionIds = ['hero', 'about', 'projects', 'skills', 'contact'];
+        
+        const handleScroll = () => {
+            const scrollPosition = window.scrollY + 200;
+            for (const id of sectionIds) {
+                const element = document.getElementById(id);
+                if (element) {
+                    const top = element.offsetTop;
+                    const height = element.offsetHeight;
+                    if (scrollPosition >= top && scrollPosition < top + height) {
+                        setActiveSection(id);
+                        break;
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const scrollTo = (id: string) => {
         const element = document.getElementById(id);
@@ -70,10 +92,10 @@ export const HeaderNav: React.FC = () => {
                 </div>
 
                 {/* Nav Links */}
-                <nav style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <button
                         onClick={() => scrollTo('about')}
-                        className="nav-item-btn"
+                        className={`nav-item-btn ${activeSection === 'about' ? 'active' : ''}`}
                         title="About Me"
                     >
                         <User size={15} />
@@ -82,7 +104,7 @@ export const HeaderNav: React.FC = () => {
 
                     <button
                         onClick={() => scrollTo('projects')}
-                        className="nav-item-btn"
+                        className={`nav-item-btn ${activeSection === 'projects' ? 'active' : ''}`}
                         title="Projects"
                     >
                         <FolderGit2 size={15} />
@@ -91,7 +113,7 @@ export const HeaderNav: React.FC = () => {
 
                     <button
                         onClick={() => scrollTo('skills')}
-                        className="nav-item-btn"
+                        className={`nav-item-btn ${activeSection === 'skills' ? 'active' : ''}`}
                         title="Skills"
                     >
                         <Code size={15} />
@@ -100,7 +122,7 @@ export const HeaderNav: React.FC = () => {
 
                     <button
                         onClick={() => scrollTo('contact')}
-                        className="nav-item-btn"
+                        className={`nav-item-btn ${activeSection === 'contact' ? 'active' : ''}`}
                         title="Contact"
                     >
                         <Mail size={15} />
@@ -133,3 +155,4 @@ export const HeaderNav: React.FC = () => {
         </motion.header>
     );
 };
+

@@ -10,6 +10,7 @@ interface Project {
     description: string;
     liveLink: string | null;
     githubLink: string;
+    architecturePattern?: string;
     tags: string[];
 }
 
@@ -340,7 +341,18 @@ export const HTMLContent = () => {
 
                     <div className="architectural-layout" style={{ gap: '3rem' }}>
                         {projects.map((project: Project, i: number) => (
-                            <motion.div key={i} variants={itemVariants} className="col-span-6 glass-panel project-card">
+                            <motion.div
+                                key={i}
+                                variants={itemVariants}
+                                className="col-span-6 glass-panel glass-panel-spotlight project-card"
+                                onMouseMove={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const x = e.clientX - rect.left;
+                                    const y = e.clientY - rect.top;
+                                    e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+                                    e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+                                }}
+                            >
                                 <div style={{ flexGrow: 1 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
                                         <span style={{ fontSize: '0.7rem', letterSpacing: '0.15em', fontFamily: 'var(--font-display)', color: 'var(--text-secondary)' }}>
@@ -350,7 +362,18 @@ export const HTMLContent = () => {
                                             FEATURED
                                         </span>
                                     </div>
-                                    <h3 style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>{project.title}</h3>
+                                    <h3 style={{ fontSize: '1.8rem', marginBottom: '0.6rem' }}>{project.title}</h3>
+                                    
+                                    {/* Architecture Micro Badge (Idea 4) */}
+                                    {project.architecturePattern && (
+                                        <div style={{ marginBottom: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.6rem', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8' }} />
+                                            <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-display)', color: '#e0f2fe', letterSpacing: '0.05em' }}>
+                                                {project.architecturePattern}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)' }}>
                                         {project.description || 'System architected for optimal performance.'}
                                     </p>

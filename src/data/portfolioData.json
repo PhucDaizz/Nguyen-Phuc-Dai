@@ -33,6 +33,7 @@
       "description": "AI Fitness Coach is an intelligent fitness platform that delivers personalized workout planning, real-time coaching, and adaptive recommendations using LLMs, RAG, vector search, and microservices architecture.",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/AI-Fitness-Coach",
+      "architecturePattern": "Microservices & Agentic RAG",
       "tags": ["ASP.NET Core", "Agentic RAG", "AI", "LLMs", "React", "TypeScript", "RabbitMQ", "Redis", "SignalR"]
     },  
     {
@@ -40,6 +41,7 @@
       "description": "An EV-focused carbon credit marketplace that automates credit calculation from travel data, manages verification workflows, and supports real-time auctions with AI-driven price suggestions.",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/CarbonTC",
+      "architecturePattern": "CQRS & Event-Driven",
       "tags": ["ASP.NET Core", "C#", "SQL Server", "EF Core", "RabbitMQ", "Redis", "SignalR", "CQRS", "Clean Architecture"]
     },
     {
@@ -47,6 +49,7 @@
       "description": "Modern E-Commerce frontend web application built with React and responsive UI design.",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/E-commerce-FE",
+      "architecturePattern": "Component-Driven SPA",
       "tags": ["ReactJS", "Redux", "Vite", "Bootstrap", "Responsive Design"]
     },
     {
@@ -54,6 +57,7 @@
       "description": "A comprehensive e-commerce platform offering full user-facing features and robust administrator management tools.",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/E-commerce-BE",
+      "architecturePattern": "Clean Architecture & Modular API",
       "tags": ["ASP.NET Core", "Web API", "Docker", "Redis", "EF Core", "SignalR", "Clean Architecture"]
     },
     {
@@ -61,6 +65,7 @@
       "description": "The Ultimate Language Learning API: Unleash smarter learning with flashcards, R/W modules, AI for personalized paths & intelligent feedback, comprehensive progress tracking, admin controls, plus thrilling live flashcard rooms supporting many players",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/WordWise-BE",
+      "architecturePattern": "Domain-Driven Design (DDD)",
       "tags": ["C#", ".NET 8", "SQL Server", "Clean Architecture"]
     },
     {
@@ -68,6 +73,7 @@
       "description": "Smarter learning, stronger skills: master vocab with flashcards, R/W practice, AI paths, progress tracking, team rooms & live challenges for ultimate language mastery.",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/WordWise",
+      "architecturePattern": "Client-Server Realtime UI",
       "tags": ["React", "JavaScript", "REST API", "Bootstrap"]
     }
   ],

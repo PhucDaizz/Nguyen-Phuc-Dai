@@ -430,18 +430,45 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.4rem 0.6rem;
-  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 100px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.nav-item-btn:hover {
+.nav-item-btn:hover,
+.nav-item-btn.active {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Mouse Spotlight Glass Panel Effect */
+.glass-panel-spotlight {
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-panel-spotlight::before {
+  content: '';
+  position: absolute;
+  top: var(--mouse-y, -100%);
+  left: var(--mouse-x, -100%);
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+}
+
+.glass-panel-spotlight:hover::before {
+  opacity: 1;
 }
 
 @keyframes pulse {
+
   0% {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
