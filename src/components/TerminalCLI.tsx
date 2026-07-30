@@ -12,7 +12,7 @@ export const TerminalCLI: React.FC = () => {
             output: (
                 <div>
                     <p style={{ color: '#4ade80', marginBottom: '0.4rem' }}>
-                        🚀 Antigravity CLI v1.0.4 - [NGUYEN PHUC DAI PORTFOLIO]
+                        🚀 PHUCDAI CLI v1.0.4 - [NGUYEN PHUC DAI PORTFOLIO]
                     </p>
                     <p style={{ color: 'var(--text-secondary)' }}>
                         Type <span style={{ color: '#38bdf8' }}>'help'</span> to see available commands or click buttons below.
