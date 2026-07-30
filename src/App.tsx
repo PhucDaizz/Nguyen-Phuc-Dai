@@ -4,6 +4,7 @@ import { Scene } from './components/Scene';
 import { HTMLContent } from './components/HTMLContent';
 import { HeaderNav } from './components/HeaderNav';
 import { TerminalCLI } from './components/TerminalCLI';
+import { CustomCursor } from './components/CustomCursor';
 import { Suspense, useState, useEffect } from 'react';
 import { Loader } from './components/Loader';
 
@@ -33,6 +34,7 @@ function App() {
 
   return (
     <>
+      <CustomCursor />
       <Loader />
       <HeaderNav />
       <TerminalCLI />

@@ -21,11 +21,18 @@
   padding: 0;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -298,6 +305,20 @@ a:hover {
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 0 1.2rem;
+  }
+
+  .glass-panel {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+
+  .hero-content {
+    width: 100%;
+    padding: 0 0.5rem;
+  }
+
   .contact-links {
     flex-direction: column;
     gap: 1.5rem;

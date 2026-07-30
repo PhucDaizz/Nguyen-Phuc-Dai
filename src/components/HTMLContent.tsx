@@ -151,7 +151,7 @@ export const HTMLContent = () => {
                 console.warn("Using fallback local data due to rate limit/network error", error);
             }
         }
-        // loadGithubData();
+        loadGithubData();
     }, []);
 
     // Sleek animation parameters
