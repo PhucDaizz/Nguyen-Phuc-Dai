@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Scroll } from '@react-three/drei';
-import { Github, ExternalLink, Linkedin, Mail, ArrowUpRight } from 'lucide-react';
+import { Github, ExternalLink, Linkedin, Mail, ArrowUpRight, Star, GitFork, BookOpen, Code2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
+import portfolioData from '../data/portfolioData.json';
 
 interface Project {
     title: string;
@@ -12,28 +13,29 @@ interface Project {
     tags: string[];
 }
 
+interface UserStats {
+    publicRepos: number;
+    followers: number;
+    totalStars: number;
+    totalForks: number;
+    topLanguages: { name: string; count: number; percentage: number }[];
+}
+
 export const HTMLContent = () => {
     const [projects, setProjects] = useState<Project[]>([]);
+    const [userStats, setUserStats] = useState<UserStats | null>(null);
 
     useEffect(() => {
-        async function loadProjects() {
+        async function loadGithubData() {
             try {
-                // Hardcoded list of pinned repositories to ensure they match the GitHub profile exactly.
-                // Note: GitHub REST API does not have a "pinned" endpoint, so we fetch them by name.
-                const pinnedRepoNames = [
-                    'AI-Fitness-Coach',
-                    'CarbonTC',
-                    'E-commerce-FE',
-                    'E-commerce-BE',
-                    'WordWise-BE',
-                    'WordWise'
-                ];
+                const username = portfolioData.githubStats.username;
+                const pinnedRepoNames = portfolioData.githubStats.pinnedRepos;
 
-                const fetchPromises = pinnedRepoNames.map(repoName =>
-                    fetch(`https://api.github.com/repos/PhucDaizz/${repoName}`).then(res => res.json())
+                // 1. Fetch Pinned Repos
+                const repoPromises = pinnedRepoNames.map(repoName =>
+                    fetch(`https://api.github.com/repos/${username}/${repoName}`).then(res => res.json())
                 );
-
-                const reposData = await Promise.all(fetchPromises);
+                const reposData = await Promise.all(repoPromises);
                 const validRepos = reposData.filter(repo => repo && !repo.message);
 
                 setProjects(validRepos.map((repo: any) => ({
@@ -43,11 +45,49 @@ export const HTMLContent = () => {
                     githubLink: repo.html_url,
                     tags: repo.topics && repo.topics.length > 0 ? repo.topics : (repo.language ? [repo.language] : []),
                 })));
+
+                // 2. Fetch User Profile & All Repos for Stats
+                const [userRes, userReposRes] = await Promise.all([
+                    fetch(`https://api.github.com/users/${username}`).then(res => res.json()),
+                    fetch(`https://api.github.com/users/${username}/repos?per_page=100`).then(res => res.json())
+                ]);
+
+                if (userRes && Array.isArray(userReposRes)) {
+                    let totalStars = 0;
+                    let totalForks = 0;
+                    const langCountMap: Record<string, number> = {};
+
+                    userReposRes.forEach((repo: any) => {
+                        totalStars += repo.stargazers_count || 0;
+                        totalForks += repo.forks_count || 0;
+                        if (repo.language) {
+                            langCountMap[repo.language] = (langCountMap[repo.language] || 0) + 1;
+                        }
+                    });
+
+                    const totalLangEntries = Object.values(langCountMap).reduce((a, b) => a + b, 0) || 1;
+                    const sortedLangs = Object.entries(langCountMap)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 5)
+                        .map(([name, count]) => ({
+                            name,
+                            count,
+                            percentage: Math.round((count / totalLangEntries) * 100)
+                        }));
+
+                    setUserStats({
+                        publicRepos: userRes.public_repos || userReposRes.length,
+                        followers: userRes.followers || 0,
+                        totalStars,
+                        totalForks,
+                        topLanguages: sortedLangs
+                    });
+                }
             } catch (error) {
-                console.error("Error fetching projects", error);
+                console.error("Error fetching GitHub data", error);
             }
         }
-        loadProjects();
+        loadGithubData();
     }, []);
 
     // Sleek animation parameters
@@ -86,17 +126,16 @@ export const HTMLContent = () => {
                 >
                     <motion.div variants={itemVariants} style={{ overflow: 'hidden' }}>
                         <h5 style={{ fontSize: '1rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                            SOFTWARE & SYSTEM ENGINEERING
+                            {portfolioData.hero.role}
                         </h5>
                     </motion.div>
                     <motion.div variants={itemVariants}>
-                        <h1>NGUYEN PHUC DAI</h1>
+                        <h1>{portfolioData.hero.name}</h1>
                     </motion.div>
 
                     <motion.div variants={itemVariants}>
                         <p style={{ maxWidth: '700px', marginTop: '3rem', fontSize: '1.4rem' }}>
-                            Building robust, performance-driven web systems and APIs.
-                            Focusing on scalable architectures, clean code, and delivering real value to users.
+                            {portfolioData.hero.description}
                         </p>
                     </motion.div>
 
@@ -110,7 +149,7 @@ export const HTMLContent = () => {
                                 document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
                             }}
                         >
-                            About Me <ArrowUpRight size={16} style={{ display: 'inline', marginLeft: '0.5rem', marginBottom: '-2px' }} />
+                            {portfolioData.hero.ctaText} <ArrowUpRight size={16} style={{ display: 'inline', marginLeft: '0.5rem', marginBottom: '-2px' }} />
                         </a>
                     </motion.div>
                 </motion.div>
@@ -125,56 +164,116 @@ export const HTMLContent = () => {
                     viewport={{ once: true, margin: "-100px" }}
                 >
                     <motion.h2 variants={itemVariants} style={{ marginBottom: '4rem' }}>
-                        About<br /><span style={{ color: 'var(--text-secondary)' }}>Me</span>
+                        {portfolioData.about.title}<br /><span style={{ color: 'var(--text-secondary)' }}>{portfolioData.about.subtitle}</span>
                     </motion.h2>
 
                     <div className="architectural-layout">
                         <motion.div variants={itemVariants} className="col-span-12 glass-panel" style={{ marginBottom: '3rem' }}>
                             <div className="architectural-layout identity-layout">
                                 <div className="col-span-5 premium-image-container identity-image-col" style={{ height: '500px' }}>
-                                    <img src="https://github.com/PhucDaizz.png" alt="Portrait" className="premium-image" />
+                                    <img src={portfolioData.about.avatarUrl} alt="Portrait" className="premium-image" />
                                 </div>
                                 <div className="col-span-7">
-                                    <h3 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 300 }}>Full-Stack Software Developer</h3>
-                                    <p style={{ marginBottom: '2rem', fontSize: '1.2rem' }}>
-                                        I am Nguyen Phuc Dai, a software developer passionate about building robust web systems and APIs on the .NET platform. My expertise spans ASP.NET Core, Entity Framework Core, SQL Server, Docker, and ReactJS.
-                                    </p>
-                                    <p style={{ marginBottom: '2rem', fontSize: '1.2rem' }}>
-                                        I am always seeking opportunities to learn, improve my skills, and build high-quality software products that deliver real value to users.
-                                    </p>
+                                    <h3 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 300 }}>{portfolioData.about.role}</h3>
+                                    {portfolioData.about.paragraphs.map((p, idx) => (
+                                        <p key={idx} style={{ marginBottom: '2rem', fontSize: '1.2rem' }}>
+                                            {p}
+                                        </p>
+                                    ))}
                                     <div style={{ padding: '2rem 0', borderTop: '1px solid var(--panel-border)', borderBottom: '1px solid var(--panel-border)' }}>
                                         <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', marginBottom: '1rem' }}>CORE MISSION</h4>
-                                        <p style={{ color: 'var(--text-primary)' }}>Building reliable, high-performance web systems and writing clean, maintainable code.</p>
+                                        <p style={{ color: 'var(--text-primary)' }}>{portfolioData.about.coreMission}</p>
                                     </div>
                                 </div>
                             </div>
                         </motion.div>
 
                         <motion.div variants={itemVariants} className="col-span-12 glass-panel">
-                            <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', marginBottom: '3rem', textAlign: 'center' }}>GITHUB STATISTICS</h4>
-                            <div className="architectural-layout" style={{ gap: '2rem', alignItems: 'center' }}>
-                                <div className="col-span-6 interactive-element" style={{ width: '100%' }}>
-                                    <img
-                                        src="https://github-readme-stats.vercel.app/api?username=PhucDaizz&show_icons=true&bg_color=0a0a0a&title_color=ffffff&icon_color=a1a1aa&text_color=a1a1aa&hide_border=true&ring_color=555555"
-                                        alt="Stats"
-                                        style={{ width: '100%', borderRadius: '8px' }}
-                                    />
+                            <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', marginBottom: '3rem', textAlign: 'center' }}>
+                                GITHUB METRICS & INSIGHTS
+                            </h4>
+                            
+                            <div className="architectural-layout" style={{ gap: '2rem', alignItems: 'stretch' }}>
+                                {/* Left Widget: Overview Stats */}
+                                <div className="col-span-6 glass-panel interactive-element" style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '2rem', borderRadius: '12px' }}>
+                                    <h5 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
+                                        <Github size={20} /> Overall Performance
+                                    </h5>
+                                    
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
+                                        <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                                <BookOpen size={16} /> Repositories
+                                            </div>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 600, marginTop: '0.5rem', color: '#fff' }}>
+                                                {userStats ? userStats.publicRepos : '...'}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                                <Star size={16} style={{ color: '#eab308' }} /> Stars Earned
+                                            </div>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 600, marginTop: '0.5rem', color: '#fff' }}>
+                                                {userStats ? userStats.totalStars : '...'}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                                <GitFork size={16} /> Total Forks
+                                            </div>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 600, marginTop: '0.5rem', color: '#fff' }}>
+                                                {userStats ? userStats.totalForks : '...'}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                                <Github size={16} /> Followers
+                                            </div>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 600, marginTop: '0.5rem', color: '#fff' }}>
+                                                {userStats ? userStats.followers : '...'}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="col-span-6 interactive-element" style={{ width: '100%' }}>
-                                    <img
-                                        src="https://github-readme-stats.vercel.app/api/top-langs/?username=PhucDaizz&layout=compact&langs_count=8&bg_color=0a0a0a&title_color=ffffff&text_color=a1a1aa&hide_border=true"
-                                        alt="Languages"
-                                        style={{ width: '100%', borderRadius: '8px' }}
-                                    />
+
+                                {/* Right Widget: Top Languages */}
+                                <div className="col-span-6 glass-panel interactive-element" style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '2rem', borderRadius: '12px' }}>
+                                    <h5 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
+                                        <Code2 size={20} /> Most Used Languages
+                                    </h5>
+                                    
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                        {userStats?.topLanguages ? (
+                                            userStats.topLanguages.map((lang) => (
+                                                <div key={lang.name}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontSize: '0.95rem' }}>
+                                                        <span style={{ color: 'var(--text-primary)' }}>{lang.name}</span>
+                                                        <span style={{ color: 'var(--text-secondary)' }}>{lang.percentage}%</span>
+                                                    </div>
+                                                    <div style={{ width: '100%', height: '6px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                                                        <div
+                                                            style={{
+                                                                width: `${lang.percentage}%`,
+                                                                height: '100%',
+                                                                background: 'linear-gradient(90deg, #a1a1aa, #ffffff)',
+                                                                borderRadius: '4px',
+                                                                transition: 'width 1s ease-in-out'
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>
+                                                Loading Language Data...
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                            {/* <div style={{ marginTop: '2rem', textAlign: 'center' }} className="interactive-element">
-                                <img
-                                    src="https://github-readme-activity-graph.vercel.app/graph?username=PhucDaizz&theme=github-dark-dimmed&bg_color=0a0a0a&hide_border=true&color=a1a1aa&line=555555&point=ffffff"
-                                    alt="Graph"
-                                    style={{ width: '100%', borderRadius: '8px' }}
-                                />
-                            </div> */}
                         </motion.div>
                     </div>
                 </motion.div>
@@ -237,38 +336,20 @@ export const HTMLContent = () => {
                     </motion.h2>
 
                     <motion.div variants={itemVariants} className="glass-panel architectural-layout expertise-panel">
-                        <div className="col-span-4 expertise-col">
-                            <h4 style={{ fontSize: '1rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '2rem' }}>01 // BACKEND</h4>
-                            <ul style={{ listStyle: 'none', lineHeight: '2.5', fontSize: '1.2rem', fontWeight: 300 }}>
-                                <li className="interactive-element" style={{ display: 'block' }}>C# & .NET Core 8</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>ASP.NET Core (API/MVC)</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>Entity Framework Core</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>Clean Architecture & SOLID</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>Microservices & CQRS</li>
-                            </ul>
-                        </div>
-
-                        <div className="col-span-4 expertise-col">
-                            <h4 style={{ fontSize: '1rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '2rem' }}>02 // DATABASES & BROKERS</h4>
-                            <ul style={{ listStyle: 'none', lineHeight: '2.5', fontSize: '1.2rem', fontWeight: 300 }}>
-                                <li className="interactive-element" style={{ display: 'block' }}>SQL Server (T-SQL)</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>Redis Caching</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>RabbitMQ</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>MySQL / PostgreSQL</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>Query Optimization</li>
-                            </ul>
-                        </div>
-
-                        <div className="col-span-4 expertise-col">
-                            <h4 style={{ fontSize: '1rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '2rem' }}>03 // FRONTEND & DEVOPS</h4>
-                            <ul style={{ listStyle: 'none', lineHeight: '2.5', fontSize: '1.2rem', fontWeight: 300 }}>
-                                <li className="interactive-element" style={{ display: 'block' }}>ReactJS & JavaScript (ES6+)</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>SignalR Real-time Comm.</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>Docker Containerization</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>Ocelot API Gateway</li>
-                                <li className="interactive-element" style={{ display: 'block' }}>Vite & Responsive UI</li>
-                            </ul>
-                        </div>
+                        {portfolioData.expertise.map((exp) => (
+                            <div key={exp.id} className="col-span-4 expertise-col">
+                                <h4 style={{ fontSize: '1rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+                                    {exp.id} // {exp.category}
+                                </h4>
+                                <ul style={{ listStyle: 'none', lineHeight: '2.5', fontSize: '1.2rem', fontWeight: 300 }}>
+                                    {exp.skills.map((skill, index) => (
+                                        <li key={index} className="interactive-element" style={{ display: 'block' }}>
+                                            {skill}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
                     </motion.div>
                 </motion.div>
             </section>
@@ -282,25 +363,25 @@ export const HTMLContent = () => {
                     viewport={{ once: true }}
                 >
                     <motion.h2 variants={itemVariants} style={{ fontSize: 'clamp(3rem, 8vw, 6rem)', marginBottom: '3rem' }}>
-                        Initialize<br /><span style={{ color: 'var(--text-secondary)' }}>Handshake</span>
+                        {portfolioData.contact.title}<br /><span style={{ color: 'var(--text-secondary)' }}>{portfolioData.contact.subtitle}</span>
                     </motion.h2>
 
                     <motion.div variants={itemVariants} className="architectural-layout" style={{ gap: '2rem' }}>
                         <div className="col-span-6 glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <Mail size={32} style={{ color: 'var(--text-secondary)' }} />
                             <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginTop: '1rem' }}>PRIMARY COMMUNICATION CHANNEL</h4>
-                            <a href="mailto:dai742004.dn@gmail.com" className="interactive-element" style={{ fontSize: '1.8rem', fontWeight: 300 }}>
-                                dai742004.dn@gmail.com
+                            <a href={`mailto:${portfolioData.contact.email}`} className="interactive-element" style={{ fontSize: '1.8rem', fontWeight: 300 }}>
+                                {portfolioData.contact.email}
                             </a>
                         </div>
 
                         <div className="col-span-6 glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '1rem' }}>DIGITAL PRESENCE</h4>
                             <div className="contact-links">
-                                <a href="https://github.com/PhucDaizz" target="_blank" rel="noreferrer" className="interactive-element" style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <a href={portfolioData.contact.github} target="_blank" rel="noreferrer" className="interactive-element" style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                     <Github size={24} /> GitHub <ArrowUpRight size={18} />
                                 </a>
-                                <a href="https://linkedin.com/in/nguy%E1%BB%85n-ph%C3%BAc-%C4%91%E1%BA%A1i-82719a27b" target="_blank" rel="noreferrer" className="interactive-element" style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <a href={portfolioData.contact.linkedin} target="_blank" rel="noreferrer" className="interactive-element" style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                     <Linkedin size={24} /> LinkedIn <ArrowUpRight size={18} />
                                 </a>
                             </div>
@@ -308,7 +389,7 @@ export const HTMLContent = () => {
                     </motion.div>
 
                     <motion.footer variants={itemVariants} className="site-footer">
-                        <span>© {new Date().getFullYear()} NGUYEN PHUC DAI.</span>
+                        <span>© {new Date().getFullYear()} {portfolioData.hero.name}.</span>
                         <span>CRAFTING RELIABLE SOFTWARE.</span>
                     </motion.footer>
                 </motion.div>
@@ -317,3 +398,4 @@ export const HTMLContent = () => {
         </Scroll>
     );
 };
+

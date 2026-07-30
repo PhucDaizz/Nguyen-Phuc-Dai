@@ -1,0 +1,72 @@
+{
+  "hero": {
+    "role": "SOFTWARE & SYSTEM ENGINEERING",
+    "name": "NGUYEN PHUC DAI",
+    "description": "Building robust, performance-driven web systems and APIs. Focusing on scalable architectures, clean code, and delivering real value to users.",
+    "ctaText": "About Me"
+  },
+  "about": {
+    "title": "About",
+    "subtitle": "Me",
+    "role": "Full-Stack Software Developer",
+    "avatarUrl": "https://github.com/PhucDaizz.png",
+    "paragraphs": [
+      "I am Nguyen Phuc Dai, a software developer passionate about building robust web systems and APIs on the .NET platform. My expertise spans ASP.NET Core, Entity Framework Core, SQL Server, Docker, and ReactJS.",
+      "I am always seeking opportunities to learn, improve my skills, and build high-quality software products that deliver real value to users."
+    ],
+    "coreMission": "Building reliable, high-performance web systems and writing clean, maintainable code."
+  },
+  "githubStats": {
+    "username": "PhucDaizz",
+    "pinnedRepos": [
+      "AI-Fitness-Coach",
+      "CarbonTC",
+      "E-commerce-FE",
+      "E-commerce-BE",
+      "WordWise-BE",
+      "WordWise"
+    ]
+  },
+  "expertise": [
+    {
+      "id": "01",
+      "category": "BACKEND",
+      "skills": [
+        "C# & .NET Core 8",
+        "ASP.NET Core (API/MVC)",
+        "Entity Framework Core",
+        "Clean Architecture & SOLID",
+        "Microservices & CQRS"
+      ]
+    },
+    {
+      "id": "02",
+      "category": "DATABASES & BROKERS",
+      "skills": [
+        "SQL Server (T-SQL)",
+        "Redis Caching",
+        "RabbitMQ",
+        "MySQL / PostgreSQL",
+        "Query Optimization"
+      ]
+    },
+    {
+      "id": "03",
+      "category": "FRONTEND & DEVOPS",
+      "skills": [
+        "ReactJS & JavaScript (ES6+)",
+        "SignalR Real-time Comm.",
+        "Docker Containerization",
+        "Ocelot API Gateway",
+        "Vite & Responsive UI"
+      ]
+    }
+  ],
+  "contact": {
+    "title": "Initialize",
+    "subtitle": "Handshake",
+    "email": "dai742004.dn@gmail.com",
+    "github": "https://github.com/PhucDaizz",
+    "linkedin": "https://linkedin.com/in/nguy%E1%BB%85n-ph%C3%BAc-%C4%91%E1%BA%A1i-82719a27b"
+  }
+}
