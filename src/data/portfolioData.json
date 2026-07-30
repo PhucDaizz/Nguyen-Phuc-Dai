@@ -41,7 +41,7 @@
       "description": "An EV-focused carbon credit marketplace that automates credit calculation from travel data, manages verification workflows, and supports real-time auctions with AI-driven price suggestions.",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/CarbonTC",
-      "architecturePattern": "CQRS & Event-Driven",
+      "architecturePattern": "Microservices, CQRS & Event-Driven Architecture",
       "tags": ["ASP.NET Core", "C#", "SQL Server", "EF Core", "RabbitMQ", "Redis", "SignalR", "CQRS", "Clean Architecture"]
     },
     {
@@ -49,7 +49,7 @@
       "description": "Modern E-Commerce frontend web application built with React and responsive UI design.",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/E-commerce-FE",
-      "architecturePattern": "Component-Driven SPA",
+      "architecturePattern": "Component-Based Architecture",
       "tags": ["ReactJS", "Redux", "Vite", "Bootstrap", "Responsive Design"]
     },
     {
@@ -57,7 +57,7 @@
       "description": "A comprehensive e-commerce platform offering full user-facing features and robust administrator management tools.",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/E-commerce-BE",
-      "architecturePattern": "Clean Architecture & Modular API",
+      "architecturePattern": "Clean Architecture",
       "tags": ["ASP.NET Core", "Web API", "Docker", "Redis", "EF Core", "SignalR", "Clean Architecture"]
     },
     {
@@ -65,15 +65,15 @@
       "description": "The Ultimate Language Learning API: Unleash smarter learning with flashcards, R/W modules, AI for personalized paths & intelligent feedback, comprehensive progress tracking, admin controls, plus thrilling live flashcard rooms supporting many players",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/WordWise-BE",
-      "architecturePattern": "Domain-Driven Design (DDD)",
-      "tags": ["C#", ".NET 8", "SQL Server", "Clean Architecture"]
+      "architecturePattern": "Monolithic REST API",
+      "tags": ["C#", ".NET 8", "SQL Server", "Gemini API", "Generative AI"]
     },
     {
       "title": "WordWise",
       "description": "Smarter learning, stronger skills: master vocab with flashcards, R/W practice, AI paths, progress tracking, team rooms & live challenges for ultimate language mastery.",
       "liveLink": null,
       "githubLink": "https://github.com/PhucDaizz/WordWise",
-      "architecturePattern": "Client-Server Realtime UI",
+      "architecturePattern": "Component-Based Architecture",
       "tags": ["React", "JavaScript", "REST API", "Bootstrap"]
     }
   ],
