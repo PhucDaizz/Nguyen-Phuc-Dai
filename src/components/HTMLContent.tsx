@@ -22,8 +22,20 @@ interface UserStats {
 }
 
 export const HTMLContent = () => {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [userStats, setUserStats] = useState<UserStats | null>(null);
+    const [projects, setProjects] = useState<Project[]>(portfolioData.featuredProjects || []);
+    const [userStats, setUserStats] = useState<UserStats | null>({
+        publicRepos: 18,
+        followers: 12,
+        totalStars: 5,
+        totalForks: 3,
+        topLanguages: [
+            { name: 'C#', count: 10, percentage: 45 },
+            { name: 'TypeScript', count: 6, percentage: 25 },
+            { name: 'JavaScript', count: 4, percentage: 15 },
+            { name: 'HTML/CSS', count: 3, percentage: 10 },
+            { name: 'Docker', count: 1, percentage: 5 }
+        ]
+    });
     const [emailCopied, setEmailCopied] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -60,15 +72,17 @@ export const HTMLContent = () => {
                     fetch(`https://api.github.com/repos/${username}/${repoName}`).then(res => res.json())
                 );
                 const reposData = await Promise.all(repoPromises);
-                const validRepos = reposData.filter(repo => repo && !repo.message);
+                const validRepos = reposData.filter(repo => repo && !repo.message && repo.name);
 
-                setProjects(validRepos.map((repo: any) => ({
-                    title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-                    description: repo.description,
-                    liveLink: repo.homepage,
-                    githubLink: repo.html_url,
-                    tags: repo.topics && repo.topics.length > 0 ? repo.topics : (repo.language ? [repo.language] : []),
-                })));
+                if (validRepos.length > 0) {
+                    setProjects(validRepos.map((repo: any) => ({
+                        title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+                        description: repo.description || 'System architected for optimal performance.',
+                        liveLink: repo.homepage || null,
+                        githubLink: repo.html_url,
+                        tags: repo.topics && repo.topics.length > 0 ? repo.topics : (repo.language ? [repo.language] : ['C#', '.NET']),
+                    })));
+                }
 
                 // 2. Fetch User Profile & All Repos for Stats
                 const [userRes, userReposRes] = await Promise.all([
@@ -76,7 +90,7 @@ export const HTMLContent = () => {
                     fetch(`https://api.github.com/users/${username}/repos?per_page=100`).then(res => res.json())
                 ]);
 
-                if (userRes && Array.isArray(userReposRes)) {
+                if (userRes && !userRes.message && Array.isArray(userReposRes)) {
                     let totalStars = 0;
                     let totalForks = 0;
                     const langCountMap: Record<string, number> = {};
@@ -108,7 +122,7 @@ export const HTMLContent = () => {
                     });
                 }
             } catch (error) {
-                console.error("Error fetching GitHub data", error);
+                console.warn("Using fallback local data due to rate limit/network error", error);
             }
         }
         loadGithubData();
