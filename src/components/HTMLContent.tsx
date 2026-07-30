@@ -93,9 +93,11 @@ export const HTMLContent = () => {
                 const username = portfolioData.githubStats.username;
                 const pinnedRepoNames = portfolioData.githubStats.pinnedRepos;
 
-                // 1. Fetch Pinned Repos
+                // 1. Fetch Pinned Repos with res.ok check
                 const repoPromises = pinnedRepoNames.map(repoName =>
-                    fetch(`https://api.github.com/repos/${username}/${repoName}`).then(res => res.json())
+                    fetch(`https://api.github.com/repos/${username}/${repoName}`)
+                        .then(res => res.ok ? res.json() : null)
+                        .catch(() => null)
                 );
                 const reposData = await Promise.all(repoPromises);
                 const validRepos = reposData.filter(repo => repo && !repo.message && repo.name);
@@ -110,10 +112,10 @@ export const HTMLContent = () => {
                     })));
                 }
 
-                // 2. Fetch User Profile & All Repos for Stats
+                // 2. Fetch User Profile & All Repos for Stats with res.ok check
                 const [userRes, userReposRes] = await Promise.all([
-                    fetch(`https://api.github.com/users/${username}`).then(res => res.json()),
-                    fetch(`https://api.github.com/users/${username}/repos?per_page=100`).then(res => res.json())
+                    fetch(`https://api.github.com/users/${username}`).then(res => res.ok ? res.json() : null).catch(() => null),
+                    fetch(`https://api.github.com/users/${username}/repos?per_page=100`).then(res => res.ok ? res.json() : null).catch(() => null)
                 ]);
 
                 if (userRes && !userRes.message && Array.isArray(userReposRes)) {
