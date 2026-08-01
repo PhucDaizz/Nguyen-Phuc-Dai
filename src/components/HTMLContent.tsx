@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Scroll } from '@react-three/drei';
-import { Github, ExternalLink, Linkedin, Mail, ArrowUpRight, Star, GitFork, BookOpen, Code2, Copy, Check, ArrowUp } from 'lucide-react';
+import { Github, ExternalLink, Linkedin, Mail, ArrowUpRight, Star, GitFork, BookOpen, Code2, Copy, Check, ArrowUp, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import portfolioData from '../data/portfolioData.json';
@@ -23,10 +23,10 @@ interface UserStats {
 }
 
 export const HTMLContent = () => {
-    const [projects] = useState<Project[]>(portfolioData.featuredProjects || []);
+    const [projects, _setProjects] = useState<Project[]>(portfolioData.featuredProjects || []);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState('ALL');
-    const [userStats] = useState<UserStats | null>({
+    const [userStats, _setUserStats] = useState<UserStats | null>({
         publicRepos: 18,
         followers: 12,
         totalStars: 5,
@@ -41,6 +41,10 @@ export const HTMLContent = () => {
     });
     const [emailCopied, setEmailCopied] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
+
+    // Contact Form States
+    const [formSubmitting, setFormSubmitting] = useState(false);
+    const [formStatus, setFormStatus] = useState<{ success?: boolean; message?: string }>({});
 
     // Filter categories calculation
     const filterCategories = ['ALL', '.NET / C#', 'REACT', 'AI / RAG'];
@@ -77,17 +81,8 @@ export const HTMLContent = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const handleCopyEmail = () => {
-        navigator.clipboard.writeText(portfolioData.contact.email);
-        setEmailCopied(true);
-        setTimeout(() => setEmailCopied(false), 2000);
-    };
-
-    const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
     /* 
+    // OPTIONAL: Live GitHub Data Fetching (Uncomment if needed)
     useEffect(() => {
         async function loadGithubData() {
             try {
@@ -104,7 +99,7 @@ export const HTMLContent = () => {
                 const validRepos = reposData.filter(repo => repo && !repo.message && repo.name);
 
                 if (validRepos.length > 0) {
-                    setProjects(validRepos.map((repo: any) => ({
+                    _setProjects(validRepos.map((repo: any) => ({
                         title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
                         description: repo.description || 'System architected for optimal performance.',
                         liveLink: repo.homepage || null,
@@ -142,7 +137,7 @@ export const HTMLContent = () => {
                             percentage: Math.round((count / totalLangEntries) * 100)
                         }));
 
-                    setUserStats({
+                    _setUserStats({
                         publicRepos: userRes.public_repos || userReposRes.length,
                         followers: userRes.followers || 0,
                         totalStars,
@@ -154,9 +149,51 @@ export const HTMLContent = () => {
                 console.warn("Using fallback local data due to rate limit/network error", error);
             }
         }
-        // loadGithubData();
+        loadGithubData();
     }, []);
     */
+
+    const handleCopyEmail = () => {
+        navigator.clipboard.writeText(portfolioData.contact.email);
+        setEmailCopied(true);
+        setTimeout(() => setEmailCopied(false), 2000);
+    };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setFormSubmitting(true);
+        setFormStatus({});
+
+        const formData = new FormData(e.currentTarget);
+        // Using Web3Forms free endpoint (can be replaced with user's access_key)
+        formData.append("access_key", "YOUR_WEB3FORMS_ACCESS_KEY"); 
+
+        try {
+            const response = await fetch("https://api.web3forms.com/submit", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setFormStatus({ success: true, message: "Thank you! Your message has been sent successfully." });
+                (e.target as HTMLFormElement).reset();
+            } else {
+                // Fallback to mailto link if key is not configured yet
+                setFormStatus({ success: true, message: "Opening your mail client..." });
+                window.location.href = `mailto:${portfolioData.contact.email}?subject=Contact from Portfolio&body=${encodeURIComponent(formData.get("message") as string || "")}`;
+            }
+        } catch (error) {
+            setFormStatus({ success: false, message: "Something went wrong. Please try sending via email link above." });
+        } finally {
+            setFormSubmitting(false);
+        }
+    };
 
     // Sleek animation parameters
     const containerVariants: Variants = {
@@ -541,7 +578,7 @@ export const HTMLContent = () => {
             </section>
 
             {/* 5. CONTACT SECTION */}
-            <section id="contact" className="container" style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: '10vh' }}>
+            <section id="contact" className="container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: '15vh' }}>
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
@@ -553,40 +590,146 @@ export const HTMLContent = () => {
                     </motion.h2>
 
                     <motion.div variants={itemVariants} className="architectural-layout" style={{ gap: '2rem' }}>
-                        <div className="col-span-6 glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <Mail size={32} style={{ color: 'var(--text-secondary)' }} />
-                            <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginTop: '1rem' }}>PRIMARY COMMUNICATION CHANNEL</h4>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                                <a href={`mailto:${portfolioData.contact.email}`} className="interactive-element" style={{ fontSize: '1.8rem', fontWeight: 300 }}>
-                                    {portfolioData.contact.email}
-                                </a>
-                                <button
-                                    onClick={handleCopyEmail}
-                                    className="btn"
-                                    style={{
-                                        padding: '0.4rem 0.8rem',
-                                        fontSize: '0.75rem',
-                                        background: emailCopied ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                                        borderColor: emailCopied ? '#22c55e' : 'rgba(255, 255, 255, 0.15)',
-                                        color: emailCopied ? '#4ade80' : 'var(--text-primary)'
-                                    }}
-                                >
-                                    {emailCopied ? <Check size={14} /> : <Copy size={14} />}
-                                    <span>{emailCopied ? 'Copied' : 'Copy'}</span>
-                                </button>
+                        {/* Quick Info Column */}
+                        <div className="col-span-5 glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', justifyContent: 'space-between' }}>
+                            <div>
+                                <Mail size={32} style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }} />
+                                <h4 style={{ fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>PRIMARY EMAIL</h4>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+                                    <a href={`mailto:${portfolioData.contact.email}`} className="interactive-element" style={{ fontSize: '1.2rem', fontWeight: 300 }}>
+                                        {portfolioData.contact.email}
+                                    </a>
+                                    <button
+                                        onClick={handleCopyEmail}
+                                        className="btn"
+                                        style={{
+                                            padding: '0.3rem 0.6rem',
+                                            fontSize: '0.7rem',
+                                            background: emailCopied ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                                            borderColor: emailCopied ? '#22c55e' : 'rgba(255, 255, 255, 0.15)',
+                                            color: emailCopied ? '#4ade80' : 'var(--text-primary)'
+                                        }}
+                                    >
+                                        {emailCopied ? <Check size={12} /> : <Copy size={12} />}
+                                        <span>{emailCopied ? 'Copied' : 'Copy'}</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 style={{ fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--text-secondary)', marginBottom: '1rem' }}>DIGITAL PRESENCE</h4>
+                                <div className="contact-links" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                                    <a href={portfolioData.contact.github} target="_blank" rel="noreferrer" className="interactive-element" style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <Github size={20} /> GitHub <ArrowUpRight size={14} />
+                                    </a>
+                                    <a href={portfolioData.contact.linkedin} target="_blank" rel="noreferrer" className="interactive-element" style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <Linkedin size={20} /> LinkedIn <ArrowUpRight size={14} />
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="col-span-6 glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <h4 style={{ fontSize: '0.9rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '1rem' }}>DIGITAL PRESENCE</h4>
-                            <div className="contact-links">
-                                <a href={portfolioData.contact.github} target="_blank" rel="noreferrer" className="interactive-element" style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <Github size={24} /> GitHub <ArrowUpRight size={18} />
-                                </a>
-                                <a href={portfolioData.contact.linkedin} target="_blank" rel="noreferrer" className="interactive-element" style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <Linkedin size={24} /> LinkedIn <ArrowUpRight size={18} />
-                                </a>
-                            </div>
+                        {/* Interactive Direct Message Form Column */}
+                        <div className="col-span-7 glass-panel">
+                            <h4 style={{ fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>SEND DIRECT MESSAGE</h4>
+                            
+                            <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>YOUR NAME</label>
+                                        <input 
+                                            type="text" 
+                                            name="name" 
+                                            required 
+                                            placeholder="John Doe" 
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem 1rem',
+                                                background: 'rgba(255, 255, 255, 0.03)',
+                                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontFamily: 'var(--font-sans)',
+                                                fontSize: '0.9rem',
+                                                outline: 'none'
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>YOUR EMAIL</label>
+                                        <input 
+                                            type="email" 
+                                            name="email" 
+                                            required 
+                                            placeholder="john@example.com" 
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem 1rem',
+                                                background: 'rgba(255, 255, 255, 0.03)',
+                                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontFamily: 'var(--font-sans)',
+                                                fontSize: '0.9rem',
+                                                outline: 'none'
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>MESSAGE</label>
+                                    <textarea 
+                                        name="message" 
+                                        rows={4} 
+                                        required 
+                                        placeholder="Hello, I'd like to discuss a project..." 
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem 1rem',
+                                            background: 'rgba(255, 255, 255, 0.03)',
+                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontFamily: 'var(--font-sans)',
+                                            fontSize: '0.9rem',
+                                            outline: 'none',
+                                            resize: 'none'
+                                        }}
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={formSubmitting}
+                                    className="btn interactive-element"
+                                    style={{
+                                        alignSelf: 'flex-start',
+                                        padding: '0.75rem 1.8rem',
+                                        fontSize: '0.85rem',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '0.6rem',
+                                        background: formSubmitting ? 'rgba(255, 255, 255, 0.1)' : '#fff',
+                                        color: formSubmitting ? 'var(--text-secondary)' : '#000',
+                                        borderRadius: '100px',
+                                        cursor: formSubmitting ? 'wait' : 'pointer'
+                                    }}
+                                >
+                                    <Send size={15} />
+                                    <span>{formSubmitting ? 'Sending...' : 'Send Message'}</span>
+                                </button>
+
+                                {formStatus.message && (
+                                    <p style={{ 
+                                        fontSize: '0.85rem', 
+                                        color: formStatus.success ? '#4ade80' : '#f87171',
+                                        marginTop: '0.5rem'
+                                    }}>
+                                        {formStatus.message}
+                                    </p>
+                                )}
+                            </form>
                         </div>
                     </motion.div>
 
