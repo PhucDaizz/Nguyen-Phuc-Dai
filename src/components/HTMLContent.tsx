@@ -23,10 +23,10 @@ interface UserStats {
 }
 
 export const HTMLContent = () => {
-    const [projects, setProjects] = useState<Project[]>(portfolioData.featuredProjects || []);
+    const [projects] = useState<Project[]>(portfolioData.featuredProjects || []);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState('ALL');
-    const [userStats, setUserStats] = useState<UserStats | null>({
+    const [userStats] = useState<UserStats | null>({
         publicRepos: 18,
         followers: 12,
         totalStars: 5,
@@ -87,6 +87,7 @@ export const HTMLContent = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    /* 
     useEffect(() => {
         async function loadGithubData() {
             try {
@@ -155,6 +156,7 @@ export const HTMLContent = () => {
         }
         // loadGithubData();
     }, []);
+    */
 
     // Sleek animation parameters
     const containerVariants: Variants = {
