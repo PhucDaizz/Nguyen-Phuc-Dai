@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { Github, ExternalLink } from 'lucide-react';
 
 interface Project {
@@ -12,8 +12,8 @@ interface Project {
 }
 
 interface ProjectsSectionProps {
-    containerVariants: any;
-    itemVariants: any;
+    containerVariants: Variants;
+    itemVariants: Variants;
     projects: Project[];
 }
 
@@ -53,8 +53,8 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ containerVaria
             >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '2rem' }}>
                     <div>
-                        <span style={{ fontSize: '0.8rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', fontFamily: 'var(--font-display)' }}>
-                            PORTFOLIO WORK
+                        <span className="section-label">
+                            Portfolio Work
                         </span>
                         <motion.h2 variants={itemVariants} style={{ marginBottom: 0 }}>
                             Featured<br /><span style={{ color: 'var(--text-secondary)' }}>Projects</span>
@@ -140,7 +140,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ containerVaria
                                         {/* Architecture Micro Badge */}
                                         {project.architecturePattern && (
                                             <div style={{ marginBottom: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.6rem', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38bdf8' }} />
+                                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)' }} />
                                                 <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-display)', color: '#e0f2fe', letterSpacing: '0.05em' }}>
                                                     {project.architecturePattern}
                                                 </span>

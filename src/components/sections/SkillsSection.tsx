@@ -1,18 +1,19 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
+import { SectionHeading } from '../SectionHeading';
 import portfolioData from '../../data/portfolioData.json';
 
 interface SkillsSectionProps {
-    containerVariants: any;
-    itemVariants: any;
+    containerVariants: Variants;
+    itemVariants: Variants;
 }
 
 export const SkillsSection: React.FC<SkillsSectionProps> = ({ containerVariants, itemVariants }) => {
     const getDotColor = (categoryId: string) => {
         switch (categoryId) {
-            case '01': return '#a855f7'; // Backend - Purple
-            case '02': return '#3b82f6'; // Database - Blue
-            case '03': return '#10b981'; // Frontend/DevOps - Emerald
+            case '01': return 'var(--accent-purple)'; // Backend - Purple
+            case '02': return 'var(--accent-blue)';   // Database - Blue
+            case '03': return 'var(--accent-emerald)'; // Frontend/DevOps - Emerald
             default: return '#ffffff';
         }
     };
@@ -25,9 +26,11 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ containerVariants,
                 whileInView="show"
                 viewport={{ once: true, margin: "-100px" }}
             >
-                <motion.h2 variants={itemVariants} style={{ marginBottom: '4rem' }}>
-                    Technical<br /><span style={{ color: 'var(--text-secondary)' }}>Skills</span>
-                </motion.h2>
+                <SectionHeading label="Technical Expertise">
+                    <motion.h2 variants={itemVariants}>
+                        Technical<br /><span style={{ color: 'var(--text-secondary)' }}>Skills</span>
+                    </motion.h2>
+                </SectionHeading>
 
                 <motion.div variants={itemVariants} className="glass-panel architectural-layout expertise-panel">
                     {portfolioData.expertise.map((exp) => (

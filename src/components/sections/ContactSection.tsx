@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { Mail, Github, Linkedin, ArrowUpRight, Copy, Check, Send } from 'lucide-react';
+import { SectionHeading } from '../SectionHeading';
 import portfolioData from '../../data/portfolioData.json';
 
 interface ContactSectionProps {
-    containerVariants: any;
-    itemVariants: any;
+    containerVariants: Variants;
+    itemVariants: Variants;
     emailCopied: boolean;
     handleCopyEmail: () => void;
 }
@@ -25,7 +26,20 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         setFormStatus({});
 
         const formData = new FormData(e.currentTarget);
-        formData.append("access_key", "YOUR_WEB3FORMS_ACCESS_KEY"); 
+        const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY as string | undefined;
+
+        // No Web3Forms key configured -> fall back to opening the mail client directly.
+        if (!accessKey) {
+            const subject = "Contact from Portfolio";
+            const body = `From: ${formData.get("name")}\n\n${formData.get("message")}`;
+            window.location.href = `mailto:${portfolioData.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            setFormStatus({ success: true, message: "Opening your mail client..." });
+            (e.target as HTMLFormElement).reset();
+            setFormSubmitting(false);
+            return;
+        }
+
+        formData.append("access_key", accessKey);
 
         try {
             const response = await fetch("https://api.web3forms.com/submit", {
@@ -42,7 +56,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 setFormStatus({ success: true, message: "Opening your mail client..." });
                 window.location.href = `mailto:${portfolioData.contact.email}?subject=Contact from Portfolio&body=${encodeURIComponent(formData.get("message") as string || "")}`;
             }
-        } catch (error) {
+        } catch {
             setFormStatus({ success: false, message: "Something went wrong. Please try sending via email link above." });
         } finally {
             setFormSubmitting(false);
@@ -57,9 +71,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 whileInView="show"
                 viewport={{ once: true }}
             >
-                <motion.h2 variants={itemVariants} style={{ fontSize: 'clamp(3rem, 8vw, 6rem)', marginBottom: '3rem' }}>
-                    {portfolioData.contact.title}<br /><span style={{ color: 'var(--text-secondary)' }}>{portfolioData.contact.subtitle}</span>
-                </motion.h2>
+                <SectionHeading label="Initiate Contact" style={{ marginBottom: '3rem' }}>
+                    <motion.h2 variants={itemVariants} style={{ fontSize: 'clamp(3rem, 8vw, 6rem)' }}>
+                        {portfolioData.contact.title}<br /><span style={{ color: 'var(--text-secondary)' }}>{portfolioData.contact.subtitle}</span>
+                    </motion.h2>
+                </SectionHeading>
 
                 <motion.div variants={itemVariants} className="architectural-layout" style={{ gap: '2rem' }}>
                     {/* Quick Info Column */}

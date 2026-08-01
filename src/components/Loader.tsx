@@ -1,10 +1,8 @@
 import { useProgress } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
 
 export const Loader = () => {
     const { progress } = useProgress();
-    const [currentStep, setCurrentStep] = useState(0);
 
     const steps = [
         "INITIALIZING CORE SYSTEM ARCHITECTURE...",
@@ -14,13 +12,8 @@ export const Loader = () => {
         "SYSTEM READY - LAUNCHING PORTFOLIO..."
     ];
 
-    useEffect(() => {
-        if (progress < 25) setCurrentStep(0);
-        else if (progress < 50) setCurrentStep(1);
-        else if (progress < 75) setCurrentStep(2);
-        else if (progress < 99) setCurrentStep(3);
-        else setCurrentStep(4);
-    }, [progress]);
+    // Derive the diagnostic step directly from progress (no state/effect needed)
+    const currentStep = progress < 25 ? 0 : progress < 50 ? 1 : progress < 75 ? 2 : progress < 99 ? 3 : 4;
 
     return (
         <AnimatePresence>

@@ -1,11 +1,11 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import portfolioData from "../../data/portfolioData.json";
 
 interface HeroSectionProps {
-  containerVariants: any;
-  itemVariants: any;
+  containerVariants: Variants;
+  itemVariants: Variants;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
@@ -96,6 +96,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             />
           </a>
         </motion.div>
+      </motion.div>
+
+      {/* Scroll-down indicator */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2, duration: 0.6 }}
+        style={{ position: "absolute", bottom: "2.5rem", left: "50%", transform: "translateX(-50%)" }}
+        onClick={() =>
+          document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })
+        }
+      >
+        <div className="scroll-indicator" role="button" aria-label="Scroll to About" title="Scroll down">
+          <span className="scroll-indicator-dot" />
+        </div>
       </motion.div>
     </section>
   );

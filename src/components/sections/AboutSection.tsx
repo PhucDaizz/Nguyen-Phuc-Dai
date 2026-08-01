@@ -1,6 +1,7 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { Github, BookOpen, Star, GitFork, Code2 } from 'lucide-react';
+import { SectionHeading } from '../SectionHeading';
 import portfolioData from '../../data/portfolioData.json';
 
 interface UserStats {
@@ -12,8 +13,8 @@ interface UserStats {
 }
 
 interface AboutSectionProps {
-    containerVariants: any;
-    itemVariants: any;
+    containerVariants: Variants;
+    itemVariants: Variants;
     userStats: UserStats | null;
 }
 
@@ -26,9 +27,11 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ containerVariants, i
                 whileInView="show"
                 viewport={{ once: true, margin: "-100px" }}
             >
-                <motion.h2 variants={itemVariants} style={{ marginBottom: '4rem' }}>
-                    {portfolioData.about.title}<br /><span style={{ color: 'var(--text-secondary)' }}>{portfolioData.about.subtitle}</span>
-                </motion.h2>
+                <SectionHeading label="Profile Identity">
+                    <motion.h2 variants={itemVariants}>
+                        {portfolioData.about.title}<br /><span style={{ color: 'var(--text-secondary)' }}>{portfolioData.about.subtitle}</span>
+                    </motion.h2>
+                </SectionHeading>
 
                 <div className="architectural-layout">
                     <motion.div variants={itemVariants} className="col-span-12 glass-panel" style={{ marginBottom: '3rem' }}>

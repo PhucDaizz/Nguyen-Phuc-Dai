@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 export const CustomCursor: React.FC = () => {
     const [position, setPosition] = useState({ x: -100, y: -100 });
     const [isHovered, setIsHovered] = useState(false);
     const [isMouseDown, setIsMouseDown] = useState(false);
     const [trail, setTrail] = useState<{ x: number; y: number; id: number }[]>([]);
+    const prefersReducedMotion = useReducedMotion() ?? false;
 
     useEffect(() => {
         let counter = 0;
@@ -58,6 +59,11 @@ export const CustomCursor: React.FC = () => {
         return null;
     }
 
+    // Respect reduced-motion: keep the native cursor instead of a custom animated one
+    if (prefersReducedMotion) {
+        return null;
+    }
+
     return (
         <div style={{ pointerEvents: 'none', position: 'fixed', inset: 0, zIndex: 99999 }}>
             {/* Trail Particles */}
@@ -74,8 +80,8 @@ export const CustomCursor: React.FC = () => {
                         width: '4px',
                         height: '4px',
                         borderRadius: '50%',
-                        background: '#38bdf8',
-                        boxShadow: '0 0 8px #38bdf8',
+                        background: 'var(--accent)',
+                        boxShadow: '0 0 8px var(--accent)',
                         transform: 'translate(-50%, -50%)',
                         pointerEvents: 'none'
                     }}
@@ -88,7 +94,7 @@ export const CustomCursor: React.FC = () => {
                     x: position.x - 4,
                     y: position.y - 4,
                     scale: isMouseDown ? 0.7 : isHovered ? 1.5 : 1,
-                    backgroundColor: isHovered ? '#38bdf8' : '#ffffff'
+                    backgroundColor: isHovered ? 'var(--accent)' : '#ffffff'
                 }}
                 transition={{ type: 'spring', stiffness: 1000, damping: 50, mass: 0.1 }}
                 style={{
@@ -97,7 +103,7 @@ export const CustomCursor: React.FC = () => {
                     height: '8px',
                     borderRadius: '50%',
                     pointerEvents: 'none',
-                    boxShadow: isHovered ? '0 0 12px #38bdf8' : '0 0 8px rgba(255, 255, 255, 0.8)'
+                    boxShadow: isHovered ? '0 0 12px var(--accent)' : '0 0 8px rgba(255, 255, 255, 0.8)'
                 }}
             />
 

@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal as TerminalIcon, X, CornerDownLeft, Sparkles } from 'lucide-react';
 import portfolioData from '../data/portfolioData.json';
+
+// Accent themes switchable via the `theme` command (persisted in localStorage)
+const THEMES: Record<string, string> = {
+    cyan: '#38bdf8',
+    purple: '#a855f7',
+    green: '#4ade80',
+    blue: '#3b82f6',
+    white: '#ffffff',
+};
+
+const THEME_STORAGE_KEY = 'portfolio-theme';
 
 export const TerminalCLI: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -12,29 +23,46 @@ export const TerminalCLI: React.FC = () => {
             output: (
                 <div>
                     <p style={{ color: '#4ade80', marginBottom: '0.4rem' }}>
-                        🚀 PHUCDAI CLI v1.0.4 - [NGUYEN PHUC DAI PORTFOLIO]
+                        🚀 PHUCDAI CLI v1.1.0 - [NGUYEN PHUC DAI PORTFOLIO]
                     </p>
                     <p style={{ color: 'var(--text-secondary)' }}>
-                        Type <span style={{ color: '#38bdf8' }}>'help'</span> to see available commands or click buttons below.
+                        Type <span style={{ color: 'var(--accent)' }}>'help'</span> to see available commands or click buttons below.
                     </p>
                 </div>
             )
         }
     ]);
+    // Input history for arrow up/down navigation
+    const [cmdHistory, setCmdHistory] = useState<string[]>([]);
+    const [historyIndex, setHistoryIndex] = useState<number>(-1);
+
+    // Apply persisted accent theme on mount
+    useEffect(() => {
+        const saved = localStorage.getItem(THEME_STORAGE_KEY);
+        if (saved && THEMES[saved]) {
+            document.documentElement.style.setProperty('--accent', THEMES[saved]);
+        }
+    }, []);
 
     const handleCommand = (cmdStr: string) => {
         const cleanCmd = cmdStr.trim().toLowerCase();
+        const [cmd, ...rest] = cleanCmd.split(/\s+/);
+        const args = rest.join(' ').trim();
         let responseOutput: React.ReactNode = '';
 
-        switch (cleanCmd) {
+        switch (cmd) {
             case 'help':
                 responseOutput = (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                        <p><span style={{ color: '#38bdf8' }}>whoami</span> - Display developer profile summary</p>
-                        <p><span style={{ color: '#38bdf8' }}>skills</span> - List core technical stack & expertise</p>
-                        <p><span style={{ color: '#38bdf8' }}>projects</span> - Show featured projects list</p>
-                        <p><span style={{ color: '#38bdf8' }}>contact</span> - Display email and social links</p>
-                        <p><span style={{ color: '#38bdf8' }}>clear</span> - Clear terminal output history</p>
+                        <p><span style={{ color: 'var(--accent)' }}>whoami</span> - Display developer profile summary</p>
+                        <p><span style={{ color: 'var(--accent)' }}>skills</span> - List core technical stack & expertise</p>
+                        <p><span style={{ color: 'var(--accent)' }}>projects</span> - Show featured projects list</p>
+                        <p><span style={{ color: 'var(--accent)' }}>open &lt;project&gt;</span> - Open a project's source in a new tab</p>
+                        <p><span style={{ color: 'var(--accent)' }}>theme [name]</span> - Show or switch accent theme (cyan/purple/green/blue/white)</p>
+                        <p><span style={{ color: 'var(--accent)' }}>social</span> - Display social profiles</p>
+                        <p><span style={{ color: 'var(--accent)' }}>contact</span> - Display email and social links</p>
+                        <p><span style={{ color: 'var(--accent)' }}>clear</span> - Clear terminal output history</p>
+                        <p style={{ color: 'var(--text-secondary)', marginTop: '0.3rem' }}>Tip: use ↑/↓ to recall previous commands.</p>
                     </div>
                 );
                 break;
@@ -53,7 +81,7 @@ export const TerminalCLI: React.FC = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         {portfolioData.expertise.map(exp => (
                             <div key={exp.id}>
-                                <span style={{ color: '#a855f7', fontWeight: 600 }}>{exp.category}: </span>
+                                <span style={{ color: 'var(--accent-purple)', fontWeight: 600 }}>{exp.category}: </span>
                                 <span style={{ color: 'var(--text-secondary)' }}>{exp.skills.join(', ')}</span>
                             </div>
                         ))}
@@ -65,11 +93,83 @@ export const TerminalCLI: React.FC = () => {
                 responseOutput = (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                         {portfolioData.featuredProjects.map((p, idx) => (
-                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span style={{ color: '#38bdf8' }}>• {p.title}</span>
+                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+                                <span style={{ color: 'var(--accent)' }}>• {p.title}</span>
                                 <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{p.architecturePattern}</span>
                             </div>
                         ))}
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>
+                            Run <span style={{ color: 'var(--accent)' }}>open &lt;project&gt;</span> to open a project's source.
+                        </p>
+                    </div>
+                );
+                break;
+
+            case 'open': {
+                if (!args) {
+                    responseOutput = (
+                        <span style={{ color: '#ef4444' }}>
+                            Usage: <span style={{ color: 'var(--accent)' }}>open &lt;project&gt;</span> (e.g. open ai fitness)
+                        </span>
+                    );
+                    break;
+                }
+                const match = portfolioData.featuredProjects.find(p =>
+                    p.title.toLowerCase().includes(args.toLowerCase())
+                );
+                if (!match) {
+                    responseOutput = (
+                        <span style={{ color: '#ef4444' }}>
+                            No project found matching '{args}'. Type <span style={{ color: 'var(--accent)' }}>projects</span> to list all.
+                        </span>
+                    );
+                    break;
+                }
+                window.open(match.githubLink, '_blank', 'noopener,noreferrer');
+                responseOutput = (
+                    <span style={{ color: '#4ade80' }}>
+                        ✓ Opening {match.title} in a new tab → {match.githubLink}
+                    </span>
+                );
+                break;
+            }
+
+            case 'theme': {
+                const current = localStorage.getItem(THEME_STORAGE_KEY) || 'cyan';
+                if (!args) {
+                    responseOutput = (
+                        <div>
+                            <p style={{ color: '#e4e4e7' }}>Available themes: <span style={{ color: 'var(--accent)' }}>{Object.keys(THEMES).join(', ')}</span></p>
+                            <p style={{ color: 'var(--text-secondary)' }}>Current: <span style={{ color: 'var(--accent)' }}>{current}</span></p>
+                            <p style={{ color: 'var(--text-secondary)' }}>Usage: <span style={{ color: 'var(--accent)' }}>theme &lt;name&gt;</span></p>
+                        </div>
+                    );
+                    break;
+                }
+                const themeName = args.split(' ')[0].toLowerCase();
+                if (!THEMES[themeName]) {
+                    responseOutput = (
+                        <span style={{ color: '#ef4444' }}>
+                            Unknown theme '{themeName}'. Try: {Object.keys(THEMES).join(', ')}
+                        </span>
+                    );
+                    break;
+                }
+                document.documentElement.style.setProperty('--accent', THEMES[themeName]);
+                localStorage.setItem(THEME_STORAGE_KEY, themeName);
+                responseOutput = (
+                    <span style={{ color: '#4ade80' }}>
+                        ✓ Accent theme set to '{themeName}'
+                    </span>
+                );
+                break;
+            }
+
+            case 'social':
+                responseOutput = (
+                    <div>
+                        <p>🐙 GitHub: <a href={portfolioData.contact.github} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>{portfolioData.contact.github}</a></p>
+                        <p>💼 LinkedIn: <a href={portfolioData.contact.linkedin} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>{portfolioData.contact.linkedin}</a></p>
                     </div>
                 );
                 break;
@@ -77,9 +177,9 @@ export const TerminalCLI: React.FC = () => {
             case 'contact':
                 responseOutput = (
                     <div>
-                        <p>📧 Email: <a href={`mailto:${portfolioData.contact.email}`} style={{ color: '#38bdf8' }}>{portfolioData.contact.email}</a></p>
-                        <p>🐙 GitHub: <a href={portfolioData.contact.github} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>{portfolioData.contact.github}</a></p>
-                        <p>💼 LinkedIn: <a href={portfolioData.contact.linkedin} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>{portfolioData.contact.linkedin}</a></p>
+                        <p>📧 Email: <a href={`mailto:${portfolioData.contact.email}`} style={{ color: 'var(--accent)' }}>{portfolioData.contact.email}</a></p>
+                        <p>🐙 GitHub: <a href={portfolioData.contact.github} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>{portfolioData.contact.github}</a></p>
+                        <p>💼 LinkedIn: <a href={portfolioData.contact.linkedin} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>{portfolioData.contact.linkedin}</a></p>
                     </div>
                 );
                 break;
@@ -90,7 +190,7 @@ export const TerminalCLI: React.FC = () => {
 
             default:
                 if (cleanCmd === '') return;
-                responseOutput = <span style={{ color: '#ef4444' }}>Command not found: '{cleanCmd}'. Type 'help' for command list.</span>;
+                responseOutput = <span style={{ color: '#ef4444' }}>Command not found: '{cmdStr.trim()}'. Type 'help' for command list.</span>;
                 break;
         }
 
@@ -99,8 +199,34 @@ export const TerminalCLI: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const trimmed = input.trim();
+        if (!trimmed) return;
         handleCommand(input);
+        setCmdHistory(prev => [...prev, trimmed]);
+        setHistoryIndex(-1);
         setInput('');
+    };
+
+    // Arrow up/down to navigate command history
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (cmdHistory.length === 0) return;
+            const nextIndex = historyIndex === -1 ? cmdHistory.length - 1 : Math.max(0, historyIndex - 1);
+            setHistoryIndex(nextIndex);
+            setInput(cmdHistory[nextIndex]);
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (historyIndex === -1) return;
+            if (historyIndex >= cmdHistory.length - 1) {
+                setHistoryIndex(-1);
+                setInput('');
+            } else {
+                const nextIndex = historyIndex + 1;
+                setHistoryIndex(nextIndex);
+                setInput(cmdHistory[nextIndex]);
+            }
+        }
     };
 
     return (
@@ -131,9 +257,9 @@ export const TerminalCLI: React.FC = () => {
                         cursor: 'pointer',
                         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
                     }}
-                    whileHover={{ scale: 1.05, border: '1px solid rgba(56, 189, 248, 0.5)' }}
+                    whileHover={{ scale: 1.05, border: '1px solid var(--accent)' }}
                 >
-                    <TerminalIcon size={16} style={{ color: '#38bdf8' }} />
+                    <TerminalIcon size={16} style={{ color: 'var(--accent)' }} />
                     <span>CLI Terminal</span>
                     <Sparkles size={13} style={{ color: '#4ade80' }} />
                 </motion.button>
@@ -191,14 +317,14 @@ export const TerminalCLI: React.FC = () => {
 
                         {/* Quick Command Pills */}
                         <div style={{ display: 'flex', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(0,0,0,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)', flexWrap: 'wrap' }}>
-                            {['whoami', 'skills', 'projects', 'contact', 'clear'].map(c => (
+                            {['help', 'whoami', 'skills', 'projects', 'social', 'theme', 'clear'].map(c => (
                                 <button
                                     key={c}
                                     onClick={() => handleCommand(c)}
                                     style={{
                                         background: 'rgba(255,255,255,0.06)',
                                         border: '1px solid rgba(255,255,255,0.1)',
-                                        color: '#38bdf8',
+                                        color: 'var(--accent)',
                                         fontSize: '0.7rem',
                                         padding: '0.2rem 0.5rem',
                                         borderRadius: '4px',
@@ -217,7 +343,7 @@ export const TerminalCLI: React.FC = () => {
                                 <div key={index} style={{ marginBottom: '0.8rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#a1a1aa' }}>
                                         <span style={{ color: '#22c55e' }}>➜</span>
-                                        <span style={{ color: '#38bdf8' }}>~</span>
+                                        <span style={{ color: 'var(--accent)' }}>~</span>
                                         <span>{item.command}</span>
                                     </div>
                                     <div style={{ marginTop: '0.2rem', paddingLeft: '1.2rem', color: '#e4e4e7' }}>
@@ -234,7 +360,8 @@ export const TerminalCLI: React.FC = () => {
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                placeholder="Type command (e.g. help, whoami)..."
+                                onKeyDown={handleKeyDown}
+                                placeholder="Type command (e.g. help, open ai fitness, theme purple)..."
                                 style={{
                                     flex: 1,
                                     background: 'transparent',

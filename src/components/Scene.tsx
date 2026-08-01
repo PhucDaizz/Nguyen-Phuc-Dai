@@ -1,6 +1,7 @@
 import { useRef, useMemo, Suspense } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useScroll, Float, Environment, Sparkles, Text } from '@react-three/drei';
+import { useReducedMotion } from 'framer-motion';
 import * as THREE from 'three';
 
 // ─── SKILL GALAXY ────────────────────────────────────────────────────────────
@@ -25,12 +26,14 @@ interface SkillNodeProps {
 const SkillNode = ({ text, radius, speed, initialAngle, yOffset, inclination }: SkillNodeProps) => {
     const groupRef = useRef<THREE.Group>(null);
     const angle = useRef(initialAngle);
+    const prefersReducedMotion = useReducedMotion() ?? false;
+    const motionFactor = prefersReducedMotion ? 0.05 : 1;
 
     const fontSize = THREE.MathUtils.mapLinear(radius, 3, 12, 0.42, 0.18);
 
     useFrame((state, delta) => {
         if (!groupRef.current) return;
-        angle.current += delta * speed;
+        angle.current += delta * speed * motionFactor;
 
         groupRef.current.position.x = Math.cos(angle.current) * radius;
         groupRef.current.position.z = Math.sin(angle.current) * radius * 0.4;
@@ -39,8 +42,10 @@ const SkillNode = ({ text, radius, speed, initialAngle, yOffset, inclination }: 
         // Billboard: always face camera
         groupRef.current.rotation.y = -angle.current;
 
-        // Gentle pulse
-        const pulse = 0.92 + Math.sin(state.clock.elapsedTime * 1.5 + initialAngle) * 0.08;
+        // Gentle pulse (disabled under reduced motion)
+        const pulse = prefersReducedMotion
+            ? 1
+            : 0.92 + Math.sin(state.clock.elapsedTime * 1.5 + initialAngle) * 0.08;
         groupRef.current.scale.setScalar(pulse);
     });
 
@@ -151,7 +156,9 @@ const AbstractGlassStructure = ({ isMobile = false }: { isMobile?: boolean }) =>
     const meshRef = useRef<THREE.Mesh>(null);
     const wireRef = useRef<THREE.Mesh>(null);
     const scroll = useScroll();
-    
+    const prefersReducedMotion = useReducedMotion() ?? false;
+    const motionFactor = prefersReducedMotion ? 0.05 : 1;
+
     // Low detail on mobile (2 subdivisions) for maximum CPU/GPU efficiency, desktop can use 3.
     const geometry = useMemo(() => new THREE.IcosahedronGeometry(2.5, isMobile ? 2 : 3), [isMobile]);
 
@@ -159,19 +166,19 @@ const AbstractGlassStructure = ({ isMobile = false }: { isMobile?: boolean }) =>
         if (!meshRef.current) return;
 
         // Base continuous rotation
-        const baseRotation = state.clock.elapsedTime * 0.05;
+        const baseRotation = state.clock.elapsedTime * 0.05 * motionFactor;
         const offset = scroll.offset;
 
         // Corrected: Set the rotation absolute to offset, preventing compounding high-speed rotation on scroll.
         meshRef.current.rotation.y = baseRotation + offset * Math.PI;
-        meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.15) * 0.15;
+        meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.15 * motionFactor) * 0.15;
 
         if (wireRef.current) {
             // Counter rotation for parallax depth effect
-            wireRef.current.rotation.y = -state.clock.elapsedTime * 0.08;
+            wireRef.current.rotation.y = -state.clock.elapsedTime * 0.08 * motionFactor;
         }
 
-        const breathe = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
+        const breathe = prefersReducedMotion ? 0 : Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
         const scale = (isMobile ? 0.8 : 1) * (1 + offset * 1.5 + breathe); // slightly smaller on mobile
 
         meshRef.current.scale.setScalar(scale);
@@ -267,6 +274,8 @@ const Fragments = () => {
 // ─── MAIN SCENE ──────────────────────────────────────────────────────────────
 
 export const Scene = ({ isMobile = false }: { isMobile?: boolean }) => {
+    const prefersReducedMotion = useReducedMotion() ?? false;
+
     return (
         <>
             <color attach="background" args={['#000000']} />
@@ -274,14 +283,16 @@ export const Scene = ({ isMobile = false }: { isMobile?: boolean }) => {
             <ambientLight intensity={0.2} />
             <directionalLight position={[10, 20, 10]} intensity={1.5} color="#ffffff" />
             <directionalLight position={[-10, -20, -10]} intensity={0.5} color="#4444ff" />
-            
-            {/* Optimized particle count for mobile */}
-            <Sparkles count={isMobile ? 80 : 300} scale={20} size={1} speed={0.4} opacity={0.2} color="#ffffff" />
+
+            {/* Optimized particle count for mobile; none under reduced motion */}
+            {!prefersReducedMotion && (
+                <Sparkles count={isMobile ? 80 : 300} scale={20} size={1} speed={0.4} opacity={0.2} color="#ffffff" />
+            )}
 
             <AbstractGlassStructure isMobile={isMobile} />
-            
-            {/* Completely hide floating debris/fragments on mobile for massive performance gains */}
-            {!isMobile && <Fragments />}
+
+            {/* Completely hide floating debris/fragments on mobile (and under reduced motion) for massive performance gains */}
+            {!isMobile && !prefersReducedMotion && <Fragments />}
 
             {/* Skill galaxy — Fade in on Technical Subsystems scroll range */}
             <SkillOrbit />

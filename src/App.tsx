@@ -6,6 +6,7 @@ import { HeaderNav } from './components/HeaderNav';
 import { TerminalCLI } from './components/TerminalCLI';
 import { CustomCursor } from './components/CustomCursor';
 import { Suspense, useState, useEffect } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { Loader } from './components/Loader';
 
 function App() {
@@ -33,7 +34,7 @@ function App() {
   }, []);
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <CustomCursor />
       <Loader />
       <HeaderNav />
@@ -57,7 +58,7 @@ function App() {
           </Suspense>
         </Canvas>
       </div>
-    </>
+    </MotionConfig>
   );
 }
 
