@@ -153,7 +153,7 @@ export const HTMLContent = () => {
                 console.warn("Using fallback local data due to rate limit/network error", error);
             }
         }
-        loadGithubData();
+        // loadGithubData();
     }, []);
 
     // Sleek animation parameters
@@ -199,8 +199,9 @@ export const HTMLContent = () => {
                     whileInView="show"
                     viewport={{ once: true }}
                 >
-                    <motion.div variants={itemVariants} style={{ overflow: 'hidden' }}>
-                        <h5 style={{ fontSize: '1rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                    <motion.div variants={itemVariants} style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1.5rem' }}>
+                        <img src="/icon.png" alt="Logo" style={{ width: '64px', height: '64px', objectFit: 'contain' }} />
+                        <h5 style={{ fontSize: '1rem', letterSpacing: '0.2em', color: 'var(--text-secondary)', margin: 0 }}>
                             {portfolioData.hero.role}
                         </h5>
                     </motion.div>
@@ -587,8 +588,11 @@ export const HTMLContent = () => {
                         </div>
                     </motion.div>
 
-                    <motion.footer variants={itemVariants} className="site-footer">
-                        <span>© {new Date().getFullYear()} {portfolioData.hero.name}.</span>
+                    <motion.footer variants={itemVariants} className="site-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <img src="/icon.png" alt="Logo" style={{ width: '24px', height: '24px', objectFit: 'contain', opacity: 0.8 }} />
+                            <span>© {new Date().getFullYear()} {portfolioData.hero.name}.</span>
+                        </div>
                         <span>CRAFTING RELIABLE SOFTWARE.</span>
                     </motion.footer>
                 </motion.div>
