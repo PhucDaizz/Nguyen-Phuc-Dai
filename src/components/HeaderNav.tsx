@@ -47,35 +47,38 @@ export const HeaderNav: React.FC = () => {
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="header-nav-wrapper"
             style={{
                 position: 'fixed',
-                top: '1.5rem',
+                top: '1rem',
                 left: 0,
                 width: '100%',
                 zIndex: 1000,
                 display: 'flex',
                 justifyContent: 'center',
-                padding: '0 1rem',
+                padding: '0 0.75rem',
                 pointerEvents: 'none'
             }}
         >
             <div
+                className="header-nav-container"
                 style={{
                     pointerEvents: 'auto',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '1.5rem',
-                    padding: '0.6rem 1.2rem',
-                    background: 'rgba(12, 12, 14, 0.75)',
+                    gap: '1.2rem',
+                    padding: '0.5rem 1rem',
+                    background: 'rgba(12, 12, 14, 0.85)',
                     backdropFilter: 'blur(16px)',
                     WebkitBackdropFilter: 'blur(16px)',
                     border: '1px solid rgba(255, 255, 255, 0.12)',
                     borderRadius: '100px',
-                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)'
+                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
+                    maxWidth: '100%',
                 }}
             >
                 {/* Live Status Indicator */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingRight: '0.8rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className="header-status-badge" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingRight: '0.8rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
                     <span
                         style={{
                             width: '8px',
@@ -92,14 +95,14 @@ export const HeaderNav: React.FC = () => {
                 </div>
 
                 {/* Nav Links */}
-                <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <nav className="header-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                     <button
                         onClick={() => scrollTo('about')}
                         className={`nav-item-btn ${activeSection === 'about' ? 'active' : ''}`}
                         title="About Me"
                     >
                         <User size={15} />
-                        <span>About</span>
+                        <span className="nav-btn-text">About</span>
                     </button>
 
                     <button
@@ -108,7 +111,7 @@ export const HeaderNav: React.FC = () => {
                         title="Projects"
                     >
                         <FolderGit2 size={15} />
-                        <span>Projects</span>
+                        <span className="nav-btn-text">Projects</span>
                     </button>
 
                     <button
@@ -117,7 +120,7 @@ export const HeaderNav: React.FC = () => {
                         title="Skills"
                     >
                         <Code size={15} />
-                        <span>Skills</span>
+                        <span className="nav-btn-text">Skills</span>
                     </button>
 
                     <button
@@ -126,13 +129,14 @@ export const HeaderNav: React.FC = () => {
                         title="Contact"
                     >
                         <Mail size={15} />
-                        <span>Contact</span>
+                        <span className="nav-btn-text">Contact</span>
                     </button>
                 </nav>
 
                 {/* Quick Copy Email Button */}
                 <button
                     onClick={handleCopyEmail}
+                    className="header-copy-btn"
                     style={{
                         pointerEvents: 'auto',
                         display: 'inline-flex',
@@ -145,11 +149,12 @@ export const HeaderNav: React.FC = () => {
                         color: copied ? '#4ade80' : 'var(--text-primary)',
                         fontSize: '0.75rem',
                         cursor: 'pointer',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.3s ease',
+                        flexShrink: 0
                     }}
                 >
                     {copied ? <Check size={13} /> : <Copy size={13} />}
-                    <span>{copied ? 'Copied!' : 'Email'}</span>
+                    <span className="copy-btn-text">{copied ? 'Copied!' : 'Email'}</span>
                 </button>
             </div>
         </motion.header>

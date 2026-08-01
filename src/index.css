@@ -334,6 +334,34 @@ a:hover {
   .premium-image-container {
     height: 320px !important;
   }
+
+  /* HeaderNav Responsive */
+  .header-nav-container {
+    gap: 0.5rem !important;
+    padding: 0.4rem 0.6rem !important;
+  }
+
+  .header-status-badge {
+    display: none !important;
+  }
+
+  .nav-item-btn {
+    padding: 0.4rem 0.6rem !important;
+  }
+
+  .nav-btn-text {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .copy-btn-text {
+    display: none;
+  }
+
+  .header-copy-btn {
+    padding: 0.4rem !important;
+  }
 }
 
 /* Project Cards */
