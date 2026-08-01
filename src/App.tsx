@@ -19,11 +19,11 @@ function App() {
 
       // Because fields stack vertically on smaller screens, they take up more 'vh'.
       if (width <= 768) {
-        setPages(12); // Extend scrolling area for mobile (all columns stack vertically)
+        setPages(11.5); // Extend scrolling area for mobile
       } else if (width <= 1024) {
-        setPages(9); // Extend scrolling area for tablet
+        setPages(9.2); // Extend scrolling area for tablet
       } else {
-        setPages(7.5); // Default for desktop
+        setPages(7.8); // Precision stop right at footer
       }
     };
 
