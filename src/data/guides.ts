@@ -19,6 +19,677 @@ export interface Guide {
 }
 
 export const GUIDES: Record<string, Guide> = {
+  'insert-interval-57': {
+    slug: 'insert-interval-57',
+    blindNo: 57,
+    time: 'O(n)',
+    space: 'O(n)',
+    rule: '3 vùng: hết trước → giữ, giao nhau → gộp vào new, bắt đầu sau → chèn new rồi giữ.',
+    checklist: [
+      'interval.end < new.start → giữ nguyên',
+      'interval.start ≤ new.end → gộp (min start, max end)',
+      'Lần đầu gặp interval.start > new.end → chèn new rồi giữ nốt phần còn lại',
+      'Hết vòng mà chưa chèn → push new ở cuối',
+    ],
+    filename: 'insert-interval.ts',
+    code: `function insert(intervals: number[][], newInterval: number[]): number[][] {
+  const res: number[][] = [];
+  let i = 0;
+  while (i < intervals.length && intervals[i][1] < newInterval[0]) {
+    res.push(intervals[i++]);
+  }
+  while (i < intervals.length && intervals[i][0] <= newInterval[1]) {
+    newInterval = [
+      Math.min(newInterval[0], intervals[i][0]),
+      Math.max(newInterval[1], intervals[i][1]),
+    ];
+    i++;
+  }
+  res.push(newInterval);
+  while (i < intervals.length) res.push(intervals[i++]);
+  return res;
+}`,
+    highlightLines: [7],
+    dryRun: {
+      input: 'intervals = [[1,3],[6,9]], newInterval = [2,5]',
+      trace: ['[1,3]: end 3 ≥ 2 → không giữ, gộp → new = [1,5]', '[6,9]: start 6 > 5 → chèn [1,5], giữ [6,9]'],
+      output: '[[1,5],[6,9]]',
+    },
+    pitfalls: ['Gộp xong quên đẩy new vào trước khi giữ phần sau', 'So sánh sai chiều (end < start là hết trước, start > end là sau)'],
+  },
+  'merge-intervals-56': {
+    slug: 'merge-intervals-56',
+    blindNo: 56,
+    time: 'O(n log n)',
+    space: 'O(n)',
+    rule: 'Sort theo start rồi quét: giao thì kéo end, không thì chốt đoạn cũ.',
+    checklist: [
+      'Sort theo start tăng dần (bắt buộc)',
+      'start ≤ lastEnd → lastEnd = max(lastEnd, end)',
+      'start > lastEnd → push đoạn cũ, bắt đầu đoạn mới',
+      'Push đoạn cuối cùng sau vòng lặp',
+    ],
+    filename: 'merge-intervals.ts',
+    code: `function merge(intervals: number[][]): number[][] {
+  intervals.sort((a, b) => a[0] - b[0]);
+  const res: number[][] = [intervals[0]];
+  for (let i = 1; i < intervals.length; i++) {
+    const [s, e] = intervals[i];
+    const last = res[res.length - 1];
+    if (s <= last[1]) last[1] = Math.max(last[1], e);
+    else res.push([s, e]);
+  }
+  return res;
+}`,
+    highlightLines: [7],
+    dryRun: {
+      input: 'intervals = [[1,3],[2,6],[8,10],[15,18]]',
+      trace: ['[2,6]: 2 ≤ 3 → [1,6]', '[8,10]: 8 > 6 → chốt [1,6], mới [8,10]', '[15,18]: chốt [8,10], mới [15,18]', 'Push nốt [15,18]'],
+      output: '[[1,6],[8,10],[15,18]]',
+    },
+    pitfalls: ['Quên sort trước (input chưa chắc đã sort)', 'Quên push đoạn cuối sau vòng lặp'],
+  },
+  'non-overlapping-435': {
+    slug: 'non-overlapping-435',
+    blindNo: 435,
+    time: 'O(n log n)',
+    space: 'O(1)',
+    rule: 'Sort theo END rồi tham lam giữ đoạn kết thúc sớm nhất — chừa chỗ cho đoạn sau.',
+    checklist: [
+      'Sort theo end (không phải start!)',
+      'Giữ đoạn đầu, end = end của nó',
+      'Đoạn sau start < end → xóa (đếm+1)',
+      'start ≥ end → giữ, cập nhật end',
+    ],
+    filename: 'non-overlapping.ts',
+    code: `function eraseOverlapIntervals(intervals: number[][]): number {
+  intervals.sort((a, b) => a[1] - b[1]);
+  let removed = 0;
+  let end = -Infinity;
+  for (const [s, e] of intervals) {
+    if (s >= end) end = e;
+    else removed++;
+  }
+  return removed;
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'intervals = [[1,2],[2,3],[3,4],[1,3]] → sort end: [1,2],[2,3],[1,3],[3,4]',
+      trace: ['[1,2]: giữ, end=2', '[2,3]: 2≥2 giữ, end=3', '[1,3]: 1<3 xóa (1)', '[3,4]: 3≥3 giữ'],
+      output: '1',
+    },
+    pitfalls: ['Sort theo start rồi tham lam (sai — vd [1,100],[2,3],[3,4] cần giữ 2 đoạn sau)', 'Nhầm điều kiện chạm nhau: start = end là KHÔNG giao (được giữ)'],
+  },
+  'meeting-rooms-252': {
+    slug: 'meeting-rooms-252',
+    blindNo: 252,
+    time: 'O(n log n)',
+    space: 'O(1)',
+    rule: 'Sort theo start, chỉ cần 1 cặp giao nhau là false.',
+    checklist: [
+      'Sort theo start',
+      'So từng cặp kề: sau.start < trước.end → false',
+      'Chạm nhau (start = end) vẫn OK',
+      'Hết vòng → true',
+    ],
+    filename: 'meeting-rooms.ts',
+    code: `function canAttendMeetings(intervals: number[][]): boolean {
+  intervals.sort((a, b) => a[0] - b[0]);
+  for (let i = 1; i < intervals.length; i++) {
+    if (intervals[i][0] < intervals[i - 1][1]) return false;
+  }
+  return true;
+}`,
+    highlightLines: [3],
+    dryRun: {
+      input: 'intervals = [[0,30],[5,10],[15,20]]',
+      trace: ['[5,10] vs [0,30]: 5 < 30 → false ngay'],
+      output: 'false',
+    },
+    pitfalls: ['Dùng ≤ thay vì < (họp nối đuôi nhau vẫn 1 phòng được)', 'Quên sort (so cặp kề của mảng chưa sort là sai)'],
+  },
+  'meeting-rooms-ii-253': {
+    slug: 'meeting-rooms-ii-253',
+    blindNo: 253,
+    time: 'O(n log n)',
+    space: 'O(n)',
+    rule: 'Sweep line: +1 khi bắt đầu, −1 khi kết thúc (kết thúc trước nếu cùng giờ) — đỉnh là đáp án.',
+    checklist: [
+      'Tách sự kiện (time, +1 start / −1 end)',
+      'Sort theo time, end (−1) trước start (+1) khi cùng giờ',
+      'Quét cộng dồn, giữ max',
+      'Cách khác: min-heap end, pop hết hạn trước khi push',
+    ],
+    filename: 'meeting-rooms-ii.ts',
+    code: `function minMeetingRooms(intervals: number[][]): number {
+  const events: [number, number][] = [];
+  for (const [s, e] of intervals) {
+    events.push([s, 1]);
+    events.push([e, -1]);
+  }
+  events.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  let cur = 0, best = 0;
+  for (const [, d] of events) {
+    cur += d;
+    best = Math.max(best, cur);
+  }
+  return best;
+}`,
+    highlightLines: [8],
+    dryRun: {
+      input: 'intervals = [[0,30],[5,10],[15,20]]',
+      trace: ['0:+1 → 1 (best 1)', '5:+1 → 2 (best 2)', '10:−1 → 1', '15:+1 → 2', '20:−1 → 1', '30:−1 → 0'],
+      output: '2',
+    },
+    pitfalls: ['Cùng giờ mà start trước end (vd họp A hết 10, B bắt đầu 10 vẫn 1 phòng — phải end trước)', 'Đếm số lần giao thay vì đỉnh đồng thời'],
+  },
+  'max-subarray-53': {
+    slug: 'max-subarray-53',
+    blindNo: 53,
+    time: 'O(n)',
+    space: 'O(1)',
+    rule: 'Kadane: ở mỗi số, hoặc cộng tiếp hoặc bắt đầu lại — lấy max, giữ best.',
+    checklist: [
+      'cur = max(x, cur + x)',
+      'best = max(best, cur)',
+      'Khởi tạo best = −∞ (mảng toàn âm vẫn đúng)',
+      'Muốn cả vị trí thì track thêm start/end',
+    ],
+    filename: 'max-subarray.ts',
+    code: `function maxSubArray(nums: number[]): number {
+  let cur = nums[0];
+  let best = nums[0];
+  for (let i = 1; i < nums.length; i++) {
+    cur = Math.max(nums[i], cur + nums[i]);
+    best = Math.max(best, cur);
+  }
+  return best;
+}`,
+    highlightLines: [5],
+    dryRun: {
+      input: 'nums = [-2,1,-3,4,-1,2,1,-5,4]',
+      trace: ['cur: −2,1,1,4,3,5,6,1,5 → best lên dần tới 6 ([4,−1,2,1])'],
+      output: '6',
+    },
+    pitfalls: ['Khởi tạo best = 0 (sai khi toàn âm)', 'Reset cur = 0 thay vì = x (mất đoạn âm đầu dãy con tối ưu)'],
+  },
+  'alien-dict-269': {
+    slug: 'alien-dict-269',
+    blindNo: 269,
+    time: 'O(C)',
+    space: 'O(1)',
+    rule: 'Cặp từ kề nhau đầu tiên khác chữ → cạnh có hướng; topo-sort ra thứ tự (premium).',
+    checklist: [
+      'Mọi chữ đều là node (kể cả đứng một mình)',
+      'Cặp kề: tìm chữ đầu tiên khác nhau → cạnh u→v',
+      'Tiền tố dài hơn đứng trước từ ngắn (["abc","ab"]) → vô nghiệm ""',
+      'Kahn: hết queue mà chưa đủ chữ → có chu trình → ""',
+    ],
+    filename: 'alien-dict.ts',
+    code: `function alienOrder(words: string[]): string {
+  const adj = new Map<string, Set<string>>();
+  const indeg = new Map<string, number>();
+  for (const w of words) {
+    for (const c of w) {
+      if (!adj.has(c)) adj.set(c, new Set());
+      if (!indeg.has(c)) indeg.set(c, 0);
+    }
+  }
+  for (let i = 0; i < words.length - 1; i++) {
+    const a = words[i], b = words[i + 1];
+    if (a.length > b.length && a.startsWith(b)) return '';
+    const m = Math.min(a.length, b.length);
+    for (let k = 0; k < m; k++) {
+      if (a[k] !== b[k]) {
+        if (!adj.get(a[k])!.has(b[k])) {
+          adj.get(a[k])!.add(b[k]);
+          indeg.set(b[k], indeg.get(b[k])! + 1);
+        }
+        break;
+      }
+    }
+  }
+  const queue: string[] = [];
+  indeg.forEach((d, c) => { if (d === 0) queue.push(c); });
+  const res: string[] = [];
+  while (queue.length > 0) {
+    const u = queue.shift()!;
+    res.push(u);
+    for (const v of adj.get(u)!) {
+      indeg.set(v, indeg.get(v)! - 1);
+      if (indeg.get(v) === 0) queue.push(v);
+    }
+  }
+  return res.length === indeg.size ? res.join('') : '';
+}`,
+    highlightLines: [18],
+    dryRun: {
+      input: 'words = ["wrt","wrf","er","ett","rftt"]',
+      trace: ['wrt/wrf → t→f; wrf/er → w→e; er/ett → r→t; ett/rftt → e→r', 'Kahn: w(0) → e → r → t → f'],
+      output: '"wertf"',
+    },
+    pitfalls: ['So mọi cặp từ (thừa — chỉ cần cặp kề)', 'Thêm cạnh trùng làm indeg tăng oan (phải check đã có cạnh chưa)'],
+  },
+  'valid-tree-261': {
+    slug: 'valid-tree-261',
+    blindNo: 261,
+    time: 'O(V + E)',
+    space: 'O(V)',
+    rule: 'Cây ⟺ cạnh = n−1 VÀ liên thông (union-find: gặp cạnh nối 2 node cùng root là có vòng) (premium).',
+    checklist: [
+      'edges.length ≠ n−1 → false ngay',
+      'Union từng cạnh; 2 đầu cùng root → có vòng → false',
+      'Hết cạnh mà không vòng + đủ n−1 cạnh → true',
+      'n = 1, edges = [] → true',
+    ],
+    filename: 'valid-tree.ts',
+    code: `function validTree(n: number, edges: number[][]): boolean {
+  if (edges.length !== n - 1) return false;
+  const parent = Array.from({ length: n }, (_, i) => i);
+  const find = (x: number): number => {
+    if (parent[x] !== x) parent[x] = find(parent[x]);
+    return parent[x];
+  };
+  for (const [a, b] of edges) {
+    if (find(a) === find(b)) return false;
+    parent[find(a)] = find(b);
+  }
+  return true;
+}`,
+    highlightLines: [10],
+    dryRun: {
+      input: 'n = 5, edges = [[0,1],[0,2],[0,3],[1,4]]',
+      trace: ['4 cạnh = 5−1 ✓', 'Union hết, không cặp nào cùng root → true'],
+      output: 'true',
+    },
+    pitfalls: ['Chỉ check n−1 cạnh mà bỏ liên thông (2 cụm rời vẫn đủ cạnh? không — nhưng check cả 2 cho chắc)', 'DFS quên visited → treo vòng'],
+  },
+  'connected-components-323': {
+    slug: 'connected-components-323',
+    blindNo: 323,
+    time: 'O(V + E)',
+    space: 'O(V)',
+    rule: 'Union từng cạnh, đếm số root khác nhau (premium).',
+    checklist: [
+      'Union-find với path compression',
+      'Union hết edges',
+      'Đếm distinct root',
+      'Node lẻ (không cạnh) tự là 1 cụm',
+    ],
+    filename: 'connected-components.ts',
+    code: `function countComponents(n: number, edges: number[][]): number {
+  const parent = Array.from({ length: n }, (_, i) => i);
+  const find = (x: number): number => {
+    if (parent[x] !== x) parent[x] = find(parent[x]);
+    return parent[x];
+  };
+  for (const [a, b] of edges) {
+    parent[find(a)] = find(b);
+  }
+  return new Set(Array.from({ length: n }, (_, i) => find(i))).size;
+}`,
+    highlightLines: [10],
+    dryRun: {
+      input: 'n = 5, edges = [[0,1],[1,2],[3,4]]',
+      trace: ['Union: {0,1,2}, {3,4} → root 0→...→ 2 cụm'],
+      output: '2',
+    },
+    pitfalls: ['DFS/BFS cũng được nhưng union-find ngắn hơn', 'Quên path compression vẫn đúng nhưng chậm'],
+  },
+  'unique-paths-62': {
+    slug: 'unique-paths-62',
+    blindNo: 62,
+    time: 'O(m·n)',
+    space: 'O(n)',
+    rule: 'Ô = trên + trái; hàng đầu/cột đầu = 1; rolling 1 hàng là đủ.',
+    checklist: [
+      'dp[j] = dp[j] (trên, giữ) + dp[j−1] (trái, mới)',
+      'Khởi tạo hàng đầu toàn 1',
+      'Duyệt hàng 2..m, cột 2..n',
+      'Đáp án dp[n−1] (muốn O(1)? công thức tổ hợp C(m+n−2, m−1))',
+    ],
+    filename: 'unique-paths.ts',
+    code: `function uniquePaths(m: number, n: number): number {
+  const dp = new Array(n).fill(1);
+  for (let i = 1; i < m; i++) {
+    for (let j = 1; j < n; j++) {
+      dp[j] += dp[j - 1];
+    }
+  }
+  return dp[n - 1];
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'm = 3, n = 7',
+      trace: ['Hàng 0: [1,1,1,1,1,1,1]', 'Hàng 1: [1,2,3,4,5,6,7]', 'Hàng 2: [1,3,6,10,15,21,28]'],
+      output: '28',
+    },
+    pitfalls: ['Duyệt cột trước hàng (dp[j−1] chưa phải trái hiện tại)', 'Tràn số ở m,n lớn mà không dùng BigInt (hiếm khi bị hỏi)'],
+  },
+  'lcs-1143': {
+    slug: 'lcs-1143',
+    blindNo: 1143,
+    time: 'O(m·n)',
+    space: 'O(min(m,n))',
+    rule: 'Khớp thì +1 đường chéo, lệch thì max(trên, trái).',
+    checklist: [
+      'dp[i][j] = LCS của tiền tố i, j',
+      'a[i−1] = b[j−1] → dp[i−1][j−1] + 1',
+      'Khác → max(dp[i−1][j], dp[i][j−1])',
+      'Tối ưu 2 hàng (rolling) vì chỉ cần hàng trước',
+    ],
+    filename: 'lcs.ts',
+    code: `function longestCommonSubsequence(a: string, b: string): number {
+  const m = a.length, n = b.length;
+  let prev = new Array(n + 1).fill(0);
+  let cur = new Array(n + 1).fill(0);
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      cur[j] = a[i - 1] === b[j - 1] ? prev[j - 1] + 1 : Math.max(prev[j], cur[j - 1]);
+    }
+    [prev, cur] = [cur, prev];
+  }
+  return prev[n];
+}`,
+    highlightLines: [7],
+    dryRun: {
+      input: 'text1 = "abcde", text2 = "ace"',
+      trace: ['a=a → 1; b× → max; c=c → 2; d×; e=e → 3'],
+      output: '3 ("ace")',
+    },
+    pitfalls: ['Nhầm với Longest Common Substring (liên tục — khác bài, khác công thức)', 'Swap 2 hàng mà quên reset hàng cur cũ'],
+  },
+  'sum-two-integers-371': {
+    slug: 'sum-two-integers-371',
+    blindNo: 371,
+    time: 'O(1)',
+    space: 'O(1)',
+    rule: 'XOR = cộng không nhớ, AND<<1 = phần nhớ; lặp tới khi nhớ = 0.',
+    checklist: [
+      'sum = a ^ b (cộng không nhớ)',
+      'carry = (a & b) << 1 (phần nhớ)',
+      'a = sum, b = carry, lặp tới b = 0',
+      'Âm vẫn đúng (bù 2, 32 bước là xong)',
+    ],
+    filename: 'sum-two-integers.ts',
+    code: `function getSum(a: number, b: number): number {
+  while (b !== 0) {
+    const carry = (a & b) << 1;
+    a = a ^ b;
+    b = carry;
+  }
+  return a;
+}`,
+    highlightLines: [2],
+    dryRun: {
+      input: 'a = 1, b = 2 (01 + 10)',
+      trace: ['XOR = 11 (3), carry = (01&10)<<1 = 0 → b = 0 → dừng'],
+      output: '3',
+    },
+    pitfalls: ['Dùng đệ quy không base (treo khi carry không bao giờ 0 ở ngôn ngữ không tràn? JS 32-bit nên ổn)', 'Quên đây là mô phỏng mạch cộng full-adder'],
+  },
+  'number-of-1-bits-191': {
+    slug: 'number-of-1-bits-191',
+    blindNo: 191,
+    time: 'O(k)',
+    space: 'O(1)',
+    rule: 'n & (n−1) gạt bit 1 thấp nhất — đếm tới khi n = 0 (k = số bit 1).',
+    checklist: [
+      'n & (n−1) xóa bit 1 cuối cùng',
+      'Đếm mỗi lần xóa',
+      'Nhanh hơn duyệt 32 bit khi ít bit 1',
+      'JS: dùng >>> 0 để chắc unsigned 32-bit',
+    ],
+    filename: 'number-of-1-bits.ts',
+    code: `function hammingWeight(n: number): number {
+  let count = 0;
+  while (n !== 0) {
+    n &= n - 1;
+    count++;
+  }
+  return count;
+}`,
+    highlightLines: [3],
+    dryRun: {
+      input: 'n = 11 (1011)',
+      trace: ['1011 & 1010 = 1010 (mất bit cuối), count=1', '1010 & 1001 = 1000, count=2', '1000 & 0111 = 0, count=3 → dừng'],
+      output: '3',
+    },
+    pitfalls: ['Dịch >> số âm lan bit dấu (dùng >>> hoặc & trick)', 'Đếm cả bit 0 (duyệt 32 lần vẫn đúng nhưng chậm hơn)'],
+  },
+  'counting-bits-338': {
+    slug: 'counting-bits-338',
+    blindNo: 338,
+    time: 'O(n)',
+    space: 'O(n)',
+    rule: 'dp[i] = dp[i>>1] + (i&1): bỏ bit cuối rồi cộng lại.',
+    checklist: [
+      'i>>1 = i bỏ bit cuối (đã tính rồi)',
+      'i&1 = bit cuối (0/1)',
+      'dp[0] = 0, chạy 1..n',
+      'Bonus follow-up: one pass + O(n)',
+    ],
+    filename: 'counting-bits.ts',
+    code: `function countBits(n: number): number[] {
+  const dp = new Array(n + 1).fill(0);
+  for (let i = 1; i <= n; i++) {
+    dp[i] = dp[i >> 1] + (i & 1);
+  }
+  return dp;
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'n = 5',
+      trace: ['dp[1] = dp[0]+1 = 1', 'dp[2] = dp[1]+0 = 1', 'dp[3] = dp[1]+1 = 2', 'dp[4] = dp[2]+0 = 1', 'dp[5] = dp[2]+1 = 2'],
+      output: '[0,1,1,2,1,2]',
+    },
+    pitfalls: ['Đếm lại từng số bằng vòng lặp bit (O(n log n)) thay vì tái dùng', 'Nhầm i>>1 với i/2 làm tròn sai ở số lẻ? (>>1 là floor, đúng)'],
+  },
+  'missing-number-268': {
+    slug: 'missing-number-268',
+    blindNo: 268,
+    time: 'O(n)',
+    space: 'O(1)',
+    rule: 'XOR hết index lẫn value: cặp nào đủ đôi tự triệt, dư lại số thiếu.',
+    checklist: [
+      'xor = n (hoặc 0 rồi xor thêm n)',
+      'xor ^= i ^ nums[i] mọi i',
+      'Số đủ đôi triệt nhau, còn số thiếu',
+      'Cách khác: tổng Gauss n(n+1)/2 − sum (coi chừng tràn ở ngôn ngữ khác)',
+    ],
+    filename: 'missing-number.ts',
+    code: `function missingNumber(nums: number[]): number {
+  let xor = nums.length;
+  for (let i = 0; i < nums.length; i++) {
+    xor ^= i ^ nums[i];
+  }
+  return xor;
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'nums = [3,0,1]',
+      trace: ['xor = 3', 'i=0: 3^0^3 = 0', 'i=1: 0^1^0 = 1', 'i=2: 1^2^1 = 2'],
+      output: '2',
+    },
+    pitfalls: ['Quên xor với n (thiếu 1 vế)', 'Sort rồi tìm chỗ gãy O(n log n) — vẫn đúng nhưng không O(1) space'],
+  },
+  'reverse-bits-190': {
+    slug: 'reverse-bits-190',
+    blindNo: 190,
+    time: 'O(1)',
+    space: 'O(1)',
+    rule: '32 vòng: lấy bit cuối (n&1) đẩy vào kết quả (<<1), dịch n sang phải.',
+    checklist: [
+      'res = (res << 1) | (n & 1)',
+      'n >>>= 1 (unsigned!)',
+      'Đúng 32 vòng (kể cả số 0 đầu)',
+      'JS: >>> 0 ở cuối để ra unsigned',
+    ],
+    filename: 'reverse-bits.ts',
+    code: `function reverseBits(n: number): number {
+  let res = 0;
+  for (let i = 0; i < 32; i++) {
+    res = (res << 1) | (n & 1);
+    n >>>= 1;
+  }
+  return res >>> 0;
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'n = 43261596',
+      trace: ['32 vòng bóc từng bit cuối đắp sang trái res', 'res = 964176192'],
+      output: '964176192',
+    },
+    pitfalls: ['Dùng >> thay vì >>> (số âm lan bit 1)', 'Quên >>> 0 cuối → JS trả số âm'],
+  },
+  'rotate-image-48': {
+    slug: 'rotate-image-48',
+    blindNo: 48,
+    time: 'O(n²)',
+    space: 'O(1)',
+    rule: 'Xoay 90° = chuyển vị (i↔j) rồi lật ngang từng hàng.',
+    checklist: [
+      'Transpose: swap m[i][j] ↔ m[j][i] với j > i',
+      'Reverse mỗi hàng',
+      'In-place, không ma trận phụ',
+      'Xoay trái = transpose + lật dọc (đổi thứ tự 2 bước)',
+    ],
+    filename: 'rotate-image.ts',
+    code: `function rotate(matrix: number[][]): void {
+  const n = matrix.length;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      [matrix[i][j], matrix[j][i]] = [matrix[j][i], matrix[i][j]];
+    }
+  }
+  for (const row of matrix) row.reverse();
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: '[[1,2,3],[4,5,6],[7,8,9]]',
+      trace: ['Transpose: [[1,4,7],[2,5,8],[3,6,9]]', 'Lật ngang: [[7,4,1],[8,5,2],[9,6,3]]'],
+      output: '[[7,4,1],[8,5,2],[9,6,3]]',
+    },
+    pitfalls: ['Transpose cả ma trận (swap 2 lần = về cũ) — chỉ swap j > i', 'Tạo ma trận mới (mất O(n²) space, đề bắt in-place)'],
+  },
+  'spiral-matrix-54': {
+    slug: 'spiral-matrix-54',
+    blindNo: 54,
+    time: 'O(m·n)',
+    space: 'O(1)',
+    rule: '4 biên top/bottom/left/right: đi hết 1 vòng thì co biên, check biên sau mỗi cạnh.',
+    checklist: [
+      'Đi: trên (trái→phải), phải (trên→dưới), dưới (phải→trái), trái (dưới→trên)',
+      'Sau mỗi cạnh: co biên tương ứng',
+      'Check top ≤ bottom, left ≤ right trước mỗi cạnh (ma trận dẹt)',
+      'Hết biên thì dừng',
+    ],
+    filename: 'spiral-matrix.ts',
+    code: `function spiralOrder(matrix: number[][]): number[] {
+  const res: number[] = [];
+  let top = 0, bottom = matrix.length - 1;
+  let left = 0, right = matrix[0].length - 1;
+  while (top <= bottom && left <= right) {
+    for (let c = left; c <= right; c++) res.push(matrix[top][c]);
+    top++;
+    for (let r = top; r <= bottom; r++) res.push(matrix[r][right]);
+    right--;
+    if (top <= bottom) {
+      for (let c = right; c >= left; c--) res.push(matrix[bottom][c]);
+      bottom--;
+    }
+    if (left <= right) {
+      for (let r = bottom; r >= top; r--) res.push(matrix[r][left]);
+      left++;
+    }
+  }
+  return res;
+}`,
+    highlightLines: [6],
+    dryRun: {
+      input: '[[1,2,3],[4,5,6],[7,8,9]]',
+      trace: ['Trên: 1,2,3 → top=1', 'Phải: 6,9 → right=1', 'Dưới: 8,7 → bottom=1', 'Trái: 4 → left=1', 'Giữa: 5'],
+      output: '[1,2,3,6,9,8,7,4,5]',
+    },
+    pitfalls: ['Quên check biên giữa chừng (ma trận 1 hàng/dup góc)', 'Co biên sai thứ tự (đi cạnh nào co biên đó ngay)'],
+  },
+  'set-zeroes-73': {
+    slug: 'set-zeroes-73',
+    blindNo: 73,
+    time: 'O(m·n)',
+    space: 'O(1)',
+    rule: 'Dùng hàng 0 + cột 0 làm cờ (2 biến riêng cho cờ của chính chúng).',
+    checklist: [
+      'Quét ghi nhớ: hàng 0 / cột 0 có số 0 không (2 cờ)',
+      'Ô (i,j) = 0 → đánh dấu row0[j] = col0[i] = 0',
+      'Zero theo cờ (bỏ hàng 0, cột 0)',
+      'Xử lý hàng 0, cột 0 theo 2 cờ',
+    ],
+    filename: 'set-zeroes.ts',
+    code: `function setZeroes(matrix: number[][]): void {
+  const R = matrix.length, C = matrix[0].length;
+  let firstRowZero = false;
+  let firstColZero = false;
+  for (let c = 0; c < C; c++) if (matrix[0][c] === 0) firstRowZero = true;
+  for (let r = 0; r < R; r++) if (matrix[r][0] === 0) firstColZero = true;
+  for (let r = 1; r < R; r++) {
+    for (let c = 1; c < C; c++) {
+      if (matrix[r][c] === 0) {
+        matrix[r][0] = 0;
+        matrix[0][c] = 0;
+      }
+    }
+  }
+  for (let r = 1; r < R; r++) {
+    for (let c = 1; c < C; c++) {
+      if (matrix[r][0] === 0 || matrix[0][c] === 0) matrix[r][c] = 0;
+    }
+  }
+  if (firstRowZero) for (let c = 0; c < C; c++) matrix[0][c] = 0;
+  if (firstColZero) for (let r = 0; r < R; r++) matrix[r][0] = 0;
+}`,
+    highlightLines: [9],
+    dryRun: {
+      input: '[[1,1,1],[1,0,1],[1,1,1]]',
+      trace: ['Hàng 0, cột 0 không có 0 (cờ false)', 'Ô (1,1)=0 → đánh dấu row0[1], col0[1]', 'Zero theo cờ: hàng 1 + cột 1', '2 cờ false → xong'],
+      output: '[[1,0,1],[0,0,0],[1,0,1]]',
+    },
+    pitfalls: ['Dùng hàng 0/cột 0 làm cờ mà không giữ 2 cờ riêng (mất thông tin gốc)', 'Set O(m+n) vẫn đúng nhưng đề bonus O(1)'],
+  },
+  'max-product-152': {
+    slug: 'max-product-152',
+    blindNo: 152,
+    time: 'O(n)',
+    space: 'O(1)',
+    rule: 'Track đồng thời max và min (âm × âm thành dương, đảo vai trò).',
+    checklist: [
+      'curMax, curMin khởi tạo nums[0], best = nums[0]',
+      'tmpMax = max(x, curMax×x, curMin×x)',
+      'curMin = min(x, curMax×x, curMin×x) (dùng curMax cũ!)',
+      'best = max(best, tmpMax)',
+    ],
+    filename: 'max-product.ts',
+    code: `function maxProduct(nums: number[]): number {
+  let curMax = nums[0];
+  let curMin = nums[0];
+  let best = nums[0];
+  for (let i = 1; i < nums.length; i++) {
+    const x = nums[i];
+    const candidates = [x, curMax * x, curMin * x];
+    curMax = Math.max(...candidates);
+    curMin = Math.min(...candidates);
+    best = Math.max(best, curMax);
+  }
+  return best;
+}`,
+    highlightLines: [7],
+    dryRun: {
+      input: 'nums = [2,3,-2,4]',
+      trace: ['x=3: max=6, min=3, best=6', 'x=−2: max=−2, min=−12 (3×−2 đảo vai!), best=6', 'x=4: max=4, min=−48, best=6'],
+      output: '6',
+    },
+    pitfalls: ['Chỉ track max (số âm lật dấu làm sai — vd [−2,3,−4] đáp án 24)', 'Cập nhật curMin sau khi curMax đã đổi (phải dùng giá trị cũ cả 2)'],
+  },
   'clone-graph-133': {
     slug: 'clone-graph-133',
     blindNo: 133,

@@ -1,7 +1,41 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import confetti from 'canvas-confetti';
 import { BLIND75, leetcodeUrl } from '../../data/blind75';
 import { ProblemStatement } from './ProblemStatement';
+import { diffPill } from './visualizers/shared';
+
+const CONFETTI_COLORS = ['#ffb547', '#ff7e5f', '#2dd4bf', '#f0e9d8'];
+
+const VIDEO_ID = 'mZtKo3thUGw'; // Myles Smith – Stargazing (official MV)
+// Mốc điệp khúc do user chốt — ĐỪNG ĐỔI số này nữa
+const CHORUS_START = 39;
+
+// Nạp YouTube IFrame API 1 lần duy nhất
+declare global {
+  interface Window {
+    YT?: any;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+let ytApiPromise: Promise<void> | null = null;
+const loadYtApi = (): Promise<void> => {
+  if (typeof window === 'undefined') return Promise.resolve();
+  if (window.YT?.Player) return Promise.resolve();
+  if (!ytApiPromise) {
+    ytApiPromise = new Promise((resolve) => {
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        if (prev) prev();
+        resolve();
+      };
+      const s = document.createElement('script');
+      s.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(s);
+    });
+  }
+  return ytApiPromise;
+};
 
 const STORE_KEY = 'dsa-blind75-done-v1';
 
@@ -131,6 +165,91 @@ export const Blind75Page = () => {
 
   const uniqueNos = useMemo(() => [...new Set(BLIND75.map((p) => p.no))], []);
   const totalDone = uniqueNos.filter((n) => doneSet.has(n)).length;
+  const complete = uniqueNos.length > 0 && totalDone === uniqueNos.length;
+
+  // Bắn pháo hoa khi vừa chạm 74/74 (mỗi lần hoàn thành lại bắn lại)
+  const celebratedRef = useRef(false);
+  const [musicOn, setMusicOn] = useState(false);
+  const [musicPlaying, setMusicPlaying] = useState(false);
+  const playerRef = useRef<any>(null);
+
+  // Dựng/tắt trình phát ẩn theo musicOn + complete
+  useEffect(() => {
+    if (!musicOn || !complete) {
+      setMusicPlaying(false);
+      return;
+    }
+    let cancelled = false;
+    let player: any = null;
+    loadYtApi().then(() => {
+      if (cancelled || !window.YT) return;
+      player = new window.YT.Player('celebration-player', {
+        videoId: VIDEO_ID,
+        playerVars: { autoplay: 1, start: CHORUS_START, loop: 1, playlist: VIDEO_ID },
+        events: {
+          onReady: (e: any) => e.target.playVideo(),
+          onStateChange: (e: any) => setMusicPlaying(e.data === 1),
+        },
+      });
+      playerRef.current = player;
+    });
+    return () => {
+      cancelled = true;
+      try {
+        player?.destroy();
+      } catch {
+        /* đã unmount */
+      }
+      playerRef.current = null;
+    };
+  }, [musicOn, complete]);
+
+  const toggleMusic = () => {
+    const p = playerRef.current;
+    if (!p || typeof p.getPlayerState !== 'function') return;
+    if (p.getPlayerState() === 1) p.pauseVideo();
+    else p.playVideo();
+  };
+  const fireConfetti = () => {
+    const end = Date.now() + 2500;
+    confetti({
+      particleCount: 160,
+      spread: 100,
+      origin: { y: 0.6 },
+      colors: CONFETTI_COLORS,
+    });
+    // 2 bên + giữa, kéo dài ~2.5s
+    const frame = () => {
+      confetti({ particleCount: 3, angle: 60, spread: 60, origin: { x: 0 }, colors: CONFETTI_COLORS });
+      confetti({ particleCount: 3, angle: 120, spread: 60, origin: { x: 1 }, colors: CONFETTI_COLORS });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    };
+    frame();
+    setTimeout(() => {
+      confetti({
+        particleCount: 80,
+        spread: 120,
+        startVelocity: 35,
+        origin: { y: 0.5 },
+        colors: CONFETTI_COLORS,
+      });
+    }, 900);
+  };
+  useEffect(() => {
+    if (complete && !celebratedRef.current) {
+      celebratedRef.current = true;
+      // nhạc + pháo hoa cùng lúc (trong cùng gesture tick nên autoplay được phép)
+      setMusicOn(true);
+      // đợi layout ổn định rồi bắn
+      const t = window.setTimeout(fireConfetti, 450);
+      return () => window.clearTimeout(t);
+    }
+    if (!complete) {
+      celebratedRef.current = false;
+      setMusicOn(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [complete]);
 
   const sel = nodeById[selected];
   const selProblems = sel
@@ -151,8 +270,9 @@ export const Blind75Page = () => {
         Blind 75 <span className="accent">sơ đồ cây</span>
       </h1>
       <p>
-        Click từng node để xem bài bên trong và tick tiến độ (lưu localStorage).
-        Node xanh lá = xong 100%, thanh ngang dưới mỗi node = % hoàn thành.
+        Click từng node để xem bài bên trong. Học xong bài nào thì <strong>tick luôn</strong> để
+        lưu tiến độ — node nào xanh lá là xong 100%, thanh ngang dưới
+        mỗi node là % cày được. Nghe đồn cày full cây sẽ có <strong>phần thưởng ở cuối</strong> đó 👀
       </p>
 
       <div className="card teal">
@@ -167,6 +287,67 @@ export const Blind75Page = () => {
           <button className="btn ghost" onClick={() => { if (confirm('Xóa hết tiến độ Blind75?')) setDone([]); }}>Reset tiến độ</button>
         </div>
       </div>
+
+      {complete && (
+        <div
+          className="card"
+          style={{
+            textAlign: 'center',
+            borderColor: 'rgba(255,181,71,.5)',
+            boxShadow: '0 0 30px var(--accent-glow)',
+            position: 'relative',
+          }}
+        >
+          {musicOn && (
+            <button
+              onClick={toggleMusic}
+              title={musicPlaying ? 'Tạm dừng nhạc' : 'Phát tiếp nhạc'}
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                width: 34,
+                height: 34,
+                borderRadius: '50%',
+                border: '1px solid var(--border-strong)',
+                background: 'rgba(0,0,0,.4)',
+                color: 'var(--accent)',
+                fontSize: 14,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all .2s var(--ease)',
+              }}
+            >
+              {musicPlaying ? '⏸' : '▶'}
+            </button>
+          )}
+          <div className="badge" style={{ marginBottom: 12 }}>Blind 75 · Hoàn thành</div>
+          <h2 style={{ margin: '0 0 8px', justifyContent: 'center' }}>
+            🎉 Chúc mừng — {totalDone}/{uniqueNos.length}!
+          </h2>
+          <p style={{ margin: '0 auto 10px', maxWidth: 600 }}>
+            74/74 không đơn thuần là một con số, mà là quả ngọt sau những giờ bạn bền bỉ
+            đối diện với từng bài toán hóc búa, từng lỗi sai và cả những lần tưởng chừng bế tắc.
+          </p>
+          <p style={{ margin: '0 auto 14px', maxWidth: 600 }}>
+            Thời gian và tâm sức bạn đã trao đi hôm nay chính là năng lực vững chắc của ngày mai.
+            Cảm ơn bạn vì đã không bỏ cuộc và kiên nhẫn đi đến tận bài cuối cùng! 💪
+          </p>
+          <div className="btn-row" style={{ justifyContent: 'center' }}>
+            <button className="btn primary" onClick={fireConfetti}>Bắn pháo hoa lại 🎉</button>
+          </div>
+        </div>
+      )}
+      {/* Trình phát ẩn: điệp khúc Stargazing khi full 74/74 (YouTube chính chủ).
+          Div ngoài cố định để React gỡ an toàn (YT thay div trong bằng iframe,
+          gỡ thẳng div trong sẽ crash đen màn hình). */}
+      {musicOn && complete && (
+        <div style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+          <div id="celebration-player" />
+        </div>
+      )}
 
       {/* ===== CÂY + SIDEBAR ===== */}
       <div className="blind-layout">
@@ -296,8 +477,8 @@ export const Blind75Page = () => {
                       <strong style={{ fontSize: 14.5, textDecoration: checked ? 'line-through' : 'none' }}>
                         {p.title}
                       </strong>
-                      <span className="pill amber">{p.difficulty}</span>
-                      {p.premium && <span className="pill amber">PREMIUM</span>}
+                      <span className={diffPill(p.difficulty)}>{p.difficulty}</span>
+                      {p.premium && <span className="pill premium">PREMIUM</span>}
                     </div>
                     <p style={{ fontSize: 13, margin: '6px 0', color: 'rgba(240,233,216,.75)' }}>
                       <span style={{ color: 'var(--accent)' }}>{p.viTitle}</span> — {p.summary}

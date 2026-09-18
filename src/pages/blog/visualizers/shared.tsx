@@ -323,6 +323,10 @@ export const parseNumList = (str: string): number[] =>
     .map(Number)
     .filter((n) => !Number.isNaN(n));
 
+// Class pill theo độ khó: Easy teal · Medium amber · Hard đỏ
+export const diffPill = (d: 'Easy' | 'Medium' | 'Hard') =>
+  d === 'Easy' ? 'pill easy' : d === 'Medium' ? 'pill medium' : 'pill hard';
+
 // Parse cây dạng level-order: "3,9,20,null,null,15,7" (null/#/none = trống)
 export const parseTreeList = (str: string): (number | null)[] =>
   str.split(',').map((s) => {
@@ -332,7 +336,60 @@ export const parseTreeList = (str: string): (number | null)[] =>
     return Number.isNaN(n) ? null : n;
   });
 
-// Đồ thị chung: n node xếp vòng tròn, edges có hướng (mũi tên) hoặc vô hướng
+// Thanh đoạn (interval) trên trục số: s=start, e=end, max=giá trị max trục
+export const IntervalBars = ({ items, max }: {
+  items: { s: number; e: number; label?: string; state?: 'cur' | 'teal' | 'dim' | 'bad' | 'dashed' }[];
+  max: number;
+}) => {
+  const W = (v: number) => `${(v / Math.max(max, 1)) * 100}%`;
+  const L = (v: number) => `${(v / Math.max(max, 1)) * 100}%`;
+  const styleFor = (st?: string) => {
+    switch (st) {
+      case 'cur':
+        return { border: 'var(--accent)', bg: 'rgba(255,181,71,.2)', color: 'var(--accent)', glow: '0 0 12px var(--accent-glow)', dash: false };
+      case 'teal':
+        return { border: 'var(--teal)', bg: 'rgba(45,212,191,.18)', color: 'var(--teal)', glow: '0 0 12px var(--teal-glow)', dash: false };
+      case 'dim':
+        return { border: 'var(--border)', bg: 'rgba(255,255,255,.04)', color: 'var(--muted)', glow: undefined, dash: false };
+      case 'bad':
+        return { border: '#ff5f57', bg: 'rgba(255,95,87,.12)', color: '#ff5f57', glow: '0 0 12px rgba(255,95,87,.4)', dash: false };
+      case 'dashed':
+        return { border: 'var(--teal)', bg: 'transparent', color: 'var(--teal)', glow: undefined, dash: true };
+      default:
+        return { border: 'var(--border-strong)', bg: 'rgba(255,255,255,.06)', color: 'var(--fg)', glow: undefined, dash: false };
+    }
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+      {items.map((it, i) => {
+        const st = styleFor(it.state);
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="mono" style={{ fontSize: 10, color: 'var(--muted)', minWidth: 86 }}>
+              {it.label ?? `[${it.s},${it.e}]`}
+            </span>
+            <div style={{ flex: 1, height: 26, position: 'relative', background: 'rgba(255,255,255,.03)', borderRadius: 6 }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  left: L(it.s),
+                  width: `max(${W(Math.max(it.e - it.s, 0.4))}, 8px)`,
+                  top: 3,
+                  bottom: 3,
+                  borderRadius: 5,
+                  border: `2px ${st.dash ? 'dashed' : 'solid'} ${st.border}`,
+                  background: st.bg,
+                  boxShadow: st.glow ?? 'none',
+                  transition: 'all .3s var(--ease)',
+                }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 export const GraphSvg = ({ n, edges, directed, states, labels }: {
   n: number;
   edges: [number, number][];
@@ -569,5 +626,48 @@ export const TreeSvg = ({ values, states, edges }: {
         </text>
       )}
     </svg>
+  );
+};
+
+// Hàng bit: value hiển thị nhị phân, hot = vị trí bit sáng (0 = LSB ngoài cùng phải)
+export const BitRow = ({ label, value, bits, hot, doneBits }: {
+  label: string; value: number; bits: number;
+  hot?: number[]; doneBits?: number[];
+}) => {
+  const bin = (value >>> 0).toString(2).padStart(bits, '0').slice(-bits);
+  const hotSet = new Set(hot ?? []);
+  const doneSet = new Set(doneBits ?? []);
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div className="demo-label" style={{ marginBottom: 4 }}>
+        {label} = {value >>> 0}
+      </div>
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+        {bin.split('').map((b, i) => {
+          const bitPos = bits - 1 - i; // 0 = LSB
+          const isHot = hotSet.has(bitPos);
+          const isDone = doneSet.has(bitPos);
+          return (
+            <div
+              key={i}
+              style={{
+                width: 30, height: 34,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 7,
+                border: `2px solid ${isHot ? 'var(--accent)' : isDone ? 'var(--teal)' : b === '1' ? 'rgba(255,255,255,.25)' : 'var(--border)'}`,
+                background: isHot ? 'var(--accent)' : isDone ? 'rgba(45,212,191,.15)' : b === '1' ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.25)',
+                color: isHot ? 'var(--bg)' : isDone ? 'var(--teal)' : b === '1' ? 'var(--fg)' : 'var(--muted)',
+                fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 13,
+                boxShadow: isHot ? '0 0 10px var(--accent-glow)' : 'none',
+                transition: 'all .25s var(--ease)',
+              }}
+              title={`bit ${bitPos}`}
+            >
+              {b}
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };

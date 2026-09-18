@@ -52,6 +52,24 @@ import { JumpVisualizer } from './JumpVisualizer';
 import { WordBreakVisualizer } from './WordBreakVisualizer';
 import { LongestPalVisualizer, CountPalVisualizer } from './PalindromeExpand';
 import { StairsVisualizer } from './StairsVisualizer';
+import { InsertIntervalVisualizer } from './InsertIntervalVisualizer';
+import { MergeIntervalsVisualizer } from './MergeIntervalsVisualizer';
+import { NonOverlapVisualizer } from './NonOverlapVisualizer';
+import { MeetingRoomsVisualizer, MeetingRooms2Visualizer } from './MeetingRoomsVisualizer';
+import { MaxSubarrayVisualizer } from './MaxSubarrayVisualizer';
+import { AlienVisualizer } from './AlienVisualizer';
+import { ValidTreeVisualizer, ComponentsVisualizer } from './UnionFindVisualizer';
+import { UniquePathsVisualizer } from './UniquePathsVisualizer';
+import { LcsVisualizer } from './LcsVisualizer';
+import { BitAddVisualizer } from './BitAddVisualizer';
+import { HammingVisualizer } from './HammingVisualizer';
+import { CountingBitsVisualizer } from './CountingBitsVisualizer';
+import { MissingVisualizer } from './MissingVisualizer';
+import { ReverseBitsVisualizer } from './ReverseBitsVisualizer';
+import { RotateVisualizer } from './RotateVisualizer';
+import { SpiralVisualizer } from './SpiralVisualizer';
+import { ZeroesVisualizer } from './ZeroesVisualizer';
+import { MaxProductVisualizer } from './MaxProductVisualizer';
 
 // Registry: slug bài giảng → visualizer tương ứng.
 // Thêm bài mới: import component + thêm 1 dòng vào map.
@@ -110,6 +128,26 @@ const VISUALIZERS: Record<string, () => React.JSX.Element> = {
   'longest-palindrome-5': LongestPalVisualizer,
   'palindromic-substrings-647': CountPalVisualizer,
   'climbing-stairs-70': StairsVisualizer,
+  'insert-interval-57': InsertIntervalVisualizer,
+  'merge-intervals-56': MergeIntervalsVisualizer,
+  'non-overlapping-435': NonOverlapVisualizer,
+  'meeting-rooms-252': MeetingRoomsVisualizer,
+  'meeting-rooms-ii-253': MeetingRooms2Visualizer,
+  'max-subarray-53': MaxSubarrayVisualizer,
+  'alien-dict-269': AlienVisualizer,
+  'valid-tree-261': ValidTreeVisualizer,
+  'connected-components-323': ComponentsVisualizer,
+  'unique-paths-62': UniquePathsVisualizer,
+  'lcs-1143': LcsVisualizer,
+  'sum-two-integers-371': BitAddVisualizer,
+  'number-of-1-bits-191': HammingVisualizer,
+  'counting-bits-338': CountingBitsVisualizer,
+  'missing-number-268': MissingVisualizer,
+  'reverse-bits-190': ReverseBitsVisualizer,
+  'rotate-image-48': RotateVisualizer,
+  'spiral-matrix-54': SpiralVisualizer,
+  'set-zeroes-73': ZeroesVisualizer,
+  'max-product-152': MaxProductVisualizer,
 };
 
 export const hasVisualizer = (slug: string) => slug in VISUALIZERS;

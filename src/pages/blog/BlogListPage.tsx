@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { BLIND75, BLIND_CATEGORIES } from '../../data/blind75';
 import { GUIDES } from '../../data/guides';
 import { ProblemStatement } from './ProblemStatement';
+import { diffPill } from './visualizers/shared';
 
 const hasGuide = (no: number) =>
   Object.values(GUIDES).some((g) => g.blindNo === no);
@@ -107,8 +108,8 @@ export const BlogListPage = () => {
               </p>
               <ProblemStatement p={p} compact />
               <div>
-                <span className="pill amber">{p.difficulty}</span>
-                {p.premium && <span className="pill amber">PREMIUM</span>}
+                <span className={diffPill(p.difficulty)}>{p.difficulty}</span>
+                {p.premium && <span className="pill premium">PREMIUM</span>}
                 {gs && <span className="pill">CÓ HƯỚNG DẪN</span>}
               </div>
               <div className="btn-row">

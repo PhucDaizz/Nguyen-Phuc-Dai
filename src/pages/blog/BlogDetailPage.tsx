@@ -3,6 +3,7 @@ import { BLIND75, leetcodeUrl } from '../../data/blind75';
 import { getGuide } from '../../data/guides';
 import { ProblemStatement } from './ProblemStatement';
 import { hasVisualizer } from './visualizers';
+import { diffPill } from './visualizers/shared';
 
 export const BlogDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -48,7 +49,7 @@ export const BlogDetailPage = () => {
       <p>{meta.summary}</p>
       {blind && <ProblemStatement p={blind} />}
       <div>
-        <span className="pill amber">{meta.difficulty}</span>
+        <span className={diffPill(meta.difficulty)}>{meta.difficulty}</span>
         <span className="pill">TIME {guide.time}</span>
         <span className="pill">SPACE {guide.space}</span>
         {blind && (

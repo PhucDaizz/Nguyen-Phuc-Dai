@@ -122,6 +122,11 @@
   font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; margin: 2px;
 }
 .dsa-scope .pill.amber { background: rgba(255,181,71,.1); border-color: rgba(255,181,71,.3); color: var(--accent); }
+/* Độ khó: mỗi mức 1 màu riêng */
+.dsa-scope .pill.easy { background: rgba(45,212,191,.1); border-color: rgba(45,212,191,.45); color: var(--teal); }
+.dsa-scope .pill.medium { background: rgba(255,181,71,.1); border-color: rgba(255,181,71,.45); color: var(--accent); }
+.dsa-scope .pill.hard { background: rgba(255,95,87,.12); border-color: rgba(255,95,87,.5); color: #ff7e7e; }
+.dsa-scope .pill.premium { background: rgba(196,181,253,.1); border-color: rgba(196,181,253,.45); color: #c4b5fd; }
 
 .dsa-scope .rule {
   background: linear-gradient(135deg, rgba(255,181,71,.08), rgba(255,126,95,.04));
