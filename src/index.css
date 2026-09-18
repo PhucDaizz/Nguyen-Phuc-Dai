@@ -626,3 +626,115 @@ textarea:focus-visible {
   background: currentColor;
   opacity: 0.5;
 }
+
+/* ===== Blog / Algorithm section ===== */
+.blog-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding: 7rem 1.25rem 4rem;
+}
+.blog-container {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.blog-narrow { max-width: 760px; }
+.blog-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  margin-bottom: 1rem;
+}
+.blog-hero h1, .blog-narrow h1 {
+  text-transform: none;
+  letter-spacing: -0.02em;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 0.75rem;
+}
+.blog-accent { color: var(--accent-cyan); }
+.blog-sub { color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.7; }
+.blog-search {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  outline: none;
+}
+.blog-search:focus { border-color: var(--accent-cyan); }
+.blog-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+.blog-chip {
+  padding: 0.4rem 0.85rem;
+  border-radius: 100px;
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.blog-chip.active, .blog-chip:hover { border-color: var(--accent-cyan); color: #fff; }
+.blog-chip.static { cursor: default; }
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+.blog-card {
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  background: rgba(255,255,255,0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.blog-card h2 { font-size: 1.15rem; text-transform: none; margin: 0; }
+.blog-card h2 a { color: #fff; text-decoration: none; }
+.blog-card h2 a:hover { color: var(--accent-cyan); }
+.blog-card p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; }
+.blog-card-meta { display: flex; gap: 0.5rem; align-items: center; }
+.blog-badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 100px;
+  background: rgba(56,189,248,0.12);
+  border: 1px solid rgba(56,189,248,0.4);
+  color: var(--accent-cyan);
+}
+.blog-level { font-size: 0.7rem; color: var(--text-secondary); }
+.blog-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: auto;
+}
+.blog-read { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--accent-cyan); text-decoration: none; }
+.blog-empty { color: var(--text-secondary); margin-top: 2rem; }
+.blog-back { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--accent-cyan); text-decoration: none; margin-bottom: 1.5rem; }
+.blog-detail-meta { display: flex; flex-wrap: wrap; gap: 1rem; color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.5rem; }
+.blog-detail-meta span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.blog-mono { font-family: monospace; }
+.blog-lead { font-size: 1.05rem; color: #e4e4e7; line-height: 1.8; margin-bottom: 1.25rem; }
+.blog-para { color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem; }
+.blog-narrow h3 { text-transform: none; margin: 2rem 0 0.75rem; font-size: 1.2rem; }
+.blog-code {
+  background: #0c0c0e;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #a5f3fc;
+}
+.blog-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+.blog-related { margin-top: 2.5rem; border-top: 1px solid var(--panel-border); padding-top: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.blog-related-link { color: var(--accent-cyan); text-decoration: none; }
+.blog-related-link:hover { text-decoration: underline; }

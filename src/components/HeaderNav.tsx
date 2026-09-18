@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Code, FolderGit2, Mail, Copy, Check } from 'lucide-react';
+import { User, Code, FolderGit2, Mail, Copy, Check, BrainCircuit } from 'lucide-react';
 import portfolioData from '../data/portfolioData.json';
 
 export const HeaderNav: React.FC = () => {
     const [copied, setCopied] = useState(false);
     const [activeSection, setActiveSection] = useState<string>('hero');
+    const navigate = useNavigate();
+    const location = useLocation();
+    const isBlog = location.pathname.startsWith('/blog');
 
     useEffect(() => {
         const sectionIds = ['hero', 'about', 'projects', 'skills', 'contact'];
@@ -30,6 +34,14 @@ export const HeaderNav: React.FC = () => {
     }, []);
 
     const scrollTo = (id: string) => {
+        if (isBlog) {
+            navigate('/');
+            // Đợi home mount rồi mới scroll
+            setTimeout(() => {
+                document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+            }, 150);
+            return;
+        }
         const element = document.getElementById(id);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
@@ -130,6 +142,15 @@ export const HeaderNav: React.FC = () => {
                     >
                         <Mail size={15} />
                         <span className="nav-btn-text">Contact</span>
+                    </button>
+
+                    <button
+                        onClick={() => navigate('/blog')}
+                        className={`nav-item-btn ${isBlog ? 'active' : ''}`}
+                        title="Blog thuật toán"
+                    >
+                        <BrainCircuit size={15} />
+                        <span className="nav-btn-text">Blog</span>
                     </button>
                 </nav>
 
