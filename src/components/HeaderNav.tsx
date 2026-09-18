@@ -54,6 +54,14 @@ export const HeaderNav: React.FC = () => {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    // Route blog: header thu gọn, rê chuột vào (hoặc chạm) thì bung ra
+    const [expanded, setExpanded] = useState(false);
+    useEffect(() => {
+        if (isBlog) setExpanded(false);
+        else setExpanded(true);
+    }, [isBlog]);
+    const collapsed = isBlog && !expanded;
+
     return (
         <motion.header
             initial={{ y: -50, opacity: 0 }}
@@ -74,11 +82,13 @@ export const HeaderNav: React.FC = () => {
         >
             <div
                 className="header-nav-container"
+                onMouseEnter={() => { if (isBlog) setExpanded(true); }}
+                onMouseLeave={() => { if (isBlog) setExpanded(false); }}
                 style={{
                     pointerEvents: 'auto',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '1.2rem',
+                    gap: collapsed ? '0.6rem' : '1.2rem',
                     padding: '0.5rem 1rem',
                     background: 'rgba(12, 12, 14, 0.85)',
                     backdropFilter: 'blur(16px)',
@@ -87,8 +97,31 @@ export const HeaderNav: React.FC = () => {
                     borderRadius: '100px',
                     boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
                     maxWidth: '100%',
+                    transition: 'gap 0.3s ease, padding 0.3s ease',
                 }}
             >
+                {collapsed ? (
+                    <button
+                        onClick={() => setExpanded(true)}
+                        className="nav-item-btn"
+                        title="Mở menu (rê chuột vào để bung)"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                        <span
+                            style={{
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                backgroundColor: '#22c55e',
+                                boxShadow: '0 0 10px #22c55e',
+                                animation: 'pulse 2s infinite',
+                                flexShrink: 0,
+                            }}
+                        />
+                        <span className="nav-btn-text" style={{ fontSize: '0.75rem', letterSpacing: '0.1em' }}>MENU</span>
+                    </button>
+                ) : (
+                <>
                 {/* Live Status Indicator */}
                 <div className="header-status-badge" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingRight: '0.8rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
                     <span
@@ -177,6 +210,8 @@ export const HeaderNav: React.FC = () => {
                     {copied ? <Check size={13} /> : <Copy size={13} />}
                     <span className="copy-btn-text">{copied ? 'Copied!' : 'Email'}</span>
                 </button>
+                </>
+                )}
             </div>
         </motion.header>
     );

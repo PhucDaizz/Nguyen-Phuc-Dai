@@ -6,7 +6,9 @@ export const BlogLayout = () => {
     <div className="dsa-scope">
       <div className="dsa-container">
         <Outlet />
-        <footer>Blind 75 · dễ &amp; dễ hiểu nhất · Space Grotesk + JetBrains Mono</footer>
+        <footer>
+          Blind 75 · biên soạn bởi <strong style={{ color: 'var(--accent)' }}>Nguyễn Phúc Đại</strong>
+        </footer>
       </div>
     </div>
   );

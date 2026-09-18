@@ -1,4 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
+import { Seo } from '../../../components/Seo';
+import { getGuide } from '../../../data/guides';
+import { BLIND75 } from '../../../data/blind75';
 import { TwoSumVisualizer } from './TwoSumVisualizer';
 import { StockVisualizer } from './StockVisualizer';
 import { DuplicateVisualizer } from './DuplicateVisualizer';
@@ -159,6 +162,11 @@ export const VisualizerPage = () => {
   if (!Viz) {
     return (
       <div className="dsa-narrow">
+        <Seo
+          title="Chưa có mô phỏng | Nguyễn Phúc Đại"
+          description="Bài này chưa có visualizer. Xem bài giảng hoặc sơ đồ cây Blind75."
+          path={`/blog/${slug}/visualize`}
+        />
         <div className="badge">Visualizer</div>
         <h1>Chưa có <span className="accent">mô phỏng</span></h1>
         <p>Bài “{slug}” chưa có visualizer. Quay lại bài giảng hoặc danh sách Blind75.</p>
@@ -172,5 +180,24 @@ export const VisualizerPage = () => {
     );
   }
 
-  return <Viz />;
+  const guide = slug ? getGuide(slug) : undefined;
+  const blind = guide ? BLIND75.find((p) => p.no === guide.blindNo) : undefined;
+  const vizTitle = blind
+    ? `Mô phỏng ${blind.title} (${blind.viTitle}) | Nguyễn Phúc Đại`
+    : 'Mô phỏng thuật toán | Nguyễn Phúc Đại';
+
+  return (
+    <>
+      <Seo
+        title={vizTitle}
+        description={
+          blind
+            ? `Mô phỏng trực quan ${blind.title}: Play/Step từng bước, tự nhập ví dụ, code C#.`
+            : 'Mô phỏng trực quan thuật toán từng bước.'
+        }
+        path={`/blog/${slug}/visualize`}
+      />
+      <Viz />
+    </>
+  );
 };

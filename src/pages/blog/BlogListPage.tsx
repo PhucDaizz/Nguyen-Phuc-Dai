@@ -4,6 +4,7 @@ import { BLIND75, BLIND_CATEGORIES } from '../../data/blind75';
 import { GUIDES } from '../../data/guides';
 import { ProblemStatement } from './ProblemStatement';
 import { diffPill } from './visualizers/shared';
+import { Seo } from '../../components/Seo';
 
 const hasGuide = (no: number) =>
   Object.values(GUIDES).some((g) => g.blindNo === no);
@@ -37,19 +38,25 @@ export const BlogListPage = () => {
 
   return (
     <div>
-      <div className="badge">Blog · Blind 75</div>
+      <Seo
+        title="Blog thuật toán Blind75 tiếng Việt | Nguyễn Phúc Đại"
+        description="Tuyển tập 75 bài Blind75 giảng lại tiếng Việt: pattern, đề gốc LeetCode, bài giảng chi tiết, mô phỏng trực quan và sơ đồ cây lộ trình."
+        path="/blog"
+      />
+      <div className="badge">Blog · Thuật toán</div>
       <h1>
-        Blind 75 <span className="accent">dễ hiểu nhất</span>
+        Học thuật toán <span className="accent">dễ hiểu nhất</span>
       </h1>
       <p>
-        Toàn bộ 75 đầu bài Blind75 theo nhóm chủ đề — mỗi bài có pattern, độ khó, tag và
-        link LeetCode gốc. Bài nào có nút “Hướng dẫn” là đã có bài giảng tiếng Việt chi tiết.
+        Tuyển tập 75 bài kinh điển theo lộ trình Blind75, được mình giảng lại bằng tiếng Việt:
+        mỗi bài có pattern, độ khó và link đề gốc. Bài nào gắn nút “Hướng dẫn” là có bài giảng
+        chi tiết kèm mô phỏng trực quan từng bước chạy.
       </p>
 
       <div className="rule">
         <p style={{ margin: 0 }}>
-          <strong>Cách học:</strong> đọc QUY TẮC → tự code 15 phút → so solution → chạy dry-run
-          bằng miệng → ghi lại 1 câu “khi nào dùng pattern này”.
+          <strong>Cách học gợi ý:</strong> đọc quy tắc → tự code 15 phút → so solution →
+          dry-run bằng miệng → ghi lại 1 câu “gặp dạng nào thì dùng pattern này”.
         </p>
       </div>
 

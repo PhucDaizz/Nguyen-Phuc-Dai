@@ -55,11 +55,19 @@
 .dsa-container { max-width: 1280px; margin: 0 auto; padding: 0 28px 80px; position: relative; z-index: 1; }
 .dsa-narrow { max-width: 860px; margin: 0 auto; }
 .dsa-layout { display: grid; grid-template-columns: 220px 1fr; gap: 40px; }
+/* Grid con phải co được, nếu không <pre> bên trong sẽ đẩy tràn màn hình mobile */
+.dsa-layout > * { min-width: 0; }
+.dsa-scope .grid-2 > *, .dsa-scope .grid-3 > * { min-width: 0; }
 .dsa-scope .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .dsa-scope .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-@media (max-width: 900px) { .dsa-layout, .dsa-scope .grid-2, .dsa-scope .grid-3 { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .dsa-layout, .dsa-scope .grid-2, .dsa-scope .grid-3 { grid-template-columns: 1fr; }
+  .dsa-container { padding: 0 16px 64px; }
+  .dsa-scope h1 { font-size: clamp(30px, 9vw, 44px); }
+  .dsa-scope h2 { font-size: clamp(22px, 6vw, 30px); }
+}
 
-.dsa-scope h1 { font-weight: 700; letter-spacing: -0.02em; font-size: clamp(40px, 6vw, 72px); line-height: 1.1; margin-bottom: 16px; }
+.dsa-scope h1 { font-weight: 700; letter-spacing: -0.02em; font-size: clamp(40px, 6vw, 72px); line-height: 1.1; margin-bottom: 16px; overflow-wrap: break-word; }
 .dsa-scope h1 .accent {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
@@ -71,8 +79,10 @@
   border-radius: 4px; box-shadow: 0 0 12px var(--accent-glow);
 }
 .dsa-scope h3 { font-size: 18px; margin-top: 28px; margin-bottom: 12px; color: var(--accent); font-weight: 700; }
-.dsa-scope p { margin-bottom: 14px; color: rgba(240,233,216,.85); font-size: 15px; }
+.dsa-scope p { margin-bottom: 14px; color: rgba(240,233,216,.85); font-size: 15px; overflow-wrap: break-word; }
 .dsa-scope code, .dsa-scope .mono { font-family: 'JetBrains Mono', monospace; }
+/* Chuỗi mono trong đoạn văn (đề bài, dry-run) được gãy dòng; code trong <pre> vẫn cuộn ngang */
+.dsa-scope p.mono, .dsa-scope .demo p.mono { overflow-wrap: break-word; word-break: break-word; }
 
 .dsa-scope .badge {
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
@@ -198,6 +208,7 @@
 .blind-tree-scroll {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
   overflow: auto;
   border-radius: 20px;
   border: 1px solid var(--border);

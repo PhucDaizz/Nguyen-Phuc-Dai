@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nguyen-phuc-dai.vercel.app/sitemap.xml

@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 import { BLIND75, leetcodeUrl } from '../../data/blind75';
 import { ProblemStatement } from './ProblemStatement';
 import { diffPill } from './visualizers/shared';
+import { Seo } from '../../components/Seo';
 
 const CONFETTI_COLORS = ['#ffb547', '#ff7e5f', '#2dd4bf', '#f0e9d8'];
 
@@ -121,6 +122,7 @@ export const Blind75Page = () => {
   const [selected, setSelected] = useState<string>('arrays');
   const [zoom, setZoom] = useState(1);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const userZoomed = useRef(false); // user đã zoom tay thì không auto-fit nữa
 
   useEffect(() => {
     localStorage.setItem(STORE_KEY, JSON.stringify(done));
@@ -133,28 +135,47 @@ export const Blind75Page = () => {
     const onWheel = (e: WheelEvent) => {
       if (!e.ctrlKey) return;
       e.preventDefault();
+      userZoomed.current = true;
       setZoom((z) => Math.min(2.2, Math.max(0.4, +(z - Math.sign(e.deltaY) * 0.1).toFixed(2))));
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
   }, []);
 
-  const zoomBy = (d: number) =>
+  const zoomBy = (d: number) => {
+    userZoomed.current = true;
     setZoom((z) => Math.min(2.2, Math.max(0.4, +(z + d).toFixed(2))));
+  };
 
   const fitWidth = () => {
     const el = scrollRef.current;
     if (!el) return;
+    userZoomed.current = true;
     setZoom(Math.min(1, Math.max(0.4, +(el.clientWidth / CANVAS_W).toFixed(2))));
   };
 
-  // Mobile/màn hẹp: mặc định thu cây vừa khung nhìn
-  useEffect(() => {
+  const autoFit = () => {
     const el = scrollRef.current;
     if (el && el.clientWidth > 0 && el.clientWidth < CANVAS_W) {
       setZoom(+(el.clientWidth / CANVAS_W).toFixed(2));
     }
+  };
+
+  // Mobile/màn hẹp: thu cây vừa khung nhìn lúc mở trang + mỗi khi đổi cỡ màn hình
+  // (chỉ khi user chưa zoom tay)
+  useEffect(() => {
+    autoFit();
+    const onResize = () => {
+      if (!userZoomed.current) autoFit();
+    };
+    window.addEventListener('resize', onResize);
+    // đo lại sau khi font/layout ổn định (mobile hay đo sai lần đầu)
+    const t = window.setTimeout(autoFit, 400);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.clearTimeout(t);
+    };
   }, []);
 
   const doneSet = useMemo(() => new Set(done), [done]);
@@ -263,6 +284,11 @@ export const Blind75Page = () => {
 
   return (
     <div>
+      <Seo
+        title="Sơ đồ cây lộ trình Blind75 + tick tiến độ | Nguyễn Phúc Đại"
+        description="Roadmap Blind75 dạng cây: 18 topic từ Arrays tới Math, tick lưu tiến độ học từng bài thuật toán."
+        path="/blog/blind75"
+      />
       <Link to="/blog" className="btn ghost">← Về Blog</Link>
       <div style={{ height: 18 }} />
       <div className="badge">Roadmap · Blind 75</div>
@@ -359,7 +385,7 @@ export const Blind75Page = () => {
               {Math.round(zoom * 100)}%
             </span>
             <button className="btn" onClick={() => zoomBy(0.15)} title="Phóng to">+</button>
-            <button className="btn ghost" onClick={() => setZoom(1)}>100%</button>
+            <button className="btn ghost" onClick={() => { userZoomed.current = true; setZoom(1); }}>100%</button>
             <button className="btn ghost" onClick={fitWidth} title="Thu vừa màn hình">Vừa màn hình</button>
             <span style={{ alignSelf: 'center', fontSize: 12, color: 'var(--muted)' }}>Mẹo: giữ Ctrl + cuộn chuột để zoom</span>
           </div>
