@@ -418,7 +418,7 @@ export const TwoSumVisualizer = () => {
           <code>
             {CSHARP_LINES.map((ln, i) => (
               <span key={i} className={`line ${step.codeLine === i ? 'active' : ''}`}>
-                <span className="ln">{i + 1}</span>{ln || ' '}
+                {ln || ' '}
               </span>
             ))}
           </code>

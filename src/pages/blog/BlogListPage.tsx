@@ -41,7 +41,7 @@ export const BlogListPage = () => {
         Blind 75 <span className="accent">dễ hiểu nhất</span>
       </h1>
       <p>
-        Toàn bộ 75 đầu bài Blind75 theo nhóm NeetCode — mỗi bài có pattern, độ khó, tag và
+        Toàn bộ 75 đầu bài Blind75 theo nhóm chủ đề — mỗi bài có pattern, độ khó, tag và
         link LeetCode gốc. Bài nào có nút “Hướng dẫn” là đã có bài giảng tiếng Việt chi tiết.
       </p>
 
@@ -56,7 +56,7 @@ export const BlogListPage = () => {
       <Link to="/blog/blind75" className="card teal" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
         <div className="card-title">
           <span className="dot" style={{ background: 'var(--teal)', boxShadow: '0 0 8px var(--teal)' }}></span>
-          ROADMAP · TREE VIEW GIỐNG NEETCODE
+          ROADMAP · SƠ ĐỒ CÂY THEO LỘ TRÌNH HỌC
         </div>
         <h3 style={{ marginTop: 0 }}>Mở sơ đồ cây Blind 75 →</h3>
         <p style={{ fontSize: 13.5, margin: 0 }}>

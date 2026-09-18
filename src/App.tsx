@@ -19,25 +19,36 @@ const ScrollToTop = () => {
   return null;
 };
 
+function AppShell() {
+  const { pathname } = useLocation();
+  // Hiệu ứng nặng của portfolio (boot loader 3D, cursor hạt) chỉ chạy ở trang chủ.
+  // Route /blog giữ nhẹ: vào thẳng, không boot screen, không cursor custom.
+  const isBlog = pathname.startsWith('/blog');
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <ScrollToTop />
+      {!isBlog && <CustomCursor />}
+      {!isBlog && <Loader />}
+      <HeaderNav />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/blog" element={<BlogLayout />}>
+          <Route index element={<BlogListPage />} />
+          <Route path="blind75" element={<Blind75Page />} />
+          <Route path=":slug/visualize" element={<VisualizerPage />} />
+          <Route path=":slug" element={<BlogDetailPage />} />
+        </Route>
+        <Route path="*" element={<HomePage />} />
+      </Routes>
+    </MotionConfig>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
-      <MotionConfig reducedMotion="user">
-        <ScrollToTop />
-        <CustomCursor />
-        <Loader />
-        <HeaderNav />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/blog" element={<BlogLayout />}>
-            <Route index element={<BlogListPage />} />
-            <Route path="blind75" element={<Blind75Page />} />
-            <Route path=":slug/visualize" element={<VisualizerPage />} />
-            <Route path=":slug" element={<BlogDetailPage />} />
-          </Route>
-          <Route path="*" element={<HomePage />} />
-        </Routes>
-      </MotionConfig>
+      <AppShell />
     </BrowserRouter>
   );
 }

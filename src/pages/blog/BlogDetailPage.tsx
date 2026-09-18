@@ -101,7 +101,7 @@ export const BlogDetailPage = () => {
               <code>
                 {lines.map((ln, i) => (
                   <span key={i} className={`line ${guide.highlightLines.includes(i + 1) ? 'active' : ''}`}>
-                    <span className="ln">{i + 1}</span>{ln || ' '}
+                    {ln || ' '}
                   </span>
                 ))}
               </code>

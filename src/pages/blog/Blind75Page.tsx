@@ -5,7 +5,7 @@ import { ProblemStatement } from './ProblemStatement';
 
 const STORE_KEY = 'dsa-blind75-done-v1';
 
-// ---------- Roadmap tree definition (layout giống ảnh NeetCode) ----------
+// ---------- Roadmap tree definition (topic nào mở khóa topic nào) ----------
 interface TreeNode {
   id: string;
   label: string;

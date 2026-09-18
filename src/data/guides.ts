@@ -19,6 +19,166 @@ export interface Guide {
 }
 
 export const GUIDES: Record<string, Guide> = {
+  'group-anagrams-49': {
+    slug: 'group-anagrams-49',
+    blindNo: 49,
+    time: 'O(n·k log k)',
+    space: 'O(n·k)',
+    rule: 'Anagram chung nhau 1 “dấu vân tay” → sort chữ cái làm key, cùng key vào 1 nhóm.',
+    checklist: [
+      'Key = chuỗi đã sort (eat/tea/ate → aet)',
+      'Map key → danh sách từ, gặp từ mới thì push vào nhóm của key nó',
+      'Muốn O(n·k) thì key = tuple đếm 26 chữ thay vì sort',
+      'Return các values của map, thứ tự nhóm nào cũng được',
+    ],
+    filename: 'group-anagrams.ts',
+    code: `function groupAnagrams(strs: string[]): string[][] {
+  const map = new Map<string, string[]>();
+  for (const w of strs) {
+    const key = w.split('').sort().join('');
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(w);
+  }
+  return [...map.values()];
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'strs = ["eat","tea","tan","ate","nat","bat"]',
+      trace: ['eat → key aet → nhóm {aet:[eat]}', 'tea → key aet → {aet:[eat,tea]}', 'tan → key ant → {ant:[tan]}', 'ate → key aet → {aet:[eat,tea,ate]}', 'nat → key ant → {ant:[tan,nat]}', 'bat → key abt → {abt:[bat]}'],
+      output: '[["eat","tea","ate"],["tan","nat"],["bat"]]',
+    },
+    pitfalls: ['So từng cặp chuỗi với nhau là O(n²·k)', 'Dùng chính chuỗi chưa sort làm key thì mỗi từ 1 nhóm'],
+  },
+  'encode-decode-strings-271': {
+    slug: 'encode-decode-strings-271',
+    blindNo: 271,
+    time: 'O(n)',
+    space: 'O(n)',
+    rule: 'Chuỗi chứa ký tự bất kỳ → đừng dùng separator, dùng tiền tố độ dài: “len#str”.',
+    checklist: [
+      'Encode: mỗi chuỗi thành len + "#" + chuỗi, nối lại',
+      'Decode: đọc số tới "#" → đó là len, cắt đúng len ký tự tiếp theo',
+      'Nhảy pointer qua đoạn vừa cắt, lặp tới hết',
+      'Chuỗi rỗng "" encode thành "0#" vẫn decode đúng',
+    ],
+    filename: 'encode-decode-strings.ts',
+    code: `function encode(strs: string[]): string {
+  return strs.map(s => s.length + '#' + s).join('');
+}
+
+function decode(s: string): string[] {
+  const res: string[] = [];
+  let i = 0;
+  while (i < s.length) {
+    let j = i;
+    while (s[j] !== '#') j++;
+    const len = Number(s.slice(i, j));
+    res.push(s.slice(j + 1, j + 1 + len));
+    i = j + 1 + len;
+  }
+  return res;
+}`,
+    highlightLines: [11],
+    dryRun: {
+      input: '["leet","code"]',
+      trace: ['Encode: "leet" → "4#leet", "code" → "4#code" → "4#leet4#code"', 'Decode: i=0, đọc tới # → len=4, cắt "leet", i=6', 'i=6, đọc tới # → len=4, cắt "code", i=12 → hết'],
+      output: '["leet","code"]',
+    },
+    pitfalls: ['Nối bằng dấu phẩy rồi split(",") sẽ vỡ khi chuỗi chứa dấu phẩy', 'Quên case chuỗi rỗng: "0#" phải decode ra [""]'],
+  },
+  'product-except-self-238': {
+    slug: 'product-except-self-238',
+    blindNo: 238,
+    time: 'O(n)',
+    space: 'O(1)',
+    rule: 'Không được chia → đi 2 pass: trái→phải tích prefix, phải→trái nhân suffix, đáp án tái dùng làm bộ nhớ.',
+    checklist: [
+      'answer[0] = 1 rồi answer[i] = answer[i-1] × nums[i-1] (tích mọi số bên trái)',
+      'suffix = 1 rồi duyệt ngược: answer[i] ×= suffix; suffix ×= nums[i]',
+      'Không dùng mảng prefix/suffix riêng — output chính là bộ nhớ phụ',
+      'Case có số 0 vẫn đúng tự nhiên, không cần if riêng',
+    ],
+    filename: 'product-except-self.ts',
+    code: `function productExceptSelf(nums: number[]): number[] {
+  const n = nums.length;
+  const answer = new Array(n);
+  answer[0] = 1;
+  for (let i = 1; i < n; i++)
+    answer[i] = answer[i - 1] * nums[i - 1];
+  let suffix = 1;
+  for (let i = n - 1; i >= 0; i--) {
+    answer[i] *= suffix;
+    suffix *= nums[i];
+  }
+  return answer;
+}`,
+    highlightLines: [9],
+    dryRun: {
+      input: 'nums = [1,2,3,4]',
+      trace: ['prefix: answer = [1,1,2,6]', 'suffix=1: i=3 → answer[3]=6×1=6, suffix=4', 'i=2 → answer[2]=2×4=8, suffix=12', 'i=1 → answer[1]=1×12=12, suffix=24', 'i=0 → answer[0]=1×24=24'],
+      output: '[24,12,8,6]',
+    },
+    pitfalls: ['Dùng phép chia sẽ sai ngay khi có số 0', 'Tạo 2 mảng prefix/suffix riêng tốn O(n) bộ nhớ phụ'],
+  },
+  'valid-anagram-242': {
+    slug: 'valid-anagram-242',
+    blindNo: 242,
+    time: 'O(n)',
+    space: 'O(1)',
+    rule: 'So hoán vị → đếm tần suất: cộng cho chuỗi 1, trừ cho chuỗi 2, âm là sai.',
+    checklist: [
+      'Dài khác nhau → false ngay, khỏi đếm',
+      'Mảng đếm 26 chữ (a-z thường), +1 cho từng chữ của s',
+      '−1 cho từng chữ của t, ô nào âm → false ngay',
+      'Hết vòng mà không âm → true',
+    ],
+    filename: 'valid-anagram.ts',
+    code: `function isAnagram(s: string, t: string): boolean {
+  if (s.length !== t.length) return false;
+  const count = new Array(26).fill(0);
+  for (const c of s) count[c.charCodeAt(0) - 97]++;
+  for (const c of t) {
+    if (--count[c.charCodeAt(0) - 97] < 0) return false;
+  }
+  return true;
+}`,
+    highlightLines: [6],
+    dryRun: {
+      input: 's = "anagram", t = "nagaram"',
+      trace: ['Dài bằng nhau (7=7)', 'Đếm s: a×3, n×1, g×1, r×1, m×1', 'Trừ t: n−1, a−1, g−1, a−1, r−1, a−1, m−1 → mọi ô về 0'],
+      output: 'true',
+    },
+    pitfalls: ['Sort 2 chuỗi O(n log n) vẫn đúng nhưng chậm hơn đếm', 'Quên check dài khác nhau trước, hoặc dùng map chữ chung chung thay vì mảng 26'],
+  },
+  'contains-duplicate-217': {
+    slug: 'contains-duplicate-217',
+    blindNo: 217,
+    time: 'O(n)',
+    space: 'O(n)',
+    rule: 'Hỏi “đã thấy số này chưa” với mỗi phần tử → Hash Set cho đáp án O(n).',
+    checklist: [
+      'Gặp số đã có trong set → return true ngay',
+      'Chưa có → add vào set, đi tiếp',
+      'Hết mảng mà chưa true → return false',
+      'Set chỉ lưu value, không cần index (khác Two Sum)',
+    ],
+    filename: 'contains-duplicate.ts',
+    code: `function containsDuplicate(nums: number[]): boolean {
+  const seen = new Set<number>();
+  for (const x of nums) {
+    if (seen.has(x)) return true;
+    seen.add(x);
+  }
+  return false;
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'nums = [1,2,3,1]',
+      trace: ['x=1: chưa có → add {1}', 'x=2: chưa có → add {1,2}', 'x=3: chưa có → add {1,2,3}', 'x=1: đã có → return true'],
+      output: 'true',
+    },
+    pitfalls: ['2 vòng lặp so từng cặp là O(n²), timeout', 'Sort trước tuy được nhưng tốn O(n log n) và sửa mảng gốc'],
+  },
   'two-sum-1': {
     slug: 'two-sum-1',
     blindNo: 1,

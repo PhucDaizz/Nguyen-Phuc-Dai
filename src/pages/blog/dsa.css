@@ -155,7 +155,20 @@
 .dsa-scope .code-head .name { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
 .dsa-scope .code-head .name .live { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal); animation: dsaPulse 2s infinite; }
 .dsa-scope pre { padding: 16px 18px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.75; margin: 0; }
-.dsa-scope pre code .line { display: block; padding: 1px 10px; margin: 0 -10px; border-left: 3px solid transparent; white-space: pre; }
+.dsa-scope pre code { counter-reset: codeline; }
+.dsa-scope pre code .line { display: block; padding: 1px 10px 1px 0; margin: 0 -10px; border-left: 3px solid transparent; white-space: pre; counter-increment: codeline; }
+.dsa-scope pre code .line::before {
+  content: counter(codeline);
+  display: inline-block;
+  min-width: 20px;
+  text-align: right;
+  margin-right: 14px;
+  margin-left: 10px;
+  color: var(--muted);
+  opacity: 0.4;
+  user-select: none;
+  -webkit-user-select: none;
+}
 .dsa-scope pre code .line.active { background: rgba(255,181,71,.08); border-left-color: var(--accent); }
 
 .dsa-scope .demo { display: flex; flex-direction: column; gap: 14px; padding: 20px; background: rgba(0,0,0,.25); border-radius: var(--radius-md); border: 1px dashed var(--border); }
