@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { GRIND_PROBLEMS, GRIND_WEEKS } from '../../data/grind75';
+import { blindCount } from '../../data/blind75';
 
 export const BlogListPage = () => {
   const [query, setQuery] = useState('');
@@ -87,8 +88,20 @@ export const BlogListPage = () => {
         </div>
       </div>
 
-      <h2>Bài viết ({posts.length})</h2>
-      <div className="grid-3">
+      <h2>Sơ đồ cây Blind 75</h2>
+      <Link to="/blog/blind75" className="card teal" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+        <div className="card-title">
+          <span className="dot" style={{ background: 'var(--teal)', boxShadow: '0 0 8px var(--teal)' }}></span>
+          ROADMAP · {blindCount} ĐẦU BÀI THEO NHÓM NEETCODE
+        </div>
+        <h3 style={{ marginTop: 0 }}>Mở sơ đồ cây Blind 75 →</h3>
+        <p style={{ fontSize: 13.5 }}>
+          Đầy đủ số bài, độ khó, tag, pattern + link LeetCode gốc. Tick để lưu tiến độ,
+          bài nào có hướng dẫn tiếng Việt sẽ hiện nút “Hướng dẫn”.
+        </p>
+      </Link>
+
+      <h2>Bài viết ({posts.length})</h2>      <div className="grid-3">
         {posts.map((p) => (
           <Link key={p.slug} to={`/blog/${p.slug}`} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="card-title">
