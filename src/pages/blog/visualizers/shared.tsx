@@ -322,3 +322,113 @@ export const parseNumList = (str: string): number[] =>
     .filter((s) => s !== '')
     .map(Number)
     .filter((n) => !Number.isNaN(n));
+
+// Parse cây dạng level-order: "3,9,20,null,null,15,7" (null/#/none = trống)
+export const parseTreeList = (str: string): (number | null)[] =>
+  str.split(',').map((s) => {
+    const t = s.trim();
+    if (t === '' || /^(null|none|#)$/i.test(t)) return null;
+    const n = Number(t);
+    return Number.isNaN(n) ? null : n;
+  });
+
+export type TreeNodeState = 'cur' | 'seen' | 'done' | 'add' | 'bad';
+
+const depthOf = (i: number) => Math.floor(Math.log2(i + 1));
+
+// SVG cây nhị phân dùng chung: values level-order, states theo array index
+export const TreeSvg = ({ values, states, edges }: {
+  values: (number | string | null)[];
+  states?: Record<number, TreeNodeState>;
+  edges?: [number, number][]; // cặp [parentIdx, childIdx] cần sáng
+}) => {
+  const W = 720;
+  const LH = 88;
+  const R = 21;
+  const TOP = 48;
+
+  const byDepth = new Map<number, number[]>();
+  values.forEach((v, i) => {
+    if (v === null || v === undefined) return;
+    const d = depthOf(i);
+    if (!byDepth.has(d)) byDepth.set(d, []);
+    byDepth.get(d)!.push(i);
+  });
+  const maxD = byDepth.size === 0 ? 0 : Math.max(...byDepth.keys());
+  const H = TOP * 2 + maxD * LH;
+
+  const pos = new Map<number, { x: number; y: number }>();
+  byDepth.forEach((idxs, d) => {
+    idxs.forEach((idx, k) => {
+      pos.set(idx, { x: (W * (k + 1)) / (idxs.length + 1), y: TOP + d * LH });
+    });
+  });
+
+  const edgeSet = new Set((edges ?? []).map(([a, b]) => `${a}-${b}`));
+  const lines: React.ReactNode[] = [];
+  pos.forEach((p, i) => {
+    if (i === 0) return;
+    const par = Math.floor((i - 1) / 2);
+    const pp = pos.get(par);
+    if (!pp) return;
+    const hot = edgeSet.has(`${par}-${i}`);
+    lines.push(
+      <line
+        key={`e${i}`}
+        x1={pp.x} y1={pp.y} x2={p.x} y2={p.y}
+        stroke={hot ? '#2dd4bf' : 'rgba(255,255,255,.18)'}
+        strokeWidth={hot ? 2.5 : 2}
+        style={hot ? { filter: 'drop-shadow(0 0 6px rgba(45,212,191,.6))' } : undefined}
+      />,
+    );
+  });
+
+  const styleFor = (st?: TreeNodeState) => {
+    switch (st) {
+      case 'cur':
+        return { fill: '#ffb547', stroke: '#ffb547', color: '#0a0e1a', glow: 'drop-shadow(0 0 16px rgba(255,181,71,.7))', scale: 1.15 };
+      case 'add':
+        return { fill: 'rgba(45,212,191,.3)', stroke: '#2dd4bf', color: '#2dd4bf', glow: 'drop-shadow(0 0 14px rgba(45,212,191,.6))', scale: 1.1 };
+      case 'seen':
+        return { fill: 'rgba(255,181,71,.14)', stroke: '#ffb547', color: '#f0e9d8', glow: 'drop-shadow(0 0 8px rgba(255,181,71,.35))', scale: 1 };
+      case 'done':
+        return { fill: 'rgba(45,212,191,.1)', stroke: 'rgba(45,212,191,.55)', color: 'rgba(45,212,191,.9)', glow: undefined, scale: 1 };
+      case 'bad':
+        return { fill: 'rgba(255,95,87,.15)', stroke: '#ff5f57', color: '#ff5f57', glow: 'drop-shadow(0 0 12px rgba(255,95,87,.5))', scale: 1.1 };
+      default:
+        return { fill: '#161d33', stroke: 'rgba(255,255,255,.2)', color: '#f0e9d8', glow: undefined, scale: 1 };
+    }
+  };
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block' }}>
+      {lines}
+      {[...pos.entries()].map(([i, p]) => {
+        const st = styleFor(states?.[i]);
+        return (
+          <g key={i}>
+            <circle
+              cx={p.x} cy={p.y} r={R * st.scale}
+              fill={st.fill} stroke={st.stroke} strokeWidth={2}
+              style={{ transition: 'all .35s cubic-bezier(0.4,0,0.2,1)', ...(st.glow ? { filter: st.glow } : {}) }}
+            />
+            <text
+              x={p.x} y={p.y}
+              textAnchor="middle" dominantBaseline="central"
+              fill={st.color}
+              fontFamily="'JetBrains Mono', monospace" fontSize={14} fontWeight={700}
+              style={{ pointerEvents: 'none', userSelect: 'none' }}
+            >
+              {values[i]}
+            </text>
+          </g>
+        );
+      })}
+      {values.every((v) => v === null || v === undefined) && (
+        <text x={W / 2} y={H / 2} textAnchor="middle" fill="#7a83a3" fontFamily="'JetBrains Mono', monospace" fontSize={13} fontStyle="italic">
+          cây rỗng
+        </text>
+      )}
+    </svg>
+  );
+};

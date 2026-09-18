@@ -19,6 +19,303 @@ export interface Guide {
 }
 
 export const GUIDES: Record<string, Guide> = {
+  'max-depth-104': {
+    slug: 'max-depth-104',
+    blindNo: 104,
+    time: 'O(n)',
+    space: 'O(h)',
+    rule: 'Chiều cao = 1 + max(trái, phải); null thì 0. Đệ quy 1 dòng là đủ.',
+    checklist: [
+      'Base: node null → depth 0',
+      'Đệ quy cả 2 nhánh, lấy max',
+      'Cộng 1 cho node hiện tại',
+      'Space O(h) do stack đệ quy (cây lệch = O(n))',
+    ],
+    filename: 'max-depth.ts',
+    code: `function maxDepth(root: TreeNode | null): number {
+  if (root === null) return 0;
+  return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+}`,
+    highlightLines: [3],
+    dryRun: {
+      input: 'root = [3,9,20,null,null,15,7]',
+      trace: ['depth(9) = 1, depth(15) = depth(7) = 1', 'depth(20) = 1 + max(1,1) = 2', 'depth(3) = 1 + max(1,2) = 3'],
+      output: '3',
+    },
+    pitfalls: ['Quên +1 ở mỗi tầng', 'Nhầm với số node (đường dài nhất theo cạnh thì trừ 1)'],
+  },
+  'same-tree-100': {
+    slug: 'same-tree-100',
+    blindNo: 100,
+    time: 'O(n)',
+    space: 'O(h)',
+    rule: 'So song song: cùng null → true, 1 null hoặc khác giá trị → false, rồi so 2 nhánh.',
+    checklist: [
+      'Cả 2 null → true (lá gặp nhau)',
+      '1 null hoặc val khác → false ngay',
+      'Đệ quy trái VÀ phải (&&)',
+      'Thứ tự check null trước khi đọc .val',
+    ],
+    filename: 'same-tree.ts',
+    code: `function isSameTree(p: TreeNode | null, q: TreeNode | null): boolean {
+  if (p === null && q === null) return true;
+  if (p === null || q === null || p.val !== q.val) return false;
+  return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+}`,
+    highlightLines: [3],
+    dryRun: {
+      input: 'p = [1,2,3], q = [1,2,3]',
+      trace: ['1 = 1 → so trái (2 vs 2) và phải (3 vs 3)', '2 = 2, 2 lá null khớp → true', '3 = 3 tương tự → true'],
+      output: 'true',
+    },
+    pitfalls: ['Chỉ so giá trị mà bỏ cấu trúc (vd [1,2] vs [1,null,2])', 'Dùng || thay vì && ở 2 nhánh'],
+  },
+  'invert-tree-226': {
+    slug: 'invert-tree-226',
+    blindNo: 226,
+    time: 'O(n)',
+    space: 'O(h)',
+    rule: 'Gương cây = swap trái/phải mọi node, đệ quy xuống tiếp.',
+    checklist: [
+      'Null → return null',
+      'Swap: temp = left, left = right, right = temp',
+      'Đệ quy invert cả 2 nhánh đã swap',
+      'Return root',
+    ],
+    filename: 'invert-tree.ts',
+    code: `function invertTree(root: TreeNode | null): TreeNode | null {
+  if (root === null) return null;
+  const tmp = root.left;
+  root.left = invertTree(root.right);
+  root.right = invertTree(tmp);
+  return root;
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'root = [4,2,7,1,3,6,9]',
+      trace: ['Swap ở 4: trái ↔ phải → [4,7,2,...]', 'Đệ quy nhánh 7: [7,9,6]', 'Đệ quy nhánh 2: [2,3,1]'],
+      output: '[4,7,2,9,6,3,1]',
+    },
+    pitfalls: ['Gán left = right rồi right = left mà không qua temp (mất nhánh)', 'Quên return root ở cuối'],
+  },
+  'max-path-sum-124': {
+    slug: 'max-path-sum-124',
+    blindNo: 124,
+    time: 'O(n)',
+    space: 'O(h)',
+    rule: 'Mỗi node: trả lên gain tốt nhất 1 nhánh, cập nhật max toàn cục bằng cả 2 nhánh.',
+    checklist: [
+      'Gain âm thì bỏ (max(0, gain)) — đường rỗng tốt hơn đường lỗ',
+      'max = max(max, val + left + right) tại mỗi node',
+      'Return val + max(left, right) cho cha (chỉ 1 nhánh)',
+      'Khởi tạo max = −∞ vì toàn cây có thể âm',
+    ],
+    filename: 'max-path-sum.ts',
+    code: `function maxPathSum(root: TreeNode | null): number {
+  let best = -Infinity;
+  const gain = (node: TreeNode | null): number => {
+    if (node === null) return 0;
+    const l = Math.max(0, gain(node.left));
+    const r = Math.max(0, gain(node.right));
+    best = Math.max(best, node.val + l + r);
+    return node.val + Math.max(l, r);
+  };
+  gain(root);
+  return best;
+}`,
+    highlightLines: [7],
+    dryRun: {
+      input: 'root = [-10,9,20,null,null,15,7]',
+      trace: ['gain(9) = 9, best = 9', 'gain(15) = 15, gain(7) = 7', 'gain(20) = 20+15+7 → best = 42, return 20+15=35', 'gain(−10): best = max(42, −10+9+35=34) = 42'],
+      output: '42',
+    },
+    pitfalls: ['Return cả 2 nhánh cho cha (đường đi sẽ rẽ nhánh, sai định nghĩa)', 'Khởi tạo best = 0 sẽ sai khi mọi số âm'],
+  },
+  'level-order-102': {
+    slug: 'level-order-102',
+    blindNo: 102,
+    time: 'O(n)',
+    space: 'O(n)',
+    rule: 'BFS + chốt levelSize đầu mỗi tầng: xử lý đúng số node của tầng đó.',
+    checklist: [
+      'Queue bắt đầu [root], result = []',
+      'levelSize = queue.length (chốt trước khi lặp)',
+      'Shift đúng levelSize node, push con vào queue',
+      'Push cả level vào result',
+    ],
+    filename: 'level-order.ts',
+    code: `function levelOrder(root: TreeNode | null): number[][] {
+  if (root === null) return [];
+  const queue: TreeNode[] = [root];
+  const result: number[][] = [];
+  while (queue.length > 0) {
+    const size = queue.length;
+    const level: number[] = [];
+    for (let i = 0; i < size; i++) {
+      const node = queue.shift()!;
+      level.push(node.val);
+      if (node.left !== null) queue.push(node.left);
+      if (node.right !== null) queue.push(node.right);
+    }
+    result.push(level);
+  }
+  return result;
+}`,
+    highlightLines: [6],
+    dryRun: {
+      input: 'root = [3,9,20,null,null,15,7]',
+      trace: ['Tầng 0: size=1, lấy 3, queue=[9,20]', 'Tầng 1: size=2, lấy 9,20, queue=[15,7]', 'Tầng 2: size=2, lấy 15,7, queue rỗng'],
+      output: '[[3],[9,20],[15,7]]',
+    },
+    pitfalls: ['Dùng queue.length trực tiếp trong for (queue phình ra, lặp lố sang tầng sau)', 'Quên check root null'],
+  },
+  'serialize-tree-297': {
+    slug: 'serialize-tree-297',
+    blindNo: 297,
+    time: 'O(n)',
+    space: 'O(n)',
+    rule: 'Preorder + dấu # cho null: thứ tự duyệt chính là “bản đồ” dựng lại cây.',
+    checklist: [
+      'Serialize: preorder, null → "#"',
+      'Deserialize: đọc token theo đúng thứ tự preorder',
+      '"#" → return null (tiêu 1 token)',
+      'Số → tạo node, đệ quy trái rồi phải',
+    ],
+    filename: 'serialize-tree.ts',
+    code: `function serialize(root: TreeNode | null): string {
+  const out: string[] = [];
+  const pre = (node: TreeNode | null): void => {
+    if (node === null) { out.push('#'); return; }
+    out.push(String(node.val));
+    pre(node.left);
+    pre(node.right);
+  };
+  pre(root);
+  return out.join(',');
+}
+
+function deserialize(data: string): TreeNode | null {
+  const tokens = data.split(',');
+  let i = 0;
+  const build = (): TreeNode | null => {
+    if (tokens[i] === '#') { i++; return null; }
+    const node = new TreeNode(Number(tokens[i++]));
+    node.left = build();
+    node.right = build();
+    return node;
+  };
+  return build();
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'root = [1,2,3,null,null,4,5]',
+      trace: ['preorder: 1, 2, #, #, 3, 4, #, #, 5, #, #', 'decode: 1 → trái 2 (lá) → phải 3 → trái 4 → phải 5', 'Cây dựng lại giống hệt gốc'],
+      output: '"1,2,#,#,3,4,#,#,5,#,#"',
+    },
+    pitfalls: ['Quên dấu # cho null → decode mơ hồ (nhiều cây cùng preorder)', 'Dùng index chung mà quên tăng khi gặp #'],
+  },
+  'subtree-572': {
+    slug: 'subtree-572',
+    blindNo: 572,
+    time: 'O(m·n)',
+    space: 'O(h)',
+    rule: 'Mỗi node của cây lớn thử sameTree với cây con; sai thì đi tiếp 2 nhánh.',
+    checklist: [
+      'subRoot null → true (cây rỗng là con của mọi cây)',
+      'root null mà subRoot còn → false',
+      'sameTree(root, subRoot) đúng → true',
+      'Sai → đệ quy trái HOẶC phải (||)',
+    ],
+    filename: 'subtree.ts',
+    code: `function isSubtree(root: TreeNode | null, subRoot: TreeNode | null): boolean {
+  if (subRoot === null) return true;
+  if (root === null) return false;
+  if (isSameTree(root, subRoot)) return true;
+  return isSubtree(root.left, subRoot) || isSubtree(root.right, subRoot);
+}
+
+function isSameTree(p: TreeNode | null, q: TreeNode | null): boolean {
+  if (p === null && q === null) return true;
+  if (p === null || q === null || p.val !== q.val) return false;
+  return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'root = [3,4,5,1,2], subRoot = [4,1,2]',
+      trace: ['3 vs 4: khác gốc → đi trái', '4 vs 4: trái 1=1, phải 2=2 → sameTree true → return true'],
+      output: 'true',
+    },
+    pitfalls: ['Chỉ check từ root lớn mà không duyệt xuống (bỏ sót vị trí khớp)', 'Nhầm && với || ở 2 nhánh đệ quy'],
+  },
+  'construct-tree-105': {
+    slug: 'construct-tree-105',
+    blindNo: 105,
+    time: 'O(n)',
+    space: 'O(n)',
+    rule: 'Đầu preorder là root; vị trí root trong inorder cắt trái/phải — map index để O(1).',
+    checklist: [
+      'Map value → index trong inorder',
+      'preorder[pi++] là root hiện tại',
+      'Trái = đoạn [l, k−1], phải = [k+1, r] (k = index root)',
+      'Đệ quy trái trước rồi phải (đúng thứ tự preorder)',
+    ],
+    filename: 'construct-tree.ts',
+    code: `function buildTree(preorder: number[], inorder: number[]): TreeNode | null {
+  const pos = new Map<number, number>();
+  inorder.forEach((v, i) => pos.set(v, i));
+  let pi = 0;
+  const build = (l: number, r: number): TreeNode | null => {
+    if (l > r) return null;
+    const root = new TreeNode(preorder[pi++]);
+    const k = pos.get(root.val)!;
+    root.left = build(l, k - 1);
+    root.right = build(k + 1, r);
+    return root;
+  };
+  return build(0, inorder.length - 1);
+}`,
+    highlightLines: [8],
+    dryRun: {
+      input: 'preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]',
+      trace: ['root = 3, k=1: trái [9], phải [15,20,7]', 'Trái: root = 9 (lá)', 'Phải: root = 20, k=3: trái [15], phải [7]'],
+      output: '[3,9,20,null,null,15,7]',
+    },
+    pitfalls: ['Tìm index bằng indexOf mỗi lần → O(n²)', 'Đệ quy phải trước trái (sai thứ tự preorder)'],
+  },
+  'kth-smallest-230': {
+    slug: 'kth-smallest-230',
+    blindNo: 230,
+    time: 'O(h + k)',
+    space: 'O(h)',
+    rule: 'Inorder BST ra dãy tăng → đếm tới K là đáp án, dừng sớm khỏi duyệt hết.',
+    checklist: [
+      'Inorder: trái → node → phải',
+      'Mỗi node thăm: count++, count = k → return val',
+      'Dừng sớm (không duyệt nốt cây)',
+      'Muốn O(1) thêm? Morris traversal (nâng cao)',
+    ],
+    filename: 'kth-smallest.ts',
+    code: `function kthSmallest(root: TreeNode | null, k: number): number {
+  let count = 0;
+  let answer = -1;
+  const inorder = (node: TreeNode | null): void => {
+    if (node === null || answer !== -1) return;
+    inorder(node.left);
+    count++;
+    if (count === k) { answer = node.val; return; }
+    inorder(node.right);
+  };
+  inorder(root);
+  return answer;
+}`,
+    highlightLines: [7],
+    dryRun: {
+      input: 'root = [3,1,4,null,2], k = 1',
+      trace: ['Inorder: 1 → 2 → 3 → 4', 'count=1 tại node 1 = k → answer = 1, dừng'],
+      output: '1',
+    },
+    pitfalls: ['Duyệt preorder/postorder (không có thứ tự tăng)', 'Không dừng sớm vẫn đúng nhưng phí'],
+  },
   'find-min-rotated-153': {
     slug: 'find-min-rotated-153',
     blindNo: 153,

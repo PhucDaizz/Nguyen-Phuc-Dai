@@ -21,6 +21,16 @@ import { MergeTwoVisualizer } from './MergeTwoVisualizer';
 import { MergeKVisualizer } from './MergeKVisualizer';
 import { RemoveNthVisualizer } from './RemoveNthVisualizer';
 import { ReorderVisualizer } from './ReorderVisualizer';
+import { MaxDepthVisualizer } from './MaxDepthVisualizer';
+import { SameTreeVisualizer } from './SameTreeVisualizer';
+import { InvertVisualizer } from './InvertVisualizer';
+import { MaxPathVisualizer } from './MaxPathVisualizer';
+import { LevelOrderVisualizer } from './LevelOrderVisualizer';
+import { SerializeVisualizer } from './SerializeVisualizer';
+import { SubtreeVisualizer } from './SubtreeVisualizer';
+import { ConstructVisualizer } from './ConstructVisualizer';
+import { KthSmallestVisualizer } from './KthSmallestVisualizer';
+import { LcaVisualizer } from './LcaVisualizer';
 
 // Registry: slug bài giảng → visualizer tương ứng.
 // Thêm bài mới: import component + thêm 1 dòng vào map.
@@ -47,6 +57,16 @@ const VISUALIZERS: Record<string, () => React.JSX.Element> = {
   'merge-k-lists-23': MergeKVisualizer,
   'remove-nth-19': RemoveNthVisualizer,
   'reorder-list-143': ReorderVisualizer,
+  'max-depth-104': MaxDepthVisualizer,
+  'same-tree-100': SameTreeVisualizer,
+  'invert-tree-226': InvertVisualizer,
+  'max-path-sum-124': MaxPathVisualizer,
+  'level-order-102': LevelOrderVisualizer,
+  'serialize-tree-297': SerializeVisualizer,
+  'subtree-572': SubtreeVisualizer,
+  'construct-tree-105': ConstructVisualizer,
+  'kth-smallest-230': KthSmallestVisualizer,
+  'lowest-common-ancestor-235': LcaVisualizer,
 };
 
 export const hasVisualizer = (slug: string) => slug in VISUALIZERS;
