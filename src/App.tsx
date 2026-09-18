@@ -9,6 +9,7 @@ import { BlogLayout } from './pages/blog/BlogLayout';
 import { BlogListPage } from './pages/blog/BlogListPage';
 import { BlogDetailPage } from './pages/blog/BlogDetailPage';
 import { Blind75Page } from './pages/blog/Blind75Page';
+import { VisualizerPage } from './pages/blog/visualizers';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -31,6 +32,7 @@ function App() {
           <Route path="/blog" element={<BlogLayout />}>
             <Route index element={<BlogListPage />} />
             <Route path="blind75" element={<Blind75Page />} />
+            <Route path=":slug/visualize" element={<VisualizerPage />} />
             <Route path=":slug" element={<BlogDetailPage />} />
           </Route>
           <Route path="*" element={<HomePage />} />

@@ -1,6 +1,8 @@
 import { Link, useParams } from 'react-router-dom';
 import { BLIND75, leetcodeUrl } from '../../data/blind75';
 import { getGuide } from '../../data/guides';
+import { ProblemStatement } from './ProblemStatement';
+import { hasVisualizer } from './visualizers';
 
 export const BlogDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -44,6 +46,7 @@ export const BlogDetailPage = () => {
         {meta.title} <span className="accent">— {meta.viTitle}</span>
       </h1>
       <p>{meta.summary}</p>
+      {blind && <ProblemStatement p={blind} />}
       <div>
         <span className="pill amber">{meta.difficulty}</span>
         <span className="pill">TIME {guide.time}</span>
@@ -52,6 +55,11 @@ export const BlogDetailPage = () => {
           <a href={leetcodeUrl(blind)} target="_blank" rel="noreferrer" className="btn ghost" style={{ padding: '4px 10px', fontSize: 12 }}>
             Đề gốc LeetCode ↗
           </a>
+        )}
+        {slug && hasVisualizer(slug) && (
+          <Link to={`/blog/${slug}/visualize`} className="btn primary" style={{ padding: '4px 10px', fontSize: 12 }}>
+            Mô phỏng trực quan →
+          </Link>
         )}
       </div>
 

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BLIND75, BLIND_CATEGORIES } from '../../data/blind75';
 import { GUIDES } from '../../data/guides';
+import { ProblemStatement } from './ProblemStatement';
 
 const hasGuide = (no: number) =>
   Object.values(GUIDES).some((g) => g.blindNo === no);
@@ -104,6 +105,7 @@ export const BlogListPage = () => {
               <p style={{ fontSize: 13.5 }}>
                 <span style={{ color: 'var(--accent)' }}>{p.viTitle}</span> — {p.summary}
               </p>
+              <ProblemStatement p={p} compact />
               <div>
                 <span className="pill amber">{p.difficulty}</span>
                 {p.premium && <span className="pill amber">PREMIUM</span>}

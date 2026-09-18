@@ -22,6 +22,9 @@ shadows, every decorative detail purposeful.
 ## When to apply
 
 - User asks for any HTML page / demo / visualization / dashboard / tool / landing page.
+- User asks for "mô phỏng", "visualize", "minh họa trực quan" một bài toán → áp dụng
+  thêm [references/visualizer.md](references/visualizer.md) (trace-engine + 7 khối page,
+  code solution bằng C#).
 - User says "theo phong cách của tôi", "dùng style guide", or references this skill.
 - **Do NOT apply** when the user explicitly specifies a different style (e.g. light theme,
   specific brand palette, existing design system) for that particular page.
@@ -80,6 +83,14 @@ shadows, every decorative detail purposeful.
 - [assets/boilerplate.html](assets/boilerplate.html) — copy-paste starting page with all
   tokens, background layers, grid layout and one of each core component wired up.
   Copy it, replace content, keep the tokens.
+- [references/visualizer.md](references/visualizer.md) — **mẫu chuẩn visualizer từng bài
+  toán**: trace-engine (`build → generateTrace → renderStep`), 7 khối page bắt buộc
+  (header+stats, visualization SVG, state cards, description-bar, controls
+  Play/Back/Step/Reset + speed + custom input, presets, shortcuts, code panel),
+  node visuals theo cấu trúc dữ liệu. Solution code luôn viết bằng **C#**.
+- [assets/visualizer-reference.html](assets/visualizer-reference.html) — reference
+  implementation hoàn chỉnh (BFS Level Order Traversal): copy cấu trúc + CSS trạng thái
+  node (`idle/in-queue/current/child-enqueue/processed`), đổi data + trace theo bài mới.
 
 ## Portfolio mapping (React, không phải single-file HTML)
 
@@ -92,6 +103,7 @@ Khi áp dụng vào React portfolio này, map class trong skill sang scope `.dsa
   để không vỡ theme 3D của trang chủ `/`.
 - Fonts: import Space Grotesk + JetBrains Mono trong `src/pages/blog/dsa.css`
   qua `@import` Google Fonts.
-- Mỗi bài Grind75: badge (week + pattern) → h1 → rule (ý tưởng chính) →
+- Mỗi bài Blind75: badge (category + pattern) → h1 → rule (ý tưởng chính) →
   card checklist (nhận diện pattern) → code-block (solution + highlight dòng key)
   → card teal (complexity + test) → demo (dry-run / edge cases).
+- Visualizer từng bài toán: tuân thủ [references/visualizer.md](references/visualizer.md).

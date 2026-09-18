@@ -174,3 +174,34 @@
 .dsa-stat { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: var(--accent); }
 .dsa-scope footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 .dsa-scope ::selection { background: var(--accent); color: var(--bg); }
+
+/* ===== Blind75: cây (trái) + sidebar bài (phải) ===== */
+.blind-layout { display: flex; gap: 18px; align-items: flex-start; }
+.blind-tree-scroll {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+.blind-sidebar {
+  width: 380px;
+  flex-shrink: 0;
+  margin-bottom: 0;
+  position: sticky;
+  top: 96px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+/* .card gốc có overflow:hidden (cho light-bar) nên phải ghi đè đủ specificity */
+.dsa-scope .card.blind-sidebar {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+@media (max-width: 1100px) {
+  .blind-layout { flex-direction: column; }
+  .blind-sidebar { width: 100%; position: static; max-height: none; }
+}

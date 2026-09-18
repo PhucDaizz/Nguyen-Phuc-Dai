@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Level Order Traversal · BFS Visualization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0e1a;
+    --bg-2: #0d1424;
+    --bg-3: #161d33;
+    --fg: #f0e9d8;
+    --muted: #7a83a3;
+    --accent: #ffb547;
+    --accent-2: #ff7e5f;
+    --accent-glow: rgba(255, 181, 71, 0.4);
+    --teal: #2dd4bf;
+    --teal-glow: rgba(45, 212, 191, 0.4);
+    --card: rgba(255, 255, 255, 0.025);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.15);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255, 181, 71, 0.07), transparent 50%),
+      radial-gradient(ellipse 60% 50% at 80% 100%, rgba(45, 212, 191, 0.07), transparent 50%);
+    background-attachment: fixed;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 25% 30%, rgba(255, 181, 71, 0.05), transparent 35%),
+      radial-gradient(circle at 75% 70%, rgba(45, 212, 191, 0.05), transparent 35%);
+    pointer-events: none;
+    z-index: 0;
+    animation: bgFloat 24s ease-in-out infinite;
+  }
+
+  @keyframes bgFloat {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-30px, 25px); }
+  }
+
+  .container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .header-text { flex: 1; min-width: 280px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(255, 181, 71, 0.08);
+    border: 1px solid rgba(255, 181, 71, 0.2);
+    border-radius: 100px;
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  h1 {
+    font-size: clamp(34px, 5vw, 54px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+  h1 .accent {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 580px;
+    line-height: 1.65;
+  }
+
+  .stats { display: flex; gap: 12px; }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 18px;
+    backdrop-filter: blur(10px);
+    min-width: 92px;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.teal { color: var(--teal); }
+
+  /* MAIN GRID */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 1024px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+
+  /* TREE PANEL */
+  .tree-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    min-height: 540px;
+  }
+  .tree-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 24px; right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.4;
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .panel-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .panel-title .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+  .tree-svg {
+    width: 100%;
+    height: 450px;
+    display: block;
+  }
+
+  /* TREE NODES */
+  .tree-node .core {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    fill: var(--bg-3);
+    stroke: var(--border-strong);
+    stroke-width: 2;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .tree-node text {
+    fill: var(--fg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    transition: fill 0.3s;
+    pointer-events: none;
+    user-select: none;
+  }
+  .tree-node .ring {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 0;
+    opacity: 0;
+  }
+  .tree-node.in-queue .core {
+    fill: rgba(255, 181, 71, 0.15);
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 10px var(--accent-glow));
+  }
+  .tree-node.current .core {
+    fill: var(--accent);
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 24px var(--accent-glow));
+    transform: scale(1.18);
+  }
+  .tree-node.current text { fill: var(--bg); }
+  .tree-node.current .ring {
+    animation: ringPulse 1.5s ease-out infinite;
+  }
+  @keyframes ringPulse {
+    0% { r: 22; opacity: 0.9; stroke-width: 2.5; }
+    100% { r: 42; opacity: 0; stroke-width: 0.5; }
+  }
+  .tree-node.processed .core {
+    fill: rgba(45, 212, 191, 0.1);
+    stroke: rgba(45, 212, 191, 0.55);
+    opacity: 0.75;
+  }
+  .tree-node.processed text { fill: rgba(45, 212, 191, 0.85); }
+  .tree-node.child-enqueue .core {
+    fill: rgba(45, 212, 191, 0.25);
+    stroke: var(--teal);
+    filter: drop-shadow(0 0 18px var(--teal-glow));
+    animation: popIn 0.5s ease-out;
+  }
+  @keyframes popIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    55% { transform: scale(1.28); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .tree-edge {
+    stroke: var(--border-strong);
+    stroke-width: 2;
+    fill: none;
+    transition: all 0.3s;
+  }
+  .tree-edge.active {
+    stroke: var(--teal);
+    stroke-width: 2.5;
+    filter: drop-shadow(0 0 8px var(--teal-glow));
+  }
+  .level-guide {
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-dasharray: 4 8;
+    stroke-width: 1;
+    transition: all 0.3s;
+  }
+  .level-guide.active {
+    stroke: rgba(255, 181, 71, 0.3);
+    stroke-width: 1.5;
+  }
+  .level-text {
+    fill: var(--muted);
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    transition: fill 0.3s;
+  }
+  .level-text.active {
+    fill: var(--accent);
+    font-weight: 700;
+  }
+
+  /* PROGRESS */
+  .progress-bar {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 16px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--teal));
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 2px;
+    box-shadow: 0 0 10px var(--accent-glow);
+  }
+
+  /* STATE PANEL */
+  .state-panel { display: flex; flex-direction: column; gap: 14px; }
+  .state-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+  .state-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 18px; right: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.3;
+  }
+  .state-card.teal::before {
+    background: linear-gradient(90deg, transparent, var(--teal), transparent);
+  }
+  .state-card h3 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .state-card h3 .icon {
+    width: 22px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    background: rgba(255, 181, 71, 0.1);
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+  .state-card.teal h3 .icon {
+    color: var(--teal);
+    background: rgba(45, 212, 191, 0.1);
+  }
+
+  /* QUEUE */
+  .queue-container {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-height: 44px;
+    align-items: center;
+    padding: 10px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    border: 1px dashed var(--border);
+  }
+  .queue-item {
+    background: rgba(255, 181, 71, 0.12);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    animation: slideIn 0.3s ease-out;
+    box-shadow: 0 0 10px rgba(255, 181, 71, 0.15);
+    position: relative;
+  }
+  .queue-item.front {
+    background: var(--accent);
+    color: var(--bg);
+    transform: scale(1.08);
+    box-shadow: 0 0 18px var(--accent-glow);
+  }
+  @keyframes slideIn {
+    from { transform: translateX(-15px) scale(0.7); opacity: 0; }
+    to { transform: translateX(0) scale(1); opacity: 1; }
+  }
+  .queue-empty, .level-empty, .result-empty {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 13px;
+    padding: 4px 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .queue-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* CURRENT LEVEL */
+  .level-container {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-height: 38px;
+    align-items: center;
+  }
+  .level-item {
+    background: rgba(45, 212, 191, 0.12);
+    border: 1px solid var(--teal);
+    color: var(--teal);
+    padding: 5px 11px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    animation: popIn 0.4s ease-out;
+  }
+
+  /* RESULT */
+  .result-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .result-level {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 8px;
+    border-left: 3px solid var(--teal);
+    animation: slideIn 0.4s ease-out;
+  }
+  .result-level .level-idx {
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 26px;
+    font-weight: 600;
+  }
+  .result-level .level-vals {
+    color: var(--teal);
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  /* DESCRIPTION */
+  .description-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 22px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+    min-height: 60px;
+  }
+  .step-indicator {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    min-width: 74px;
+    text-align: center;
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+  .step-message {
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--fg);
+    flex: 1;
+  }
+  .step-message strong {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  /* CONTROLS */
+  .controls {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+    padding: 9px 16px;
+    border-radius: 9px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    border-color: var(--accent);
+    background: rgba(255, 181, 71, 0.06);
+    color: var(--accent);
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: var(--bg);
+    border-color: transparent;
+    font-weight: 700;
+    min-width: 80px;
+    justify-content: center;
+  }
+  .btn.primary:hover {
+    box-shadow: 0 4px 20px var(--accent-glow);
+    color: var(--bg);
+  }
+  .btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    pointer-events: none;
+  }
+  .speed-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .speed-control input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 90px;
+    height: 4px;
+    background: var(--border-strong);
+    border-radius: 4px;
+    outline: none;
+  }
+  .speed-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+  .speed-control input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+  }
+  .speed-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    min-width: 46px;
+    color: var(--accent);
+  }
+  .input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+  .input-group label {
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .input-group input {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    width: 200px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: var(--accent); }
+
+  .presets {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .preset {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .preset:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(255, 181, 71, 0.06);
+  }
+
+  .shortcuts {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    padding: 8px 14px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .shortcuts kbd {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: inherit;
+    color: var(--fg);
+    margin: 0 2px;
+  }
+
+  /* CODE PANEL */
+  .code-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-header .title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .code-header .title .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 8px var(--teal);
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .code-dot:nth-child(1) { background: #ff5f57; }
+  .code-dot:nth-child(2) { background: #febc2e; }
+  .code-dot:nth-child(3) { background: #28c840; }
+
+  pre {
+    padding: 18px 22px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+  }
+  code .line {
+    display: block;
+    padding: 1px 12px;
+    margin: 0 -12px;
+    border-left: 3px solid transparent;
+    transition: all 0.25s;
+    position: relative;
+  }
+  code .line.active {
+    background: rgba(255, 181, 71, 0.08);
+    border-left-color: var(--accent);
+  }
+  code .line .ln {
+    color: var(--muted);
+    opacity: 0.45;
+    margin-right: 14px;
+    user-select: none;
+    display: inline-block;
+    min-width: 18px;
+    text-align: right;
+  }
+  .kw { color: #ff7e5f; }
+  .fn { color: var(--accent); }
+  .var { color: var(--teal); }
+  .num { color: #c4b5fd; }
+  .str { color: #a3e635; }
+  .com { color: var(--muted); font-style: italic; }
+  .op { color: #f0e9d8; }
+  .punc { color: var(--muted); }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+  }
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid;
+  }
+  .legend-swatch.current {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+  .legend-swatch.queue {
+    background: rgba(255, 181, 71, 0.15);
+    border-color: var(--accent);
+  }
+  .legend-swatch.processed {
+    background: rgba(45, 212, 191, 0.1);
+    border-color: rgba(45, 212, 191, 0.5);
+  }
+  .legend-swatch.idle {
+    background: var(--bg-3);
+    border-color: var(--border-strong);
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-text">
+        <div class="badge">BFS · Breadth-First Search</div>
+        <h1>Binary Tree <span class="accent">Level Order</span> Traversal</h1>
+        <p class="subtitle">Mô phỏng duyệt cây nhị phân theo từng tầng — từ trái qua phải, từ gốc xuống lá. Mỗi tầng được gom thành một sublist trong kết quả cuối cùng.</p>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Tầng</div>
+          <div class="stat-value accent" id="stat-level">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Queue</div>
+          <div class="stat-value" id="stat-queue">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Đã duyệt</div>
+          <div class="stat-value teal" id="stat-visited">0</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-grid">
+      <div class="tree-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="dot"></span>CÂY NHỊ PHÂN</div>
+          <div class="panel-title" id="tree-info">—</div>
+        </div>
+        <svg class="tree-svg" id="tree-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-swatch idle"></div>Chưa duyệt</div>
+          <div class="legend-item"><div class="legend-swatch queue"></div>Trong queue</div>
+          <div class="legend-item"><div class="legend-swatch current"></div>Đang xử lý</div>
+          <div class="legend-item"><div class="legend-swatch processed"></div>Đã duyệt</div>
+        </div>
+      </div>
+
+      <div class="state-panel">
+        <div class="state-card">
+          <h3><span class="icon">FIFO</span>QUEUE</h3>
+          <div class="queue-container" id="queue-container">
+            <span class="queue-empty">queue rỗng</span>
+          </div>
+          <div class="queue-meta">
+            <span>← front (dequeue)</span>
+            <span>enqueue →</span>
+          </div>
+        </div>
+
+        <div class="state-card teal">
+          <h3><span class="icon">[ ]</span>CURRENT LEVEL</h3>
+          <div class="level-container" id="level-container">
+            <span class="level-empty">— chưa có —</span>
+          </div>
+        </div>
+
+        <div class="state-card teal">
+          <h3><span class="icon">✓</span>RESULT</h3>
+          <div class="result-container" id="result-container">
+            <span class="result-empty">[ ]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="description-bar">
+      <div class="step-indicator" id="step-indicator">0 / 0</div>
+      <div class="step-message" id="step-message">Nhấn <strong>Play</strong> để bắt đầu mô phỏng.</div>
+    </div>
+
+    <div class="controls">
+      <button class="btn primary" id="btn-play">Play</button>
+      <button class="btn" id="btn-back">Back</button>
+      <button class="btn" id="btn-step">Step</button>
+      <button class="btn" id="btn-reset">Reset</button>
+      <div class="speed-control">
+        <span>Tốc độ</span>
+        <input type="range" id="speed" min="200" max="2000" value="900" step="100">
+        <span class="speed-val" id="speed-val">900ms</span>
+      </div>
+      <div class="input-group">
+        <label>tree[]:</label>
+        <input type="text" id="tree-input" value="1,2,3,4,5,6,7" placeholder="1,2,3,4,5,6,7">
+        <button class="btn" id="btn-build">Build</button>
+      </div>
+    </div>
+
+    <div class="presets">
+      <button class="preset" data-tree="1,2,3,4,5,6,7">Cân bằng · 7 node</button>
+      <button class="preset" data-tree="3,9,20,null,null,15,7">LeetCode · [3,9,20,null,null,15,7]</button>
+      <button class="preset" data-tree="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15">Hoàn hảo · 15 node</button>
+      <button class="preset" data-tree="1,2,null,3,null,4,null">Lean trái</button>
+      <button class="preset" data-tree="1">1 node</button>
+      <button class="preset" data-tree="">Cây rỗng</button>
+    </div>
+
+    <div class="shortcuts">
+      Phím tắt: <kbd>Space</kbd> Play/Pause · <kbd>→</kbd> Step forward · <kbd>←</kbd> Step back · <kbd>R</kbd> Reset
+    </div>
+
+    <div class="code-panel">
+      <div class="code-header">
+        <div class="title"><span class="dot"></span>algorithm.js · BFS iterative</div>
+        <div class="code-dots">
+          <div class="code-dot"></div>
+          <div class="code-dot"></div>
+          <div class="code-dot"></div>
+        </div>
+      </div>
+      <pre><code id="code-block"></code></pre>
+    </div>
+  </div>
+
+  <script>
+    // ===================== STATE =====================
+    const state = {
+      root: null,
+      nodeMap: new Map(),
+      layout: null,
+      trace: [],
+      currentStep: 0,
+      playing: false,
+      speed: 900,
+      timer: null
+    };
+
+    // ===================== TREE BUILDING =====================
+    let _nid = 0;
+    function makeNode(val) { return { id: ++_nid, val, left: null, right: null }; }
+
+    function buildTree(arr) {
+      _nid = 0;
+      state.nodeMap.clear();
+      if (!arr || arr.length === 0) return null;
+      const nodes = arr.map(v => (v === null || v === undefined) ? null : makeNode(v));
+      for (let i = 0; i < nodes.length; i++) {
+        if (!nodes[i]) continue;
+        const li = 2 * i + 1, ri = 2 * i + 2;
+        if (li < nodes.length && nodes[li]) nodes[i].left = nodes[li];
+        if (ri < nodes.length && nodes[ri]) nodes[i].right = nodes[ri];
+      }
+      nodes.filter(Boolean).forEach(n => state.nodeMap.set(n.id, n));
+      return nodes[0];
+    }
+
+    function parseInput(str) {
+      if (!str || str.trim() === '') return [];
+      return str.split(',').map(s => {
+        s = s.trim();
+        if (s === '' || s.toLowerCase() === 'null' || s.toLowerCase() === 'none') return null;
+        const n = Number(s);
+        return isNaN(n) ? null : n;
+      });
+    }
+
+    // ===================== LAYOUT =====================
+    function layoutTree(root, svgWidth, svgHeight) {
+      if (!root) return { nodes: [], edges: [], maxDepth: -1, totalNodes: 0, levelHeight: 0, padding: 50 };
+      let order = 0, maxDepth = 0;
+      const pos = new Map();
+      (function dfs(node, depth) {
+        if (!node) return;
+        dfs(node.left, depth + 1);
+        pos.set(node.id, { x: order++, depth });
+        maxDepth = Math.max(maxDepth, depth);
+        dfs(node.right, depth + 1);
+      })(root, 0);
+
+      const totalNodes = order;
+      const padding = 50;
+      const usableW = Math.max(200, svgWidth - padding * 2);
+      const usableH = Math.max(200, svgHeight - padding * 2 - 30);
+      const nodeSpacing = totalNodes > 1 ? Math.min(80, usableW / (totalNodes - 1)) : 0;
+      const levelHeight = maxDepth > 0 ? Math.min(115, usableH / maxDepth) : 0;
+      const treeWidth = (totalNodes - 1) * nodeSpacing;
+      const offsetX = (svgWidth - treeWidth) / 2;
+
+      const nodes = [], edges = [];
+      (function collect(node, parent) {
+        if (!node) return;
+        const p = pos.get(node.id);
+        const x = offsetX + p.x * nodeSpacing;
+        const y = padding + p.depth * levelHeight;
+        nodes.push({ id: node.id, val: node.val, x, y, depth: p.depth });
+        if (parent) {
+          const pp = pos.get(parent.id);
+          const px = offsetX + pp.x * nodeSpacing;
+          const py = padding + pp.depth * levelHeight;
+          edges.push({ x1: px, y1: py, x2: x, y2: y, parentId: parent.id, childId: node.id });
+        }
+        collect(node.left, node);
+        collect(node.right, node);
+      })(root, null);
+
+      return { nodes, edges, maxDepth, totalNodes, levelHeight, padding };
+    }
+
+    // ===================== TRACE GENERATION =====================
+    function generateTrace(root) {
+      const trace = [];
+      if (!root) {
+        trace.push({
+          type: 'init', queue: [], result: [], currentLevel: [],
+          current: null, child: null, processed: [], levelSize: 0,
+          message: 'Cây rỗng — trả về kết quả <strong>[]</strong>.',
+          codeLine: 1
+        });
+        trace.push({
+          type: 'done', queue: [], result: [], currentLevel: [],
+          current: null, child: null, processed: [], levelSize: 0,
+          message: 'Hoàn tất. Result = <strong>[]</strong>.',
+          codeLine: 1
+        });
+        return trace;
+      }
+
+      const queue = [], result = [];
+      let currentLevel = [];
+      const processed = [];
+
+      trace.push({
+        type: 'init', queue: [], result: [], currentLevel: [],
+        current: null, child: null, processed: [], levelSize: 0,
+        message: 'Khởi tạo: kiểm tra <strong>root</strong> không null.',
+        codeLine: 1
+      });
+
+      queue.push(root);
+      trace.push({
+        type: 'enqueue_root',
+        queue: queue.map(n => n.id), result: [], currentLevel: [],
+        current: null, child: root.id, processed: [], levelSize: 0,
+        message: `Khởi tạo <strong>queue = [${root.val}]</strong>, <strong>result = []</strong>.`,
+        codeLine: 2
+      });
+
+      while (queue.length > 0) {
+        const levelSize = queue.length;
+        currentLevel = [];
+        trace.push({
+          type: 'level_start',
+          queue: queue.map(n => n.id),
+          result: result.map(l => [...l]),
+          currentLevel: [],
+          current: null, child: null, processed: [...processed], levelSize,
+          message: `While: queue không rỗng. <strong>levelSize = ${levelSize}</strong> — sẽ duyệt ${levelSize} node ở tầng này.`,
+          codeLine: 4
+        });
+
+        for (let i = 0; i < levelSize; i++) {
+          const node = queue.shift();
+          currentLevel.push(node.val);
+          processed.push(node.id);
+          trace.push({
+            type: 'dequeue',
+            queue: queue.map(n => n.id),
+            result: result.map(l => [...l]),
+            currentLevel: [...currentLevel],
+            current: node.id, child: null, processed: [...processed], levelSize,
+            message: `Dequeue <strong>${node.val}</strong> → push vào level. Level hiện tại: <strong>[${currentLevel.join(', ')}]</strong>.`,
+            codeLine: 7
+          });
+          if (node.left) {
+            queue.push(node.left);
+            trace.push({
+              type: 'enqueue_left',
+              queue: queue.map(n => n.id),
+              result: result.map(l => [...l]),
+              currentLevel: [...currentLevel],
+              current: node.id, child: node.left.id, processed: [...processed], levelSize,
+              message: `Node <strong>${node.val}</strong> có con trái — enqueue <strong>${node.left.val}</strong>.`,
+              codeLine: 9
+            });
+          }
+          if (node.right) {
+            queue.push(node.right);
+            trace.push({
+              type: 'enqueue_right',
+              queue: queue.map(n => n.id),
+              result: result.map(l => [...l]),
+              currentLevel: [...currentLevel],
+              current: node.id, child: node.right.id, processed: [...processed], levelSize,
+              message: `Node <strong>${node.val}</strong> có con phải — enqueue <strong>${node.right.val}</strong>.`,
+              codeLine: 10
+            });
+          }
+        }
+        result.push([...currentLevel]);
+        trace.push({
+          type: 'level_end',
+          queue: queue.map(n => n.id),
+          result: result.map(l => [...l]),
+          currentLevel: [...currentLevel],
+          current: null, child: null, processed: [...processed], levelSize,
+          message: `Hoàn thành tầng — push <strong>[${currentLevel.join(', ')}]</strong> vào result. Result có ${result.length} tầng.`,
+          codeLine: 12
+        });
+      }
+
+      trace.push({
+        type: 'done',
+        queue: [], result: result.map(l => [...l]), currentLevel: [],
+        current: null, child: null, processed: [...processed], levelSize: 0,
+        message: `Queue rỗng — duyệt hoàn tất. Result = <strong>${JSON.stringify(result)}</strong>.`,
+        codeLine: 14
+      });
+      return trace;
+    }
+
+    // ===================== CODE =====================
+    const codeLines = [
+      '<span class="kw">function</span> <span class="fn">levelOrder</span><span class="punc">(</span><span class="var">root</span><span class="punc">)</span> <span class="punc">{</span>',
+      '  <span class="kw">if</span> <span class="punc">(</span><span class="op">!</span><span class="var">root</span><span class="punc">)</span> <span class="kw">return</span> <span class="punc">[]</span><span class="punc">;</span>',
+      '  <span class="kw">const</span> <span class="var">queue</span> <span class="op">=</span> <span class="punc">[</span><span class="var">root</span><span class="punc">]</span><span class="punc">,</span> <span class="var">result</span> <span class="op">=</span> <span class="punc">[]</span><span class="punc">;</span>',
+      '  <span class="kw">while</span> <span class="punc">(</span><span class="var">queue</span><span class="punc">.</span><span class="var">length</span><span class="punc">)</span> <span class="punc">{</span>',
+      '    <span class="kw">const</span> <span class="var">levelSize</span> <span class="op">=</span> <span class="var">queue</span><span class="punc">.</span><span class="var">length</span><span class="punc">;</span>',
+      '    <span class="kw">const</span> <span class="var">level</span> <span class="op">=</span> <span class="punc">[]</span><span class="punc">;</span>',
+      '    <span class="kw">for</span> <span class="punc">(</span><span class="kw">let</span> <span class="var">i</span> <span class="op">=</span> <span class="num">0</span><span class="punc">;</span> <span class="var">i</span> <span class="op">&lt;</span> <span class="var">levelSize</span><span class="punc">;</span> <span class="var">i</span><span class="op">++</span><span class="punc">)</span> <span class="punc">{</span>',
+      '      <span class="kw">const</span> <span class="var">node</span> <span class="op">=</span> <span class="var">queue</span><span class="punc">.</span><span class="fn">shift</span><span class="punc">(</span><span class="punc">)</span><span class="punc">;</span>',
+      '      <span class="var">level</span><span class="punc">.</span><span class="fn">push</span><span class="punc">(</span><span class="var">node</span><span class="punc">.</span><span class="var">val</span><span class="punc">)</span><span class="punc">;</span>',
+      '      <span class="kw">if</span> <span class="punc">(</span><span class="var">node</span><span class="punc">.</span><span class="var">left</span><span class="punc">)</span>  <span class="var">queue</span><span class="punc">.</span><span class="fn">push</span><span class="punc">(</span><span class="var">node</span><span class="punc">.</span><span class="var">left</span><span class="punc">)</span><span class="punc">;</span>',
+      '      <span class="kw">if</span> <span class="punc">(</span><span class="var">node</span><span class="punc">.</span><span class="var">right</span><span class="punc">)</span> <span class="var">queue</span><span class="punc">.</span><span class="fn">push</span><span class="punc">(</span><span class="var">node</span><span class="punc">.</span><span class="var">right</span><span class="punc">)</span><span class="punc">;</span>',
+      '    <span class="punc">}</span>',
+      '    <span class="var">result</span><span class="punc">.</span><span class="fn">push</span><span class="punc">(</span><span class="var">level</span><span class="punc">)</span><span class="punc">;</span>',
+      '  <span class="punc">}</span>',
+      '  <span class="kw">return</span> <span class="var">result</span><span class="punc">;</span>',
+      '<span class="punc">}</span>'
+    ];
+
+    function renderCode() {
+      const block = document.getElementById('code-block');
+      block.innerHTML = codeLines.map((line, i) =>
+        `<span class="line" data-line="${i}"><span class="ln">${i + 1}</span>${line}</span>`
+      ).join('');
+    }
+
+    // ===================== TREE RENDERING =====================
+    function renderTree() {
+      const svg = document.getElementById('tree-svg');
+      const containerWidth = svg.clientWidth || (svg.parentElement.clientWidth - 48);
+      const containerHeight = 450;
+      svg.setAttribute('viewBox', `0 0 ${containerWidth} ${containerHeight}`);
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+      const layout = layoutTree(state.root, containerWidth, containerHeight);
+      state.layout = layout;
+      let html = '';
+
+      // Level guides
+      if (state.root && layout.maxDepth >= 0) {
+        const levels = layout.maxDepth + 1;
+        for (let i = 0; i < levels; i++) {
+          const y = layout.padding + i * layout.levelHeight;
+          html += `<line class="level-guide" data-level="${i}" x1="20" y1="${y}" x2="${containerWidth - 20}" y2="${y}"/>`;
+          html += `<text class="level-text" data-level="${i}" x="22" y="${y - 8}">L${i}</text>`;
+        }
+      }
+
+      // Edges
+      layout.edges.forEach(e => {
+        html += `<line class="tree-edge" data-parent="${e.parentId}" data-child="${e.childId}" x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}"/>`;
+      });
+
+      // Nodes
+      layout.nodes.forEach(n => {
+        html += `<g class="tree-node" data-id="${n.id}">
+          <circle class="ring" cx="${n.x}" cy="${n.y}" r="22"/>
+          <circle class="core" cx="${n.x}" cy="${n.y}" r="22"/>
+          <text x="${n.x}" y="${n.y}">${n.val}</text>
+        </g>`;
+      });
+
+      svg.innerHTML = html;
+
+      const info = document.getElementById('tree-info');
+      if (state.root) {
+        info.textContent = `${layout.totalNodes} nodes · depth ${layout.maxDepth + 1}`;
+      } else {
+        info.textContent = 'cây rỗng';
+      }
+    }
+
+    // ===================== STEP RENDERING =====================
+    function renderStep(step) {
+      if (!step) return;
+
+      // Tree nodes
+      document.querySelectorAll('.tree-node').forEach(el => {
+        el.classList.remove('in-queue', 'current', 'processed', 'child-enqueue');
+        const id = Number(el.dataset.id);
+        if (step.current === id) el.classList.add('current');
+        else if (step.child === id) el.classList.add('child-enqueue');
+        else if (step.queue.includes(id)) el.classList.add('in-queue');
+        else if (step.processed.includes(id)) el.classList.add('processed');
+      });
+
+      // Edges
+      document.querySelectorAll('.tree-edge').forEach(el => {
+        el.classList.remove('active');
+        const parentId = Number(el.dataset.parent);
+        const childId = Number(el.dataset.child);
+        if (step.current === parentId && step.child === childId) {
+          el.classList.add('active');
+        }
+      });
+
+      // Level guides
+      let currentLevelNum = -1;
+      if (step.type === 'level_start' || step.currentLevel.length > 0) {
+        currentLevelNum = step.result.length;
+      } else if (step.type === 'level_end') {
+        currentLevelNum = step.result.length - 1;
+      }
+      document.querySelectorAll('.level-guide, .level-text').forEach(el => {
+        el.classList.toggle('active', Number(el.dataset.level) === currentLevelNum);
+      });
+
+      // Queue
+      const queueContainer = document.getElementById('queue-container');
+      if (step.queue.length === 0) {
+        queueContainer.innerHTML = '<span class="queue-empty">queue rỗng</span>';
+      } else {
+        queueContainer.innerHTML = step.queue.map((id, idx) => {
+          const node = state.nodeMap.get(id);
+          const isFront = idx === 0;
+          return `<div class="queue-item ${isFront ? 'front' : ''}">${node ? node.val : '?'}</div>`;
+        }).join('');
+      }
+
+      // Current level
+      const levelContainer = document.getElementById('level-container');
+      if (step.currentLevel.length === 0) {
+        levelContainer.innerHTML = '<span class="level-empty">— chưa có —</span>';
+      } else {
+        levelContainer.innerHTML = step.currentLevel.map(v => `<div class="level-item">${v}</div>`).join('');
+      }
+
+      // Result
+      const resultContainer = document.getElementById('result-container');
+      if (step.result.length === 0) {
+        resultContainer.innerHTML = '<span class="result-empty">[ ]</span>';
+      } else {
+        resultContainer.innerHTML = step.result.map((level, idx) =>
+          `<div class="result-level">
+            <span class="level-idx">[${idx}]</span>
+            <span class="level-vals">[${level.join(', ')}]</span>
+          </div>`
+        ).join('');
+      }
+
+      // Description
+      document.getElementById('step-indicator').textContent = `${state.currentStep + 1} / ${state.trace.length}`;
+      document.getElementById('step-message').innerHTML = step.message;
+
+      // Stats
+      let levelDisplay;
+      if (step.type === 'init' || step.type === 'enqueue_root') levelDisplay = 0;
+      else if (step.type === 'done') levelDisplay = step.result.length;
+      else levelDisplay = step.result.length + 1;
+      document.getElementById('stat-level').textContent = levelDisplay;
+      document.getElementById('stat-queue').textContent = step.queue.length;
+      document.getElementById('stat-visited').textContent = step.processed.length;
+
+      // Progress
+      const progress = state.trace.length > 0 ? (state.currentStep + 1) / state.trace.length * 100 : 0;
+      document.getElementById('progress-fill').style.width = `${progress}%`;
+
+      // Code highlight
+      document.querySelectorAll('code .line').forEach((el, idx) => {
+        el.classList.toggle('active', idx === step.codeLine);
+      });
+    }
+
+    // ===================== CONTROLS =====================
+    function play() {
+      if (state.currentStep >= state.trace.length - 1) {
+        state.currentStep = 0;
+        renderStep(state.trace[0]);
+      }
+      state.playing = true;
+      updateButtons();
+      scheduleNext();
+    }
+    function scheduleNext() {
+      if (!state.playing) return;
+      state.timer = setTimeout(() => {
+        if (state.currentStep < state.trace.length - 1) {
+          state.currentStep++;
+          renderStep(state.trace[state.currentStep]);
+          scheduleNext();
+        } else {
+          pause();
+        }
+      }, state.speed);
+    }
+    function pause() {
+      state.playing = false;
+      if (state.timer) { clearTimeout(state.timer); state.timer = null; }
+      updateButtons();
+    }
+    function stepForward() {
+      pause();
+      if (state.currentStep < state.trace.length - 1) {
+        state.currentStep++;
+        renderStep(state.trace[state.currentStep]);
+      }
+      updateButtons();
+    }
+    function stepBack() {
+      pause();
+      if (state.currentStep > 0) {
+        state.currentStep--;
+        renderStep(state.trace[state.currentStep]);
+      }
+      updateButtons();
+    }
+    function reset() {
+      pause();
+      state.currentStep = 0;
+      if (state.trace.length > 0) renderStep(state.trace[0]);
+      updateButtons();
+    }
+    function updateButtons() {
+      const playBtn = document.getElementById('btn-play');
+      const stepBtn = document.getElementById('btn-step');
+      const backBtn = document.getElementById('btn-back');
+      playBtn.textContent = state.playing ? 'Pause' : 'Play';
+      stepBtn.disabled = state.currentStep >= state.trace.length - 1;
+      backBtn.disabled = state.currentStep <= 0;
+    }
+    function rebuildTree(arr) {
+      pause();
+      state.root = buildTree(arr);
+      state.trace = generateTrace(state.root);
+      state.currentStep = 0;
+      renderTree();
+      if (state.trace.length > 0) renderStep(state.trace[0]);
+      updateButtons();
+    }
+
+    // ===================== EVENTS =====================
+    document.getElementById('btn-play').addEventListener('click', () => {
+      if (state.playing) pause(); else play();
+    });
+    document.getElementById('btn-step').addEventListener('click', stepForward);
+    document.getElementById('btn-back').addEventListener('click', stepBack);
+    document.getElementById('btn-reset').addEventListener('click', reset);
+    document.getElementById('speed').addEventListener('input', e => {
+      state.speed = Number(e.target.value);
+      document.getElementById('speed-val').textContent = `${state.speed}ms`;
+    });
+    document.getElementById('btn-build').addEventListener('click', () => {
+      rebuildTree(parseInput(document.getElementById('tree-input').value));
+    });
+    document.getElementById('tree-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') rebuildTree(parseInput(e.target.value));
+    });
+    document.querySelectorAll('.preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tree = btn.dataset.tree;
+        document.getElementById('tree-input').value = tree;
+        rebuildTree(parseInput(tree));
+      });
+    });
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.code === 'Space') { e.preventDefault(); state.playing ? pause() : play(); }
+      else if (e.code === 'ArrowRight') { e.preventDefault(); stepForward(); }
+      else if (e.code === 'ArrowLeft') { e.preventDefault(); stepBack(); }
+      else if (e.code === 'KeyR') { e.preventDefault(); reset(); }
+    });
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        renderTree();
+        if (state.trace.length > 0) renderStep(state.trace[state.currentStep]);
+      }, 200);
+    });
+
+    // ===================== INIT =====================
+    renderCode();
+    rebuildTree([1, 2, 3, 4, 5, 6, 7]);
+  </script>
+</body>
+</html>
