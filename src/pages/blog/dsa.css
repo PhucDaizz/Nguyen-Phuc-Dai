@@ -1,0 +1,176 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ===== dsa-html-style — scoped cho route /blog ===== */
+.dsa-scope {
+  --bg: #0a0e1a;
+  --bg-2: #0d1424;
+  --bg-3: #161d33;
+  --fg: #f0e9d8;
+  --muted: #7a83a3;
+  --accent: #ffb547;
+  --accent-2: #ff7e5f;
+  --accent-glow: rgba(255, 181, 71, 0.4);
+  --teal: #2dd4bf;
+  --teal-glow: rgba(45, 212, 191, 0.4);
+  --card: rgba(255, 255, 255, 0.025);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 8px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  position: relative;
+  min-height: 100vh;
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.6;
+  padding: 7rem 1.25rem 4rem;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255,181,71,.07), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 80% 100%, rgba(45,212,191,.07), transparent 50%);
+  background-attachment: fixed;
+}
+.dsa-scope::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+.dsa-scope::after {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 30%, rgba(255, 181, 71, 0.05), transparent 35%),
+    radial-gradient(circle at 75% 70%, rgba(45, 212, 191, 0.05), transparent 35%);
+  pointer-events: none; z-index: 0;
+  animation: dsaBgFloat 24s ease-in-out infinite;
+}
+@keyframes dsaBgFloat { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-30px, 25px); } }
+
+.dsa-container { max-width: 1280px; margin: 0 auto; padding: 0 28px 80px; position: relative; z-index: 1; }
+.dsa-narrow { max-width: 860px; margin: 0 auto; }
+.dsa-layout { display: grid; grid-template-columns: 220px 1fr; gap: 40px; }
+.dsa-scope .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.dsa-scope .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media (max-width: 900px) { .dsa-layout, .dsa-scope .grid-2, .dsa-scope .grid-3 { grid-template-columns: 1fr; } }
+
+.dsa-scope h1 { font-weight: 700; letter-spacing: -0.02em; font-size: clamp(40px, 6vw, 72px); line-height: 1.1; margin-bottom: 16px; }
+.dsa-scope h1 .accent {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.dsa-scope h2 { font-size: clamp(28px, 3.5vw, 40px); margin-top: 56px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px; font-weight: 700; }
+.dsa-scope h2::before {
+  content: ''; width: 4px; height: 28px; flex-shrink: 0;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-radius: 4px; box-shadow: 0 0 12px var(--accent-glow);
+}
+.dsa-scope h3 { font-size: 18px; margin-top: 28px; margin-bottom: 12px; color: var(--accent); font-weight: 700; }
+.dsa-scope p { margin-bottom: 14px; color: rgba(240,233,216,.85); font-size: 15px; }
+.dsa-scope code, .dsa-scope .mono { font-family: 'JetBrains Mono', monospace; }
+
+.dsa-scope .badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
+  background: rgba(255,181,71,.08); border: 1px solid rgba(255,181,71,.2); border-radius: 100px;
+  color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 18px; font-family: 'JetBrains Mono', monospace;
+}
+.dsa-scope .badge::before {
+  content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent); animation: dsaPulse 2s ease-in-out infinite;
+}
+@keyframes dsaPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(.7); } }
+
+.dsa-scope .card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 24px; backdrop-filter: blur(10px); position: relative; overflow: hidden; margin-bottom: 18px;
+  transition: border-color .3s var(--ease), transform .3s var(--ease);
+}
+.dsa-scope .card::before {
+  content: ''; position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.4;
+}
+.dsa-scope .card.teal::before { background: linear-gradient(90deg, transparent, var(--teal), transparent); }
+.dsa-scope a.card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 30px var(--accent-glow); }
+.dsa-scope .card-title {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted);
+  font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.dsa-scope .card-title .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+.dsa-scope .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.dsa-scope .btn {
+  background: transparent; border: 1px solid var(--border-strong); color: var(--fg);
+  padding: 9px 16px; border-radius: 9px; font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500; font-size: 13px; cursor: pointer; transition: all .2s var(--ease);
+  display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+}
+.dsa-scope .btn:hover { border-color: var(--accent); background: rgba(255,181,71,.06); color: var(--accent); }
+.dsa-scope .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--bg); border-color: transparent; font-weight: 700; }
+.dsa-scope .btn.primary:hover { box-shadow: 0 4px 20px var(--accent-glow); color: var(--bg); }
+.dsa-scope .btn.ghost { border-color: transparent; color: var(--muted); }
+
+.dsa-scope .pill {
+  display: inline-block; padding: 4px 10px; background: rgba(45,212,191,.1);
+  border: 1px solid rgba(45,212,191,.3); color: var(--teal); border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; margin: 2px;
+}
+.dsa-scope .pill.amber { background: rgba(255,181,71,.1); border-color: rgba(255,181,71,.3); color: var(--accent); }
+
+.dsa-scope .rule {
+  background: linear-gradient(135deg, rgba(255,181,71,.08), rgba(255,126,95,.04));
+  border: 1px solid rgba(255,181,71,.25); border-radius: var(--radius-md);
+  padding: 16px 20px; margin: 14px 0; position: relative;
+}
+.dsa-scope .rule::before {
+  content: 'QUY TẮC'; position: absolute; top: -8px; left: 16px; background: var(--bg);
+  color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.15em; padding: 2px 8px; border: 1px solid rgba(255,181,71,.25); border-radius: 4px;
+}
+
+.dsa-scope .checklist { list-style: none; padding: 0; }
+.dsa-scope .checklist li { padding: 8px 0 8px 28px; position: relative; font-size: 14.5px; color: rgba(240,233,216,.85); }
+.dsa-scope .checklist li::before {
+  content: ''; position: absolute; left: 0; top: 13px; width: 14px; height: 14px;
+  border: 1.5px solid var(--accent); border-radius: 4px; background: rgba(255,181,71,.06);
+}
+.dsa-scope .checklist li::after {
+  content: ''; position: absolute; left: 4px; top: 16px; width: 6px; height: 3px;
+  border-left: 1.5px solid var(--accent); border-bottom: 1.5px solid var(--accent); transform: rotate(-45deg);
+}
+
+.dsa-scope .code-block { background: rgba(0,0,0,.35); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin: 14px 0; }
+.dsa-scope .code-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,.2);
+}
+.dsa-scope .code-head .dots { display: flex; gap: 6px; align-items: center; }
+.dsa-scope .code-head .dots i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+.dsa-scope .code-head .name { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.dsa-scope .code-head .name .live { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal); animation: dsaPulse 2s infinite; }
+.dsa-scope pre { padding: 16px 18px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.75; margin: 0; }
+.dsa-scope pre code .line { display: block; padding: 1px 10px; margin: 0 -10px; border-left: 3px solid transparent; white-space: pre; }
+.dsa-scope pre code .line.active { background: rgba(255,181,71,.08); border-left-color: var(--accent); }
+
+.dsa-scope .demo { display: flex; flex-direction: column; gap: 14px; padding: 20px; background: rgba(0,0,0,.25); border-radius: var(--radius-md); border: 1px dashed var(--border); }
+.dsa-scope .demo-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+.dsa-scope .toc { position: sticky; top: 96px; align-self: start; font-family: 'JetBrains Mono', monospace; font-size: 12px; max-height: calc(100vh - 120px); overflow-y: auto; }
+.dsa-scope .toc a { display: block; color: var(--muted); text-decoration: none; padding: 6px 12px; border-left: 2px solid var(--border); transition: all .2s; }
+.dsa-scope .toc a:hover, .dsa-scope .toc a.active { color: var(--accent); border-left-color: var(--accent); }
+
+.dsa-search {
+  width: 100%; padding: 12px 16px; border-radius: 9px;
+  border: 1px solid var(--border-strong); background: rgba(0,0,0,.25);
+  color: var(--fg); font-family: 'Space Grotesk', sans-serif; font-size: 14px; outline: none;
+}
+.dsa-search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.dsa-stat { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: var(--accent); }
+.dsa-scope footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.dsa-scope ::selection { background: var(--accent); color: var(--bg); }

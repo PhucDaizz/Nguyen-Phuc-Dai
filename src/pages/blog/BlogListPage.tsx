@@ -1,89 +1,113 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Clock, ArrowRight, BrainCircuit } from 'lucide-react';
-import { ALGORITHM_POSTS } from '../../data/algorithms';
-
-const CATEGORIES = ['All', 'Big-O', 'Sorting', 'Searching', 'Graph', 'Dynamic Programming', 'Data Structure'] as const;
+import { GRIND_PROBLEMS, GRIND_WEEKS } from '../../data/grind75';
 
 export const BlogListPage = () => {
-  const [category, setCategory] = useState<(typeof CATEGORIES)[number]>('All');
   const [query, setQuery] = useState('');
+  const [week, setWeek] = useState<number | 'all'>('all');
 
-  const posts = useMemo(() => {
-    return ALGORITHM_POSTS.filter((p) => {
-      const matchCat = category === 'All' || p.category === category;
-      const q = query.toLowerCase();
-      const matchQuery =
-        !q ||
-        p.title.toLowerCase().includes(q) ||
-        p.summary.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.toLowerCase().includes(q));
-      return matchCat && matchQuery;
-    });
-  }, [category, query]);
+  const posts = useMemo(
+    () =>
+      GRIND_PROBLEMS.filter((p) => {
+        const matchWeek = week === 'all' || p.week === week;
+        const q = query.toLowerCase();
+        const matchQ =
+          !q ||
+          p.title.toLowerCase().includes(q) ||
+          p.viTitle.toLowerCase().includes(q) ||
+          p.pattern.toLowerCase().includes(q);
+        return matchWeek && matchQ;
+      }),
+    [query, week],
+  );
+
+  const patterns = [...new Set(GRIND_PROBLEMS.map((p) => p.pattern))];
 
   return (
-    <div className="blog-container">
-      <header className="blog-hero">
-        <p className="blog-eyebrow">
-          <BrainCircuit size={14} /> Blog / Thuật toán
-        </p>
-        <h1>
-          Học thuật toán <span className="blog-accent">từ gốc</span>
-        </h1>
-        <p className="blog-sub">
-          Ghi chép ngắn gọn, có code TypeScript chạy được — Big-O, Sorting, Searching, Graph, DP.
-        </p>
-        <input
-          className="blog-search"
-          placeholder="Tìm bài viết, tag... (vd: bfs, dp, big-o)"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <div className="blog-filters">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCategory(c)}
-              className={`blog-chip ${category === c ? 'active' : ''}`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </header>
+    <div>
+      <div className="badge">Blog · DSA Grind75</div>
+      <h1>
+        Grind75 <span className="accent">dễ hiểu nhất</span>
+      </h1>
+      <p>
+        Mỗi bài đúng 1 pattern — quy tắc nhận diện, code TypeScript ngắn gọn, dry-run từng bước.
+        Học theo tuần, mỗi tuần 1 kỹ năng, không lan man.
+      </p>
 
-      <div className="blog-grid">
-        {posts.map((post, i) => (
-          <motion.article
-            key={post.slug}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.06, duration: 0.5 }}
-            className="blog-card"
-          >
-            <div className="blog-card-meta">
-              <span className="blog-badge">{post.category}</span>
-              <span className={`blog-level ${post.difficulty.toLowerCase()}`}>{post.difficulty}</span>
-            </div>
-            <h2>
-              <Link to={`/blog/${post.slug}`}>{post.title}</Link>
-            </h2>
-            <p>{post.summary}</p>
-            <div className="blog-card-footer">
-              <span>
-                <Clock size={13} /> {post.readMinutes} min · {post.complexity.time}
-              </span>
-              <Link to={`/blog/${post.slug}`} className="blog-read">
-                Đọc <ArrowRight size={14} />
-              </Link>
-            </div>
-          </motion.article>
-        ))}
+      <div className="rule">
+        <p style={{ margin: 0 }}>
+          <strong>Cách học:</strong> đọc QUY TẮC → tự code 15 phút → so solution → chạy dry-run
+          bằng miệng → ghi lại 1 câu “khi nào dùng pattern này”.
+        </p>
       </div>
 
-      {posts.length === 0 && <p className="blog-empty">Không tìm thấy bài viết. Thử từ khóa khác.</p>}
+      <h2>Lộ trình 8 tuần</h2>
+      <div className="grid-2">
+        <div className="card">
+          <div className="card-title">
+            <span className="dot"></span>Tiến độ
+          </div>
+          <div className="mono" style={{ display: 'flex', gap: 24 }}>
+            <div><div className="dsa-stat">{GRIND_PROBLEMS.length}</div><div className="demo-label">bài mẫu</div></div>
+            <div><div className="dsa-stat">8</div><div className="demo-label">tuần</div></div>
+            <div><div className="dsa-stat">{patterns.length}</div><div className="demo-label">pattern</div></div>
+          </div>
+          <div className="btn-row">
+            {( ['all', ...GRIND_WEEKS.map((w) => w.week)] as const ).map((w) => (
+              <button
+                key={String(w)}
+                className={`btn ${week === w ? 'primary' : ''}`}
+                onClick={() => setWeek(w as number | 'all')}
+              >
+                {w === 'all' ? 'Tất cả' : `Tuần ${w}`}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="card teal">
+          <div className="card-title">
+            <span className="dot" style={{ background: 'var(--teal)', boxShadow: '0 0 8px var(--teal)' }}></span>
+            Tuần này học gì
+          </div>
+          {GRIND_WEEKS.filter((w) => week === 'all' || w.week === week)
+            .slice(0, 3)
+            .map((w) => (
+              <p key={w.week} style={{ fontSize: 13.5, margin: '0 0 8px' }}>
+                <span className="mono" style={{ color: 'var(--teal)' }}>W{w.week}</span> · {w.focus}
+                <br />
+                <span style={{ color: 'var(--muted)', fontSize: 12.5 }}>{w.goal}</span>
+              </p>
+            ))}
+          <input
+            className="dsa-search"
+            placeholder="Tìm bài, pattern... (vd: stack, dp, binary search)"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <h2>Bài viết ({posts.length})</h2>
+      <div className="grid-3">
+        {posts.map((p) => (
+          <Link key={p.slug} to={`/blog/${p.slug}`} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="card-title">
+              <span className="dot"></span>#{p.no} · Tuần {p.week} · {p.pattern}
+            </div>
+            <h3 style={{ marginTop: 0 }}>{p.title}</h3>
+            <p style={{ fontSize: 13.5 }}>{p.viTitle} — {p.summary.slice(0, 90)}…</p>
+            <div>
+              <span className="pill amber">{p.difficulty}</span>
+              <span className="pill">{p.time}</span>
+              <span className="pill">{p.space}</span>
+            </div>
+            <div className="btn-row">
+              <span className="btn primary">Học ngay →</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+      {posts.length === 0 && <p>Không tìm thấy bài. Thử từ khóa khác.</p>}
     </div>
   );
 };
