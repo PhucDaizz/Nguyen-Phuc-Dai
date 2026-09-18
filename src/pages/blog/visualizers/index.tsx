@@ -38,6 +38,20 @@ import { TopKVisualizer } from './TopKVisualizer';
 import { MedianVisualizer } from './MedianVisualizer';
 import { CombinationVisualizer } from './CombinationVisualizer';
 import { WordSearchVisualizer } from './WordSearchVisualizer';
+import { CloneVisualizer } from './CloneVisualizer';
+import { ScheduleVisualizer } from './ScheduleVisualizer';
+import { PacificVisualizer } from './PacificVisualizer';
+import { IslandsVisualizer } from './IslandsVisualizer';
+import { ConsecutiveVisualizer } from './ConsecutiveVisualizer';
+import { RobberVisualizer } from './RobberVisualizer';
+import { Robber2Visualizer } from './Robber2Visualizer';
+import { DecodeVisualizer } from './DecodeVisualizer';
+import { CoinVisualizer } from './CoinVisualizer';
+import { LisVisualizer } from './LisVisualizer';
+import { JumpVisualizer } from './JumpVisualizer';
+import { WordBreakVisualizer } from './WordBreakVisualizer';
+import { LongestPalVisualizer, CountPalVisualizer } from './PalindromeExpand';
+import { StairsVisualizer } from './StairsVisualizer';
 
 // Registry: slug bài giảng → visualizer tương ứng.
 // Thêm bài mới: import component + thêm 1 dòng vào map.
@@ -81,6 +95,21 @@ const VISUALIZERS: Record<string, () => React.JSX.Element> = {
   'find-median-295': MedianVisualizer,
   'combination-sum-39': CombinationVisualizer,
   'word-search-79': WordSearchVisualizer,
+  'clone-graph-133': CloneVisualizer,
+  'course-schedule-207': ScheduleVisualizer,
+  'pacific-atlantic-417': PacificVisualizer,
+  'number-of-islands-200': IslandsVisualizer,
+  'longest-consecutive-128': ConsecutiveVisualizer,
+  'house-robber-198': RobberVisualizer,
+  'house-robber-ii-213': Robber2Visualizer,
+  'decode-ways-91': DecodeVisualizer,
+  'coin-change-322': CoinVisualizer,
+  'lis-300': LisVisualizer,
+  'jump-game-55': JumpVisualizer,
+  'word-break-139': WordBreakVisualizer,
+  'longest-palindrome-5': LongestPalVisualizer,
+  'palindromic-substrings-647': CountPalVisualizer,
+  'climbing-stairs-70': StairsVisualizer,
 };
 
 export const hasVisualizer = (slug: string) => slug in VISUALIZERS;

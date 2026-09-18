@@ -332,6 +332,145 @@ export const parseTreeList = (str: string): (number | null)[] =>
     return Number.isNaN(n) ? null : n;
   });
 
+// Đồ thị chung: n node xếp vòng tròn, edges có hướng (mũi tên) hoặc vô hướng
+export const GraphSvg = ({ n, edges, directed, states, labels }: {
+  n: number;
+  edges: [number, number][];
+  directed?: boolean;
+  states?: Record<number, TreeNodeState>;
+  labels?: (string | number)[];
+}) => {
+  const W = 460;
+  const H = 340;
+  const cx = W / 2;
+  const cy = H / 2;
+  const R = Math.min(W, H) / 2 - 46;
+  const pos = (i: number) => {
+    const a = (-90 * Math.PI) / 180 + (i * 2 * Math.PI) / Math.max(n, 1);
+    return { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) };
+  };
+  const styleFor = (st?: TreeNodeState) => {
+    switch (st) {
+      case 'cur':
+        return { fill: '#ffb547', stroke: '#ffb547', color: '#0a0e1a', glow: 'drop-shadow(0 0 14px rgba(255,181,71,.7))' };
+      case 'add':
+        return { fill: 'rgba(45,212,191,.3)', stroke: '#2dd4bf', color: '#2dd4bf', glow: 'drop-shadow(0 0 12px rgba(45,212,191,.6))' };
+      case 'seen':
+        return { fill: 'rgba(255,181,71,.14)', stroke: '#ffb547', color: '#f0e9d8', glow: undefined };
+      case 'done':
+        return { fill: 'rgba(45,212,191,.1)', stroke: 'rgba(45,212,191,.55)', color: 'rgba(45,212,191,.9)', glow: undefined };
+      case 'bad':
+        return { fill: 'rgba(255,95,87,.15)', stroke: '#ff5f57', color: '#ff5f57', glow: 'drop-shadow(0 0 10px rgba(255,95,87,.5))' };
+      default:
+        return { fill: '#161d33', stroke: 'rgba(255,255,255,.2)', color: '#f0e9d8', glow: undefined };
+    }
+  };
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block' }}>
+      <defs>
+        <marker id="g-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="rgba(255,255,255,.4)" strokeWidth="1.6" />
+        </marker>
+      </defs>
+      {edges.map(([a, b], k) => {
+        const pa = pos(a);
+        const pb = pos(b);
+        const dx = pb.x - pa.x;
+        const dy = pb.y - pa.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const off = 24;
+        return (
+          <line
+            key={k}
+            x1={pa.x + (dx / len) * off}
+            y1={pa.y + (dy / len) * off}
+            x2={pb.x - (dx / len) * (off + (directed ? 4 : 0))}
+            y2={pb.y - (dy / len) * (off + (directed ? 4 : 0))}
+            stroke="rgba(255,255,255,.28)"
+            strokeWidth={2}
+            markerEnd={directed ? 'url(#g-arrow)' : undefined}
+          />
+        );
+      })}
+      {Array.from({ length: n }, (_, i) => {
+        const p = pos(i);
+        const st = styleFor(states?.[i]);
+        return (
+          <g key={i}>
+            <circle
+              cx={p.x} cy={p.y} r={22}
+              fill={st.fill} stroke={st.stroke} strokeWidth={2}
+              style={{ transition: 'all .3s', ...(st.glow ? { filter: st.glow } : {}) }}
+            />
+            <text
+              x={p.x} y={p.y}
+              textAnchor="middle" dominantBaseline="central"
+              fill={st.color}
+              fontFamily="'JetBrains Mono', monospace" fontSize={14} fontWeight={700}
+              style={{ pointerEvents: 'none', userSelect: 'none' }}
+            >
+              {labels?.[i] ?? i}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+// Bảng lưới chung (matrix): cell text + trạng thái màu
+export const GridBoard = ({ rows, getState, size }: {
+  rows: (number | string)[][];
+  getState?: (r: number, c: number) => TreeNodeState | undefined;
+  size?: number;
+}) => {
+  const S = size ?? 44;
+  const colorFor = (st?: TreeNodeState) => {
+    switch (st) {
+      case 'cur':
+        return { border: 'var(--accent)', bg: 'var(--accent)', color: 'var(--bg)' };
+      case 'add':
+        return { border: 'var(--teal)', bg: 'rgba(45,212,191,.18)', color: 'var(--teal)' };
+      case 'seen':
+        return { border: 'rgba(255,181,71,.6)', bg: 'rgba(255,181,71,.1)', color: 'var(--accent)' };
+      case 'done':
+        return { border: 'rgba(45,212,191,.4)', bg: 'rgba(45,212,191,.06)', color: 'rgba(45,212,191,.85)' };
+      case 'bad':
+        return { border: '#ff5f57', bg: 'rgba(255,95,87,.12)', color: '#ff5f57' };
+      default:
+        return { border: 'var(--border)', bg: 'rgba(0,0,0,.25)', color: 'var(--fg)' };
+    }
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+      {rows.map((row, r) => (
+        <div key={r} style={{ display: 'flex', gap: 5 }}>
+          {row.map((v, c) => {
+            const cc = colorFor(getState?.(r, c));
+            return (
+              <div
+                key={c}
+                style={{
+                  width: S, height: S,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: 9,
+                  border: `2px solid ${cc.border}`,
+                  background: cc.bg,
+                  color: cc.color,
+                  fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 15,
+                  transition: 'all .25s var(--ease)',
+                }}
+              >
+                {v}
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export type TreeNodeState = 'cur' | 'seen' | 'done' | 'add' | 'bad';
 
 const depthOf = (i: number) => Math.floor(Math.log2(i + 1));

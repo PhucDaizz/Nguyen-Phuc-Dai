@@ -19,6 +19,519 @@ export interface Guide {
 }
 
 export const GUIDES: Record<string, Guide> = {
+  'clone-graph-133': {
+    slug: 'clone-graph-133',
+    blindNo: 133,
+    time: 'O(V + E)',
+    space: 'O(V)',
+    rule: 'Map old→new + DFS: tạo bản sao trước khi đi sâu để vòng lặp không treo.',
+    checklist: [
+      'Map node gốc → node clone',
+      'Gặp node đã có trong map → return clone cũ (xử lý vòng)',
+      'Tạo clone rỗng trước, rồi mới clone từng neighbor',
+      'Return clone của node vào',
+    ],
+    filename: 'clone-graph.ts',
+    code: `function cloneGraph(node: GraphNode | null): GraphNode | null {
+  const seen = new Map<GraphNode, GraphNode>();
+  const dfs = (n: GraphNode): GraphNode => {
+    if (seen.has(n)) return seen.get(n)!;
+    const copy = new GraphNode(n.val);
+    seen.set(n, copy);
+    for (const nb of n.neighbors) {
+      copy.neighbors.push(dfs(nb));
+    }
+    return copy;
+  };
+  return node === null ? null : dfs(node);
+}`,
+    highlightLines: [5],
+    dryRun: {
+      input: 'adjList = [[2,4],[1,3],[2,4],[1,3]] (1-indexed)',
+      trace: ['Clone 1 → neighbor 2: clone 2 → neighbor 1 (đã có!) → dùng lại', '2 → neighbor 3: clone 3 → neighbor 4: clone 4 → neighbor 1,3 (đã có)', 'Mọi cạnh nối đúng bản sao'],
+      output: 'đồ thị clone cùng cấu trúc',
+    },
+    pitfalls: ['Clone neighbor trước khi cho vào map → vòng lặp vô hạn', 'Copy reference thay vì deep copy (sửa clone ảnh hưởng gốc)'],
+  },
+  'course-schedule-207': {
+    slug: 'course-schedule-207',
+    blindNo: 207,
+    time: 'O(V + E)',
+    space: 'O(V + E)',
+    rule: 'Môn học = topo-sort: vào 0 hết được thì không chu trình (Kahn).',
+    checklist: [
+      'Dựng adjacency + bậc vào (indegree) mỗi môn',
+      'Queue các môn bậc vào = 0',
+      'Pop → trừ bậc vào các môn kề, về 0 thì push',
+      'Đếm = numCourses → true, không thì có chu trình',
+    ],
+    filename: 'course-schedule.ts',
+    code: `function canFinish(numCourses: number, prerequisites: number[][]): boolean {
+  const adj: number[][] = Array.from({ length: numCourses }, () => []);
+  const indeg = new Array(numCourses).fill(0);
+  for (const [a, b] of prerequisites) {
+    adj[b].push(a);
+    indeg[a]++;
+  }
+  const queue: number[] = [];
+  for (let i = 0; i < numCourses; i++) {
+    if (indeg[i] === 0) queue.push(i);
+  }
+  let taken = 0;
+  while (queue.length > 0) {
+    const u = queue.shift()!;
+    taken++;
+    for (const v of adj[u]) {
+      if (--indeg[v] === 0) queue.push(v);
+    }
+  }
+  return taken === numCourses;
+}`,
+    highlightLines: [16],
+    dryRun: {
+      input: 'numCourses = 2, prerequisites = [[1,0]]',
+      trace: ['indeg = [0,1], queue = [0]', 'Pop 0 → indeg[1] = 0 → push 1, taken = 1', 'Pop 1 → taken = 2 = numCourses → true'],
+      output: 'true',
+    },
+    pitfalls: ['Nhầm chiều cạnh [a,b] (b trước a) → đồ thị ngược', 'DFS 3 màu cũng được nhưng Kahn dễ code ít lỗi hơn'],
+  },
+  'pacific-atlantic-417': {
+    slug: 'pacific-atlantic-417',
+    blindNo: 417,
+    time: 'O(m·n)',
+    space: 'O(m·n)',
+    rule: 'Đi ngược từ 2 bờ vào trong (thấp → cao), ô nào cả 2 phía tới được thì lấy.',
+    checklist: [
+      'DFS/BFS từ hàng trên + cột trái (Pacific), từ hàng dưới + cột phải (Atlantic)',
+      'Đi ngược: chỉ sang ô cao hơn hoặc bằng (nước chảy xuống)',
+      '2 set visited riêng, giao nhau là đáp án',
+      'Mỗi ô thăm tối đa 1 lần mỗi phía → O(m·n)',
+    ],
+    filename: 'pacific-atlantic.ts',
+    code: `function pacificAtlantic(heights: number[][]): number[][] {
+  const R = heights.length, C = heights[0].length;
+  const pac = new Set<string>();
+  const atl = new Set<string>();
+
+  const dfs = (r: number, c: number, seen: Set<string>, prev: number): void => {
+    if (r < 0 || c < 0 || r >= R || c >= C) return;
+    const key = r + ',' + c;
+    if (seen.has(key) || heights[r][c] < prev) return;
+    seen.add(key);
+    dfs(r + 1, c, seen, heights[r][c]);
+    dfs(r - 1, c, seen, heights[r][c]);
+    dfs(r, c + 1, seen, heights[r][c]);
+    dfs(r, c - 1, seen, heights[r][c]);
+  };
+
+  for (let c = 0; c < C; c++) {
+    dfs(0, c, pac, heights[0][c]);
+    dfs(R - 1, c, atl, heights[R - 1][c]);
+  }
+  for (let r = 0; r < R; r++) {
+    dfs(r, 0, pac, heights[r][0]);
+    dfs(r, C - 1, atl, heights[r][C - 1]);
+  }
+
+  const res: number[][] = [];
+  pac.forEach((key) => {
+    if (atl.has(key)) {
+      const [r, c] = key.split(',').map(Number);
+      res.push([r, c]);
+    }
+  });
+  return res;
+}`,
+    highlightLines: [9],
+    dryRun: {
+      input: 'heights 5×5 (ví dụ LeetCode)',
+      trace: ['Pacific loang từ trên+trái vào trong (đi lên cao)', 'Atlantic loang từ dưới+phải vào trong', 'Giao nhau 7 ô: [0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]'],
+      output: '7 ô',
+    },
+    pitfalls: ['DFS xuôi từ mỗi ô ra biển (O((mn)²)) thay vì ngược từ biển vào', 'So sánh sai chiều cao (đi ngược phải cho phép lên cao, không phải xuống thấp)'],
+  },
+  'number-of-islands-200': {
+    slug: 'number-of-islands-200',
+    blindNo: 200,
+    time: 'O(m·n)',
+    space: 'O(m·n)',
+    rule: 'Gặp đất chưa thăm thì +1 và flood-fill chìm cả đảo (đánh dấu đã thăm).',
+    checklist: [
+      'Duyệt mọi ô, gặp "1" → count++, flood-fill',
+      'Flood-fill: ra biên/nước/đã thăm thì dừng',
+      'Đánh dấu bằng cách chìm thành "0" (khỏi set riêng)',
+      'Chỉ 4 hướng (không chéo)',
+    ],
+    filename: 'number-of-islands.ts',
+    code: `function numIslands(grid: string[][]): number {
+  const R = grid.length, C = grid[0].length;
+  let count = 0;
+
+  const sink = (r: number, c: number): void => {
+    if (r < 0 || c < 0 || r >= R || c >= C || grid[r][c] !== '1') return;
+    grid[r][c] = '0';
+    sink(r + 1, c);
+    sink(r - 1, c);
+    sink(r, c + 1);
+    sink(r, c - 1);
+  };
+
+  for (let r = 0; r < R; r++) {
+    for (let c = 0; c < C; c++) {
+      if (grid[r][c] === '1') {
+        count++;
+        sink(r, c);
+      }
+    }
+  }
+  return count;
+}`,
+    highlightLines: [16],
+    dryRun: {
+      input: 'grid = [["1","1","0"],["1","0","0"],["0","0","1"]]',
+      trace: ['(0,0) đất → count=1, chìm cả cụm (0,0),(0,1),(1,0)', '(2,2) đất → count=2, chìm', 'Hết → 2'],
+      output: '2',
+    },
+    pitfalls: ['Quên đánh dấu đã thăm → đếm 1 đảo nhiều lần / treo', 'Tính cả đường chéo là 1 đảo (sai — chỉ 4 hướng)'],
+  },
+  'longest-consecutive-128': {
+    slug: 'longest-consecutive-128',
+    blindNo: 128,
+    time: 'O(n)',
+    space: 'O(n)',
+    rule: 'Chỉ đếm từ “đầu dãy” (thiếu x−1) → mỗi số thăm đúng 1 lần, O(n).',
+    checklist: [
+      'Bỏ hết vào HashSet (O(1) lookup, khử trùng)',
+      'x là đầu dãy ⟺ không có x−1',
+      'Từ đầu dãy đếm lên x+1, x+2... tới đứt',
+      'Giữ max, sort là O(n log n) — không đạt',
+    ],
+    filename: 'longest-consecutive.ts',
+    code: `function longestConsecutive(nums: number[]): number {
+  const set = new Set(nums);
+  let best = 0;
+  for (const x of set) {
+    if (!set.has(x - 1)) {
+      let cur = x;
+      let len = 1;
+      while (set.has(cur + 1)) {
+        cur++;
+        len++;
+      }
+      best = Math.max(best, len);
+    }
+  }
+  return best;
+}`,
+    highlightLines: [5],
+    dryRun: {
+      input: 'nums = [100,4,200,1,3,2]',
+      trace: ['100: thiếu 99 → đầu dãy, đếm 100 → dài 1', '4: thiếu 3 → bỏ qua (không phải đầu)', '200: dài 1', '1: thiếu 0 → đầu dãy, đếm 1,2,3,4 → dài 4 ← best'],
+      output: '4',
+    },
+    pitfalls: ['Đếm từ mọi số (mỗi dãy bị đếm lại nhiều lần → O(n²) worst-case)', 'Sort trước O(n log n) — đề bắt O(n)'],
+  },
+  'house-robber-198': {
+    slug: 'house-robber-198',
+    blindNo: 198,
+    time: 'O(n)',
+    space: 'O(1)',
+    rule: 'Nhà i: max(trộm tới i−1, trộm tới i−2 + nhà i). Chỉ cần 2 biến lăn.',
+    checklist: [
+      'prev2 = 0 (tới i−2), prev1 = 0 (tới i−1)',
+      'cur = max(prev1, prev2 + nums[i])',
+      'Lăn: prev2 = prev1, prev1 = cur',
+      'Mảng rỗng → 0',
+    ],
+    filename: 'house-robber.ts',
+    code: `function rob(nums: number[]): number {
+  let prev2 = 0;
+  let prev1 = 0;
+  for (const x of nums) {
+    const cur = Math.max(prev1, prev2 + x);
+    prev2 = prev1;
+    prev1 = cur;
+  }
+  return prev1;
+}`,
+    highlightLines: [5],
+    dryRun: {
+      input: 'nums = [2,7,9,3,1]',
+      trace: ['x=2: max(0,2)=2 → (0,2)', 'x=7: max(2,7)=7 → (2,7)', 'x=9: max(7,11)=11 → (7,11)', 'x=3: max(11,10)=11 → (11,11)', 'x=1: max(11,12)=12'],
+      output: '12',
+    },
+    pitfalls: ['Tham lam lấy nhà lớn (vd [2,1,1,2]: tham được 3, đúng là 4)', 'Mảng dp O(n) vẫn đúng nhưng phí — rolling O(1) đủ'],
+  },
+  'house-robber-ii-213': {
+    slug: 'house-robber-ii-213',
+    blindNo: 213,
+    time: 'O(n)',
+    space: 'O(1)',
+    rule: 'Vòng tròn: đầu và cuối kề nhau → chạy robber thường 2 lần (bỏ đầu / bỏ cuối), lấy max.',
+    checklist: [
+      '1 nhà → trộm luôn',
+      'Case A: trộm [0..n−2] (bỏ nhà cuối)',
+      'Case B: trộm [1..n−1] (bỏ nhà đầu)',
+      'Đáp án = max(A, B)',
+    ],
+    filename: 'house-robber-ii.ts',
+    code: `function rob2(nums: number[]): number {
+  if (nums.length === 1) return nums[0];
+  const robRange = (l: number, r: number): number => {
+    let prev2 = 0, prev1 = 0;
+    for (let i = l; i <= r; i++) {
+      const cur = Math.max(prev1, prev2 + nums[i]);
+      prev2 = prev1;
+      prev1 = cur;
+    }
+    return prev1;
+  };
+  return Math.max(robRange(0, nums.length - 2), robRange(1, nums.length - 1));
+}`,
+    highlightLines: [12],
+    dryRun: {
+      input: 'nums = [2,3,2]',
+      trace: ['Bỏ cuối [2,3]: max = 3', 'Bỏ đầu [3,2]: max = 3', 'max(3,3) = 3 (không thể 2+2 vì kề vòng tròn)'],
+      output: '3',
+    },
+    pitfalls: ['Chạy robber thẳng cả vòng (trộm cả đầu + cuối kề nhau)', 'Quên case 1 nhà (range rỗng)'],
+  },
+  'decode-ways-91': {
+    slug: 'decode-ways-91',
+    blindNo: 91,
+    time: 'O(n)',
+    space: 'O(1)',
+    rule: 'Như leo thang: 1 chữ số (1–9) hoặc 2 chữ số (10–26); số 0 không đứng một mình.',
+    checklist: [
+      'dp[i] = cách giải s[:i]',
+      's[i−1] ≠ 0 → + dp[i−1]',
+      's[i−2:i] trong 10..26 → + dp[i−2]',
+      'Rolling 2 biến là đủ',
+    ],
+    filename: 'decode-ways.ts',
+    code: `function numDecodings(s: string): number {
+  let prev2 = 1;
+  let prev1 = s[0] === '0' ? 0 : 1;
+  for (let i = 2; i <= s.length; i++) {
+    let cur = 0;
+    if (s[i - 1] !== '0') cur += prev1;
+    const two = Number(s.slice(i - 2, i));
+    if (two >= 10 && two <= 26) cur += prev2;
+    prev2 = prev1;
+    prev1 = cur;
+  }
+  return prev1;
+}`,
+    highlightLines: [7],
+    dryRun: {
+      input: 's = "226"',
+      trace: ['i=1 ("2"): 1 cách', 'i=2 ("22"): 1 chữ (2) + 2 chữ (22) = 2', 'i=3 ("226"): 1 chữ (6→+2) + 2 chữ (26→+1) = 3'],
+      output: '3 ("BBF","BZ","VF")',
+    },
+    pitfalls: ['Cho "0" đứng một mình (0 không map chữ nào)', 'Nhận 2 chữ số 01–09 (số 0 đầu là sai)'],
+  },
+  'coin-change-322': {
+    slug: 'coin-change-322',
+    blindNo: 322,
+    time: 'O(amount·n)',
+    space: 'O(amount)',
+    rule: 'dp[x] = 1 + min(dp[x−c]) mọi mệnh giá; duyệt amount tăng dần (dùng lại xu thoải mái).',
+    checklist: [
+      'dp[0] = 0, còn lại = ∞',
+      'x từ 1..amount: thử mọi xu c ≤ x',
+      'dp[x] = min(dp[x], dp[x−c] + 1)',
+      'dp[amount] vẫn ∞ → return −1',
+    ],
+    filename: 'coin-change.ts',
+    code: `function coinChange(coins: number[], amount: number): number {
+  const dp = new Array(amount + 1).fill(Infinity);
+  dp[0] = 0;
+  for (let x = 1; x <= amount; x++) {
+    for (const c of coins) {
+      if (x - c >= 0) dp[x] = Math.min(dp[x], dp[x - c] + 1);
+    }
+  }
+  return dp[amount] === Infinity ? -1 : dp[amount];
+}`,
+    highlightLines: [6],
+    dryRun: {
+      input: 'coins = [1,2,5], amount = 11',
+      trace: ['dp[1..4] = 1,2,1,2 (dùng 1,2)', 'dp[5] = 1 (xu 5)', 'dp[6..10] = 2,2,3,3,2', 'dp[11] = dp[6]+1 = 3 (5+5+1)'],
+      output: '3',
+    },
+    pitfalls: ['Tham lam lấy xu lớn trước ([1,3,4] đổi 6: tham 4+1+1=3 xu, đúng là 3+3=2 xu)', 'Quên −1 khi không đổi được'],
+  },
+  'lis-300': {
+    slug: 'lis-300',
+    blindNo: 300,
+    time: 'O(n²)',
+    space: 'O(n)',
+    rule: 'dp[i] = 1 + max(dp[j]) với mọi j < i mà nums[j] < nums[i]. Muốn O(n log n): patience + binary search.',
+    checklist: [
+      'dp[i] khởi tạo 1 (một mình nó)',
+      'j < i và nums[j] < nums[i] → dp[i] = max(dp[i], dp[j]+1)',
+      'Đáp án = max toàn bộ dp (không phải dp cuối)',
+      'Bản O(n log n): duy trì tails + binary search vị trí thay',
+    ],
+    filename: 'lis.ts',
+    code: `function lengthOfLIS(nums: number[]): number {
+  const dp = new Array(nums.length).fill(1);
+  let best = 1;
+  for (let i = 0; i < nums.length; i++) {
+    for (let j = 0; j < i; j++) {
+      if (nums[j] < nums[i]) dp[i] = Math.max(dp[i], dp[j] + 1);
+    }
+    best = Math.max(best, dp[i]);
+  }
+  return nums.length === 0 ? 0 : best;
+}`,
+    highlightLines: [6],
+    dryRun: {
+      input: 'nums = [10,9,2,5,3,7,101,18]',
+      trace: ['dp[2]=1 (số 2)', 'dp[3]=2 (2→5)', 'dp[4]=2 (2→3)', 'dp[5]=3 (2→3→7)', 'dp[6]=4 (…→101)', 'dp[7]=4'],
+      output: '4',
+    },
+    pitfalls: ['Return dp cuối (dãy dài nhất chưa chắc kết thúc ở cuối)', 'Dùng ≤ thay vì < (phải tăng chặt — strictly)'],
+  },
+  'jump-game-55': {
+    slug: 'jump-game-55',
+    blindNo: 55,
+    time: 'O(n)',
+    space: 'O(1)',
+    rule: 'Tham lam từ phải sang trái: goal lùi dần về index tới được nó, tới 0 là thắng.',
+    checklist: [
+      'goal = index cuối',
+      'i từ cuối về đầu: i + nums[i] ≥ goal → goal = i',
+      'goal = 0 → true',
+      'DP O(n²) cũng đúng nhưng phí',
+    ],
+    filename: 'jump-game.ts',
+    code: `function canJump(nums: number[]): boolean {
+  let goal = nums.length - 1;
+  for (let i = nums.length - 1; i >= 0; i--) {
+    if (i + nums[i] >= goal) goal = i;
+  }
+  return goal === 0;
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 'nums = [2,3,1,1,4]',
+      trace: ['goal=4; i=4: 4+4≥4 → goal=4', 'i=3: 3+1≥4 → goal=3', 'i=2: 2+1≥3 → goal=2', 'i=1: 1+3≥2 → goal=1', 'i=0: 0+2≥1 → goal=0 → true'],
+      output: 'true',
+    },
+    pitfalls: ['Tham lam xuôi (luôn nhảy xa nhất) sai — vd [3,2,1,0,4]', 'DP từ trái sang mà không cắt tỉa → O(n²) timeout ở test lớn'],
+  },
+  'word-break-139': {
+    slug: 'word-break-139',
+    blindNo: 139,
+    time: 'O(n²)',
+    space: 'O(n)',
+    rule: 'dp[i] = có j < i sao cho dp[j] đúng và s[j:i] trong dict.',
+    checklist: [
+      'dp[0] = true (chuỗi rỗng)',
+      'i từ 1..n, j từ 0..i−1',
+      'dp[j] && dict.has(s[j:i]) → dp[i] = true, break',
+      'Từ điển dùng Set để O(1)',
+    ],
+    filename: 'word-break.ts',
+    code: `function wordBreak(s: string, wordDict: string[]): boolean {
+  const dict = new Set(wordDict);
+  const dp = new Array(s.length + 1).fill(false);
+  dp[0] = true;
+  for (let i = 1; i <= s.length; i++) {
+    for (let j = 0; j < i; j++) {
+      if (dp[j] && dict.has(s.slice(j, i))) {
+        dp[i] = true;
+        break;
+      }
+    }
+  }
+  return dp[s.length];
+}`,
+    highlightLines: [7],
+    dryRun: {
+      input: 's = "leetcode", dict = ["leet","code"]',
+      trace: ['dp[4] = true (s[0:4]="leet" ✓)', 'dp[8]: j=4, dp[4] ✓ và s[4:8]="code" ✓ → true'],
+      output: 'true',
+    },
+    pitfalls: ['Tham lam cắt từ dài nhất trước ("aaaaaaa" + ["aaaa","aa"] cần backtrack)', 'Quên từ được dùng lại nhiều lần'],
+  },
+  'longest-palindrome-5': {
+    slug: 'longest-palindrome-5',
+    blindNo: 5,
+    time: 'O(n²)',
+    space: 'O(1)',
+    rule: 'Mỗi vị trí bung 2 phía: tâm lẻ (i,i) + tâm chẵn (i,i+1), giữ chuỗi dài nhất.',
+    checklist: [
+      'Tâm lẻ: l = i, r = i; tâm chẵn: l = i, r = i+1',
+      'Bung khi s[l] = s[r], hết thì dừng',
+      'Dài hơn best thì giữ (lưu l, len)',
+      'Chuỗi rỗng/1 chữ → return luôn',
+    ],
+    filename: 'longest-palindrome.ts',
+    code: `function longestPalindrome(s: string): string {
+  if (s.length < 2) return s;
+  let start = 0, maxLen = 1;
+  const expand = (l: number, r: number): void => {
+    while (l >= 0 && r < s.length && s[l] === s[r]) {
+      if (r - l + 1 > maxLen) {
+        start = l;
+        maxLen = r - l + 1;
+      }
+      l--;
+      r++;
+    }
+  };
+  for (let i = 0; i < s.length; i++) {
+    expand(i, i);
+    expand(i, i + 1);
+  }
+  return s.slice(start, start + maxLen);
+}`,
+    highlightLines: [5],
+    dryRun: {
+      input: 's = "babad"',
+      trace: ['Tâm 1 (a): bung "bab" dài 3 ← best', 'Tâm 1-2 (a,b): khác ngay', 'Tâm 2 (b): bung "aba" dài 3 (không hơn)', 'Còn lại ngắn hơn'],
+      output: '"bab" (hoặc "aba" đều đúng)',
+    },
+    pitfalls: ['Chỉ xét tâm lẻ (mất đáp án chẵn như "abba")', 'DP bảng O(n²) bộ nhớ vẫn đúng nhưng phí hơn expand O(1)'],
+  },
+  'palindromic-substrings-647': {
+    slug: 'palindromic-substrings-647',
+    blindNo: 647,
+    time: 'O(n²)',
+    space: 'O(1)',
+    rule: 'Giống bài 5 nhưng đếm thay vì giữ chuỗi: mỗi lần bung khớp là +1.',
+    checklist: [
+      '2 tâm như bài 5 (lẻ + chẵn)',
+      'Mỗi vòng bung khớp → count++',
+      'Vị trí khác nhau tính riêng ("aaa" có 3 chữ "a" đơn)',
+      'Return count',
+    ],
+    filename: 'palindromic-substrings.ts',
+    code: `function countSubstrings(s: string): number {
+  let count = 0;
+  const expand = (l: number, r: number): void => {
+    while (l >= 0 && r < s.length && s[l] === s[r]) {
+      count++;
+      l--;
+      r++;
+    }
+  };
+  for (let i = 0; i < s.length; i++) {
+    expand(i, i);
+    expand(i, i + 1);
+  }
+  return count;
+}`,
+    highlightLines: [4],
+    dryRun: {
+      input: 's = "aaa"',
+      trace: ['Tâm 0: "a" → 1', 'Tâm 1: "a","aaa" → +2 = 3', 'Tâm 2: "a" → 4', 'Tâm chẵn 0-1: "aa" → 5; 1-2: "aa" → 6'],
+      output: '6',
+    },
+    pitfalls: ['Đếm chuỗi phân biệt thay vì theo vị trí ("aaa" có 6, không phải 3)', 'Bỏ tâm chẵn (mất "aa")'],
+  },
   'implement-trie-208': {
     slug: 'implement-trie-208',
     blindNo: 208,
