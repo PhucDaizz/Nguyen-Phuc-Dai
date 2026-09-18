@@ -19,6 +19,332 @@ export interface Guide {
 }
 
 export const GUIDES: Record<string, Guide> = {
+  'implement-trie-208': {
+    slug: 'implement-trie-208',
+    blindNo: 208,
+    time: 'O(m)',
+    space: 'O(m·n)',
+    rule: 'Trie = cây theo ký tự: đi theo từng chữ, cờ end đánh dấu hết từ.',
+    checklist: [
+      'Mỗi node: map con (26 ô hoặc dict) + cờ isEnd',
+      'Insert: thiếu nhánh thì tạo, cuối set end = true',
+      'Search: đi hết mà end = true mới đúng (app ≠ apple)',
+      'StartsWith: đi hết prefix là đủ, khỏi cần end',
+    ],
+    filename: 'implement-trie.ts',
+    code: `class TrieNode {
+  children = new Map<string, TrieNode>();
+  isEnd = false;
+}
+
+class Trie {
+  root = new TrieNode();
+
+  insert(word: string): void {
+    let node = this.root;
+    for (const c of word) {
+      if (!node.children.has(c)) node.children.set(c, new TrieNode());
+      node = node.children.get(c)!;
+    }
+    node.isEnd = true;
+  }
+
+  search(word: string): boolean {
+    const node = this.walk(word);
+    return node !== null && node.isEnd;
+  }
+
+  startsWith(prefix: string): boolean {
+    return this.walk(prefix) !== null;
+  }
+
+  private walk(s: string): TrieNode | null {
+    let node: TrieNode | null = this.root;
+    for (const c of s) {
+      node = node?.children.get(c) ?? null;
+      if (node === null) return null;
+    }
+    return node;
+  }
+}`,
+    highlightLines: [11],
+    dryRun: {
+      input: 'insert("apple"); search("apple"); search("app"); startsWith("app")',
+      trace: ['insert: root→a→p→p→l→e, end(e)=true', 'search apple: đi hết, end=true → true', 'search app: đi hết nhưng end=false → false', 'startsWith app: đi hết → true'],
+      output: 'true, false, true',
+    },
+    pitfalls: ['Search quên check isEnd ("app" thành true oan)', 'StartsWith đòi end = true (sai — prefix không cần hết từ)'],
+  },
+  'add-search-words-211': {
+    slug: 'add-search-words-211',
+    blindNo: 211,
+    time: 'O(26^m)',
+    space: 'O(m·n)',
+    rule: 'Trie thường + DFS: gặp "." thì thử cả 26 nhánh, hết chuỗi mà end thì đúng.',
+    checklist: [
+      'addWord như Trie thường',
+      'Chữ thường: đi đúng 1 nhánh, cụt → false',
+      '"." → DFS thử mọi nhánh con ở vị trí đó',
+      'Base: hết chuỗi → return node.isEnd',
+    ],
+    filename: 'add-search-words.ts',
+    code: `function searchWord(root: TrieNode, word: string, i: number): boolean {
+  let node: TrieNode | null = root;
+  const dfs = (n: TrieNode | null, k: number): boolean => {
+    if (n === null) return false;
+    if (k === word.length) return n.isEnd;
+    const c = word[k];
+    if (c === '.') {
+      for (const child of n.children.values()) {
+        if (dfs(child, k + 1)) return true;
+      }
+      return false;
+    }
+    return dfs(n.children.get(c) ?? null, k + 1);
+  };
+  return dfs(node, i);
+}`,
+    highlightLines: [8],
+    dryRun: {
+      input: 'add bad/dad/mad; search("b.d")',
+      trace: ['b → nhánh b', '. → thử b-a-d...: a khớp', 'd khớp, hết chuỗi, end=true → true'],
+      output: 'true',
+    },
+    pitfalls: ['Wu.“.” mà chỉ thử 1 nhánh (phải thử hết)', 'Quên base hết chuỗi vẫn phải check isEnd'],
+  },
+  'word-search-ii-212': {
+    slug: 'word-search-ii-212',
+    blindNo: 212,
+    time: 'O(m·n·4·3^(L−1))',
+    space: 'O(k·L)',
+    rule: 'Ném hết từ vào Trie rồi DFS 1 lần: prefix không có trong Trie thì cắt nhánh.',
+    checklist: [
+      'Build Trie cả list từ (+ lưu word ở node end)',
+      'DFS từ mọi ô, đi theo Trie (không có nhánh → cắt)',
+      'Tới node end → thu từ, xóa end để khỏi trùng',
+      'Backtrack visited sau mỗi lần thử (đánh dấu/rỡ)',
+    ],
+    filename: 'word-search-ii.ts',
+    code: `function findWords(board: string[][], words: string[]): string[] {
+  const root = buildTrie(words);
+  const res: string[] = [];
+  const R = board.length, C = board[0].length;
+
+  const dfs = (r: number, c: number, node: TrieNode): void => {
+    if (r < 0 || c < 0 || r >= R || c >= C) return;
+    const ch = board[r][c];
+    if (ch === '#' || !node.children.has(ch)) return;
+    const next = node.children.get(ch)!;
+    if (next.word !== null) {
+      res.push(next.word);
+      next.word = null; // chống trùng
+    }
+    board[r][c] = '#';
+    dfs(r + 1, c, next);
+    dfs(r - 1, c, next);
+    dfs(r, c + 1, next);
+    dfs(r, c - 1, next);
+    board[r][c] = ch;
+  };
+
+  for (let r = 0; r < R; r++)
+    for (let c = 0; c < C; c++) dfs(r, c, root);
+  return res;
+}`,
+    highlightLines: [10],
+    dryRun: {
+      input: 'board 4×4 (oath/pea/eat/rain), words = ["oath","pea","eat","rain"]',
+      trace: ['DFS từ o(0,0): o→a→t→h khớp Trie → thu "oath"', 'Từ e(1,0)... nhánh "pea": p không kề → cắt', 'Từ e(2,3)... à e(1,3)→a→t: "eat" → thu', '"rain" không đi được → bỏ'],
+      output: '["oath","eat"] (thứ tự có thể khác)',
+    },
+    pitfalls: ['DFS từng từ riêng (O(k·m·n·4^L)) thay vì 1 Trie chung', 'Quên xóa end sau khi thu → trùng từ; quên rỡ visited → sai'],
+  },
+  'top-k-frequent-347': {
+    slug: 'top-k-frequent-347',
+    blindNo: 347,
+    time: 'O(n)',
+    space: 'O(n)',
+    rule: 'Đếm tần suất rồi bucket theo tần suất (index = số lần xuất hiện), quét ngược lấy K.',
+    checklist: [
+      'Map value → count',
+      'Bucket[f] = list số xuất hiện đúng f lần (f tối đa = n)',
+      'Quét bucket từ n về 1, gom tới khi đủ K',
+      'Muốn 1 dòng? Min-heap size K (O(n log k))',
+    ],
+    filename: 'top-k-frequent.ts',
+    code: `function topKFrequent(nums: number[], k: number): number[] {
+  const freq = new Map<number, number>();
+  for (const x of nums) freq.set(x, (freq.get(x) ?? 0) + 1);
+  const bucket: number[][] = Array.from({ length: nums.length + 1 }, () => []);
+  for (const [val, count] of freq) bucket[count].push(val);
+  const res: number[] = [];
+  for (let f = nums.length; f >= 1 && res.length < k; f--) {
+    res.push(...bucket[f]);
+  }
+  return res;
+}`,
+    highlightLines: [5],
+    dryRun: {
+      input: 'nums = [1,1,1,2,2,3], k = 2',
+      trace: ['freq: 1×3, 2×2, 3×1', 'bucket[3]=[1], bucket[2]=[2], bucket[1]=[3]', 'Quét ngược: lấy 1, rồi 2 → đủ K'],
+      output: '[1,2]',
+    },
+    pitfalls: ['Sort theo tần suất O(n log n) vẫn đúng nhưng chưa tối ưu', 'Bucket size n+1 (tần suất tối đa = n) — quên +1 là tràn'],
+  },
+  'find-median-295': {
+    slug: 'find-median-295',
+    blindNo: 295,
+    time: 'O(log n)',
+    space: 'O(n)',
+    rule: '2 heap: max-heap nửa dưới + min-heap nửa trên, size chênh ≤ 1.',
+    checklist: [
+      'Số mới vào max-heap (nửa dưới) trước',
+      'Đẩy max của dưới sang trên để giữ mọi số dưới ≤ mọi số trên',
+      'Dưới ít hơn trên → chuyển 1 số về cho cân',
+      'Median: dưới nhiều hơn → đỉnh dưới; bằng nhau → trung bình 2 đỉnh',
+    ],
+    filename: 'find-median.ts',
+    code: `class Heap {
+  a: number[] = [];
+  constructor(private less: (x: number, y: number) => boolean) {}
+  get size() { return this.a.length; }
+  get top() { return this.a[0]; }
+  push(v: number): void {
+    const a = this.a;
+    a.push(v);
+    let i = a.length - 1;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (this.less(a[i], a[p])) { [a[i], a[p]] = [a[p], a[i]]; i = p; }
+      else break;
+    }
+  }
+  pop(): number {
+    const a = this.a;
+    const top = a[0];
+    const last = a.pop()!;
+    if (a.length > 0) {
+      a[0] = last;
+      let i = 0;
+      for (;;) {
+        const l = 2 * i + 1, r = 2 * i + 2;
+        let m = i;
+        if (l < a.length && this.less(a[l], a[m])) m = l;
+        if (r < a.length && this.less(a[r], a[m])) m = r;
+        if (m === i) break;
+        [a[i], a[m]] = [a[m], a[i]];
+        i = m;
+      }
+    }
+    return top;
+  }
+}
+
+class MedianFinder {
+  lo = new Heap((x, y) => x > y); // max-heap nửa dưới
+  hi = new Heap((x, y) => x < y); // min-heap nửa trên
+
+  addNum(x: number): void {
+    this.lo.push(x);
+    this.hi.push(this.lo.pop());
+    if (this.lo.size < this.hi.size) this.lo.push(this.hi.pop());
+  }
+
+  findMedian(): number {
+    if (this.lo.size > this.hi.size) return this.lo.top;
+    return (this.lo.top + this.hi.top) / 2;
+  }
+}`,
+    highlightLines: [43],
+    dryRun: {
+      input: 'add 1, add 2, median, add 3, median',
+      trace: ['add 1: lo=[1], hi=[] → median 1', 'add 2: lo=[1], hi=[2] → median (1+2)/2=1.5', 'add 3: lo=[2,1], hi=[3] → median 2'],
+      output: '1.5, 2',
+    },
+    pitfalls: ['Để size chênh > 1 (median sai)', 'Đẩy số mới thẳng vào heap trên mà không qua heap dưới (vỡ bất biến dưới ≤ trên)'],
+  },
+  'combination-sum-39': {
+    slug: 'combination-sum-39',
+    blindNo: 39,
+    time: 'O(n^(t/m))',
+    space: 'O(t/m)',
+    rule: 'Backtracking chọn/bỏ: mỗi vị trí hoặc lấy tiếp (giữ index) hoặc bỏ qua (index+1).',
+    checklist: [
+      'sum = target → lưu bản sao, return',
+      'sum > target hoặc hết mảng → cắt nhánh',
+      'Nhánh lấy: push candidate[i], dfs(i) — được dùng lại',
+      'Nhánh bỏ: pop, dfs(i+1)',
+    ],
+    filename: 'combination-sum.ts',
+    code: `function combinationSum(candidates: number[], target: number): number[][] {
+  const res: number[][] = [];
+  const dfs = (i: number, cur: number[], sum: number): void => {
+    if (sum === target) {
+      res.push([...cur]);
+      return;
+    }
+    if (sum > target || i >= candidates.length) return;
+    cur.push(candidates[i]);
+    dfs(i, cur, sum + candidates[i]);
+    cur.pop();
+    dfs(i + 1, cur, sum);
+  };
+  dfs(0, [], 0);
+  return res;
+}`,
+    highlightLines: [11],
+    dryRun: {
+      input: 'candidates = [2,3,6,7], target = 7',
+      trace: ['Lấy 2,2,2 (sum 6) → lấy nữa 8>7 cắt, bỏ → [2,2,3] ✓', 'Bỏ 3... lấy 6? 2+6=8 cắt', 'Bỏ 2 đầu: 3... 3+3+... 7? 3+... cắt; 6... 6<7, +... cắt', 'Bỏ hết tới 7 → [7] ✓'],
+      output: '[[2,2,3],[7]]',
+    },
+    pitfalls: ['Nhánh lấy mà dfs(i+1) thì mất tổ hợp dùng lại (thành Combination Sum II)', 'Lưu cur trực tiếp (reference) thay vì copy → kết quả rỗng/sai'],
+  },
+  'word-search-79': {
+    slug: 'word-search-79',
+    blindNo: 79,
+    time: 'O(m·n·4^L)',
+    space: 'O(L)',
+    rule: 'Thử mọi ô làm điểm bắt đầu, DFS 4 hướng khớp từng chữ, backtrack visited.',
+    checklist: [
+      'Ô khớp chữ đầu → DFS sâu dần theo word[k]',
+      'Đánh dấu đã thăm (đè "#" rồi rỡ lại sau)',
+      'Hết chữ (k = len) → true',
+      '4 hướng đều sai → false, rỡ dấu rồi về',
+    ],
+    filename: 'word-search.ts',
+    code: `function exist(board: string[][], word: string): boolean {
+  const R = board.length, C = board[0].length;
+
+  const dfs = (r: number, c: number, k: number): boolean => {
+    if (k === word.length) return true;
+    if (r < 0 || c < 0 || r >= R || c >= C) return false;
+    if (board[r][c] !== word[k]) return false;
+    const tmp = board[r][c];
+    board[r][c] = '#';
+    const found =
+      dfs(r + 1, c, k + 1) ||
+      dfs(r - 1, c, k + 1) ||
+      dfs(r, c + 1, k + 1) ||
+      dfs(r, c - 1, k + 1);
+    board[r][c] = tmp;
+    return found;
+  };
+
+  for (let r = 0; r < R; r++)
+    for (let c = 0; c < C; c++) {
+      if (board[r][c] === word[0] && dfs(r, c, 0)) return true;
+    }
+  return false;
+}`,
+    highlightLines: [5],
+    dryRun: {
+      input: 'board 3×4 (ABCCED...), word = "ABCCED"',
+      trace: ['(0,0) A khớp → (0,1) B khớp → (0,2) C khớp', '(1,2) C khớp → (2,2) E khớp → (2,1) D khớp, hết chữ → true'],
+      output: 'true',
+    },
+    pitfalls: ['Quên rỡ dấu visited sau khi thử (ô bị khóa vĩnh viễn)', 'Không cắt sớm khi chữ hiện tại đã lệch (duyệt thừa)'],
+  },
   'max-depth-104': {
     slug: 'max-depth-104',
     blindNo: 104,

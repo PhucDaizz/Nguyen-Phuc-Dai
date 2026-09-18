@@ -31,6 +31,13 @@ import { SubtreeVisualizer } from './SubtreeVisualizer';
 import { ConstructVisualizer } from './ConstructVisualizer';
 import { KthSmallestVisualizer } from './KthSmallestVisualizer';
 import { LcaVisualizer } from './LcaVisualizer';
+import { TrieVisualizer } from './TrieVisualizer';
+import { WildcardVisualizer } from './WildcardVisualizer';
+import { WordSearch2Visualizer } from './WordSearch2Visualizer';
+import { TopKVisualizer } from './TopKVisualizer';
+import { MedianVisualizer } from './MedianVisualizer';
+import { CombinationVisualizer } from './CombinationVisualizer';
+import { WordSearchVisualizer } from './WordSearchVisualizer';
 
 // Registry: slug bài giảng → visualizer tương ứng.
 // Thêm bài mới: import component + thêm 1 dòng vào map.
@@ -67,6 +74,13 @@ const VISUALIZERS: Record<string, () => React.JSX.Element> = {
   'construct-tree-105': ConstructVisualizer,
   'kth-smallest-230': KthSmallestVisualizer,
   'lowest-common-ancestor-235': LcaVisualizer,
+  'implement-trie-208': TrieVisualizer,
+  'add-search-words-211': WildcardVisualizer,
+  'word-search-ii-212': WordSearch2Visualizer,
+  'top-k-frequent-347': TopKVisualizer,
+  'find-median-295': MedianVisualizer,
+  'combination-sum-39': CombinationVisualizer,
+  'word-search-79': WordSearchVisualizer,
 };
 
 export const hasVisualizer = (slug: string) => slug in VISUALIZERS;
