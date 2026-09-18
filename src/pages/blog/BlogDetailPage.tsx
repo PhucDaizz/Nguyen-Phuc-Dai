@@ -1,41 +1,62 @@
 import { Link, useParams } from 'react-router-dom';
-import { GRIND_PROBLEMS, getGrindBySlug } from '../../data/grind75';
+import { BLIND75, leetcodeUrl } from '../../data/blind75';
+import { getGuide } from '../../data/guides';
 
 export const BlogDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const post = slug ? getGrindBySlug(slug) : undefined;
+  const guide = slug ? getGuide(slug) : undefined;
 
-  if (!post) {
+  if (!guide) {
     return (
       <div className="dsa-narrow">
-        <div className="badge">404</div>
-        <h1>Chưa có <span className="accent">bài này</span></h1>
-        <p>Slug “{slug}” chưa tồn tại.</p>
-        <Link to="/blog" className="btn primary">← Về danh sách Grind75</Link>
+        <div className="badge">Blog · Blind 75</div>
+        <h1>Bài này <span className="accent">chưa có hướng dẫn</span></h1>
+        <p>
+          Slug “{slug}” chưa có bài giảng tiếng Việt. Bạn có thể đọc đề gốc trên LeetCode
+          hoặc quay lại danh sách Blind75 để chọn bài khác.
+        </p>
+        <div className="btn-row">
+          <Link to="/blog" className="btn primary">← Về danh sách Blind75</Link>
+          <Link to="/blog/blind75" className="btn">Sơ đồ cây →</Link>
+        </div>
       </div>
     );
   }
 
-  const lines = post.code.split('\n');
-  const related = GRIND_PROBLEMS.filter((p) => p.slug !== post.slug && p.week === post.week).slice(0, 2);
+  const blind = BLIND75.find((p) => p.no === guide.blindNo);
+  const meta = blind ?? {
+    no: guide.blindNo,
+    lcSlug: '',
+    ...guide.fallbackMeta!,
+  };
+  const lines = guide.code.split('\n');
+  const related = BLIND75.filter((p) => p.category === meta.category && p.no !== meta.no).slice(0, 2);
 
   return (
     <div>
-      <Link to="/blog" className="btn ghost">← Tất cả bài Grind75</Link>
+      <div className="btn-row">
+        <Link to="/blog" className="btn ghost">← Tất cả bài Blind75</Link>
+        <Link to="/blog/blind75" className="btn ghost">Sơ đồ cây</Link>
+      </div>
       <div style={{ height: 18 }} />
-      <div className="badge">Tuần {post.week} · {post.pattern} · #{post.no}</div>
+      <div className="badge">Blind 75 · {meta.category} · #{meta.no}</div>
       <h1>
-        {post.title} <span className="accent">— {post.viTitle}</span>
+        {meta.title} <span className="accent">— {meta.viTitle}</span>
       </h1>
-      <p>{post.summary}</p>
+      <p>{meta.summary}</p>
       <div>
-        <span className="pill amber">{post.difficulty}</span>
-        <span className="pill">TIME {post.time}</span>
-        <span className="pill">SPACE {post.space}</span>
+        <span className="pill amber">{meta.difficulty}</span>
+        <span className="pill">TIME {guide.time}</span>
+        <span className="pill">SPACE {guide.space}</span>
+        {blind && (
+          <a href={leetcodeUrl(blind)} target="_blank" rel="noreferrer" className="btn ghost" style={{ padding: '4px 10px', fontSize: 12 }}>
+            Đề gốc LeetCode ↗
+          </a>
+        )}
       </div>
 
       <div className="rule">
-        <p style={{ margin: 0 }}><strong>{post.rule}</strong></p>
+        <p style={{ margin: 0 }}><strong>{guide.rule}</strong></p>
       </div>
 
       <div className="dsa-layout" style={{ marginTop: 32 }}>
@@ -51,7 +72,7 @@ export const BlogDetailPage = () => {
           <div className="card">
             <div className="card-title"><span className="dot"></span>CHECKLIST — HỎI 4 CÂU NÀY</div>
             <ul className="checklist">
-              {post.checklist.map((c) => (
+              {guide.checklist.map((c) => (
                 <li key={c}>{c}</li>
               ))}
             </ul>
@@ -65,13 +86,13 @@ export const BlogDetailPage = () => {
                 <i style={{ background: '#febc2e' }} />
                 <i style={{ background: '#28c840' }} />
               </div>
-              <div className="name">{post.filename}<span className="live" /></div>
-              <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>{post.time} · {post.space}</div>
+              <div className="name">{guide.filename}<span className="live" /></div>
+              <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>{guide.time} · {guide.space}</div>
             </div>
             <pre>
               <code>
                 {lines.map((ln, i) => (
-                  <span key={i} className={`line ${post.highlightLines.includes(i + 1) ? 'active' : ''}`}>
+                  <span key={i} className={`line ${guide.highlightLines.includes(i + 1) ? 'active' : ''}`}>
                     <span className="ln">{i + 1}</span>{ln || ' '}
                   </span>
                 ))}
@@ -85,20 +106,20 @@ export const BlogDetailPage = () => {
               <span className="dot" style={{ background: 'var(--teal)', boxShadow: '0 0 8px var(--teal)' }}></span>
               INPUT
             </div>
-            <p className="mono" style={{ color: 'var(--teal)' }}>{post.dryRun.input}</p>
+            <p className="mono" style={{ color: 'var(--teal)' }}>{guide.dryRun.input}</p>
             <div className="demo">
               <div className="demo-label">trace từng bước</div>
-              {post.dryRun.trace.map((t) => (
+              {guide.dryRun.trace.map((t) => (
                 <p key={t} className="mono" style={{ fontSize: 12.5, margin: 0 }}>→ {t}</p>
               ))}
               <div className="demo-label">output</div>
-              <p className="mono" style={{ color: 'var(--accent)', margin: 0 }}>{post.dryRun.output}</p>
+              <p className="mono" style={{ color: 'var(--accent)', margin: 0 }}>{guide.dryRun.output}</p>
             </div>
           </div>
 
           <h2 id="pitfalls">Bẫy thường gặp</h2>
           <div className="grid-2">
-            {post.pitfalls.map((pit) => (
+            {guide.pitfalls.map((pit) => (
               <div key={pit} className="card">
                 <div className="card-title"><span className="dot"></span>LƯU Ý</div>
                 <p style={{ margin: 0, fontSize: 13.5 }}>{pit}</p>
@@ -108,15 +129,21 @@ export const BlogDetailPage = () => {
 
           {related.length > 0 && (
             <>
-              <h2>Đọc tiếp tuần {post.week}</h2>
+              <h2>Cùng nhánh {meta.category}</h2>
               <div className="grid-2">
-                {related.map((r) => (
-                  <Link key={r.slug} to={`/blog/${r.slug}`} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div className="card-title"><span className="dot"></span>#{r.no} · {r.pattern}</div>
-                    <h3 style={{ marginTop: 0 }}>{r.title}</h3>
-                    <p style={{ fontSize: 13.5, margin: 0 }}>{r.viTitle}</p>
-                  </Link>
-                ))}
+                {related.map((r) => {
+                  return (
+                    <div key={r.no} className="card">
+                      <div className="card-title"><span className="dot"></span>#{r.no} · {r.pattern}</div>
+                      <h3 style={{ marginTop: 0 }}>{r.title}</h3>
+                      <p style={{ fontSize: 13.5, margin: 0 }}>{r.viTitle}</p>
+                      <div className="btn-row">
+                        {r.guideSlug && <Link to={`/blog/${r.guideSlug}`} className="btn primary">Hướng dẫn →</Link>}
+                        <a href={leetcodeUrl(r)} target="_blank" rel="noreferrer" className="btn ghost">LeetCode ↗</a>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </>
           )}

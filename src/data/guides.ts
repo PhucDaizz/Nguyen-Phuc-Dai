@@ -1,19 +1,12 @@
-export interface GrindStep {
-  heading: string;
-  body: string;
-}
+// Bài hướng dẫn chi tiết (tiếng Việt, tự viết) cho từng bài Blind75 đã có.
+// Key = slug dùng trong route /blog/:slug. Metadata chung (số bài, category,
+// link LeetCode...) lấy từ blind75.ts qua `blindNo`.
 
-export interface GrindProblem {
+export interface Guide {
   slug: string;
-  no: number;
-  title: string;
-  viTitle: string;
-  pattern: string;
-  week: number;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  blindNo: number;
   time: string;
   space: string;
-  summary: string;
   rule: string;
   checklist: string[];
   filename: string;
@@ -21,31 +14,16 @@ export interface GrindProblem {
   highlightLines: number[];
   dryRun: { input: string; trace: string[]; output: string };
   pitfalls: string[];
+  // Dùng khi bài guide không thuộc Blind75 (vd: template Binary Search 704)
+  fallbackMeta?: { title: string; viTitle: string; summary: string; pattern: string; category: string; difficulty: 'Easy' | 'Medium' | 'Hard' };
 }
 
-export const GRIND_WEEKS = [
-  { week: 1, focus: 'Array + Hash Map + Two Pointers', goal: 'Nhận diện O(n) bằng map và 2 đầu' },
-  { week: 2, focus: 'Sliding Window + Stack', goal: 'Cửa sổ trượt và LIFO cho Valid Parentheses' },
-  { week: 3, focus: 'Linked List + Binary Search', goal: 'Slow/fast pointer và biên lower-bound' },
-  { week: 4, focus: 'Tree + BFS/DFS', goal: 'Duyệt cây và đồ thị O(V+E)' },
-  { week: 5, focus: 'Heap + Interval', goal: 'Top-K và merge đoạn giao nhau' },
-  { week: 6, focus: 'DP cơ bản', goal: 'Memo → tabulation → rolling array' },
-  { week: 7, focus: 'Graph nâng cao', goal: 'Dijkstra, topo-sort, union-find' },
-  { week: 8, focus: 'Mock + ôn tập', goal: 'Làm lại bài sai, đo 30 phút/bài' },
-];
-
-export const GRIND_PROBLEMS: GrindProblem[] = [
-  {
+export const GUIDES: Record<string, Guide> = {
+  'two-sum-1': {
     slug: 'two-sum-1',
-    no: 1,
-    title: 'Two Sum',
-    viTitle: 'Tìm 2 số cộng bằng target',
-    pattern: 'Hash Map',
-    week: 1,
-    difficulty: 'Easy',
+    blindNo: 1,
     time: 'O(n)',
     space: 'O(n)',
-    summary: 'Bài mở màn Grind75: duyệt 1 lần, lưu số đã thấy vào map, hỏi “phần bù còn thiếu” thay vì tìm cặp.',
     rule: 'Khi cần “cặp (i, j)” với tổng/hiệu cố định → nghĩ Hash Map trước, Two Pointers sau.',
     checklist: [
       'target - nums[i] đã xuất hiện chưa?',
@@ -71,17 +49,11 @@ export const GRIND_PROBLEMS: GrindProblem[] = [
     },
     pitfalls: ['Sort rồi two-pointers sẽ mất index gốc', '2 vòng lặp O(n²) là quá chậm'],
   },
-  {
+  'valid-parentheses-20': {
     slug: 'valid-parentheses-20',
-    no: 20,
-    title: 'Valid Parentheses',
-    viTitle: 'Ngoặc đúng hay sai?',
-    pattern: 'Stack',
-    week: 2,
-    difficulty: 'Easy',
+    blindNo: 20,
     time: 'O(n)',
     space: 'O(n)',
-    summary: 'Mở ngoặc thì push, đóng ngoặc thì pop và đối chiếu. Stack rỗng cuối cùng mới đúng.',
     rule: 'Bài “mở / đóng”, “gần nhất”, “lồng nhau” → Stack (LIFO) là đáp án 90% case.',
     checklist: [
       'Map đóng → mở: ) → (, ] → [, } → {',
@@ -107,17 +79,11 @@ export const GRIND_PROBLEMS: GrindProblem[] = [
     },
     pitfalls: ['Quên check stack rỗng khi gặp ngoặc đóng', 'Dùng counter thay stack sẽ sai với “([)]”'],
   },
-  {
+  'best-time-stock-121': {
     slug: 'best-time-stock-121',
-    no: 121,
-    title: 'Best Time to Buy and Sell Stock',
-    viTitle: 'Mua thấp bán cao 1 lần',
-    pattern: 'Sliding Window (biến thể)',
-    week: 2,
-    difficulty: 'Easy',
+    blindNo: 121,
     time: 'O(n)',
     space: 'O(1)',
-    summary: 'Giữ giá thấp nhất từng thấy, mỗi ngày tính lời nếu bán hôm nay. Không cần 2 vòng lặp.',
     rule: 'Tối ưu 1 giao dịch → track min-so-far + max-profit-so-far trong 1 pass.',
     checklist: [
       'minPrice = giá đầu tiên',
@@ -142,17 +108,19 @@ export const GRIND_PROBLEMS: GrindProblem[] = [
     },
     pitfalls: ['Brute force i<j là O(n²)', 'Nhầm cho phép nhiều giao dịch (đó là bài 122)'],
   },
-  {
+  'binary-search-704': {
     slug: 'binary-search-704',
-    no: 704,
-    title: 'Binary Search',
-    viTitle: 'Template không bao giờ sai',
-    pattern: 'Binary Search',
-    week: 3,
-    difficulty: 'Easy',
+    blindNo: 704,
     time: 'O(log n)',
     space: 'O(1)',
-    summary: 'Template lower-bound [l, r): hỏi predicate đơn điệu, thu hẹp một nửa mỗi bước.',
+    fallbackMeta: {
+      title: 'Binary Search',
+      viTitle: 'Template không bao giờ sai',
+      summary: 'Template lower-bound [l, r): hỏi predicate đơn điệu, thu hẹp một nửa mỗi bước. Nền tảng cho mọi bài search trong Blind75.',
+      pattern: 'Binary Search',
+      category: 'Binary',
+      difficulty: 'Easy',
+    },
     rule: 'Mảng sorted hoặc “answer-space đơn điệu” → Binary Search, viết template [l, r) để khỏi off-by-one.',
     checklist: [
       'Điều kiện sort tăng dần?',
@@ -178,17 +146,11 @@ export const GRIND_PROBLEMS: GrindProblem[] = [
     },
     pitfalls: ['Dùng (l+r)/2 tràn số ở ngôn ngữ khác (JS an toàn hơn)', 'Quên verify sau vòng lặp'],
   },
-  {
+  'lowest-common-ancestor-235': {
     slug: 'lowest-common-ancestor-235',
-    no: 235,
-    title: 'Lowest Common Ancestor of a BST',
-    viTitle: 'Tổ tiên chung thấp nhất trong BST',
-    pattern: 'BST',
-    week: 4,
-    difficulty: 'Medium',
+    blindNo: 235,
     time: 'O(h)',
     space: 'O(1)',
-    summary: 'Tận dụng tính chất BST: cả 2 cùng nhỏ → sang trái, cùng lớn → sang phải, rẽ nhánh → đây là LCA.',
     rule: 'BST + tìm kiếm theo giá trị → so sánh và đi 1 nhánh, không cần duyệt cả cây.',
     checklist: [
       'p.val và q.val đều < root.val → sang trái',
@@ -214,17 +176,11 @@ export const GRIND_PROBLEMS: GrindProblem[] = [
     },
     pitfalls: ['Nhầm với LCA cây nhị phân thường (bài 236 cần đệ quy)', 'Quên case p hoặc q chính là ancestor'],
   },
-  {
+  'climbing-stairs-70': {
     slug: 'climbing-stairs-70',
-    no: 70,
-    title: 'Climbing Stairs',
-    viTitle: 'Bài DP vỡ lòng: Fibonacci trá hình',
-    pattern: 'Dynamic Programming',
-    week: 6,
-    difficulty: 'Easy',
+    blindNo: 70,
     time: 'O(n)',
     space: 'O(1)',
-    summary: 'Đến bậc n chỉ từ n-1 hoặc n-2 → dp[n] = dp[n-1] + dp[n-2]. Rolling 2 biến là đủ.',
     rule: 'Đếm số cách với bước 1/2 → Fibonacci. Hỏi min/max cách → DP với rolling array.',
     checklist: [
       'Base: dp[1]=1, dp[2]=2',
@@ -247,6 +203,7 @@ export const GRIND_PROBLEMS: GrindProblem[] = [
     },
     pitfalls: ['Đệ quy không memo → O(2^n) timeout', 'Mảng dp O(n) vẫn đúng nhưng phí bộ nhớ'],
   },
-];
+};
 
-export const getGrindBySlug = (slug: string) => GRIND_PROBLEMS.find((p) => p.slug === slug);
+export const getGuide = (slug: string): Guide | undefined => GUIDES[slug];
+export const guideCount = Object.keys(GUIDES).length;
