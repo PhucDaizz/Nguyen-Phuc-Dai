@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getSolutions, CODEC_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 // ===================== TRACE ENGINE =====================
 interface Step {
@@ -77,27 +79,8 @@ const generateTrace = (words: string[]): Step[] => {
   return trace;
 };
 
-// ===================== C# SOLUTION =====================
-const CSHARP_LINES = [
-  'public string Encode(IList<string> strs) {',
-  '    var sb = new StringBuilder();',
-  '    foreach (string s in strs)',
-  "        sb.Append(s.Length).Append('#').Append(s);",
-  '    return sb.ToString();',
-  '}',
-  'public IList<string> Decode(string s) {',
-  '    var res = new List<string>();',
-  '    int i = 0;',
-  "    while (i < s.Length) {",
-  '        int j = i;',
-  "        while (s[j] != '#') j++;",
-  '        int len = int.Parse(s.Substring(i, j - i));',
-  '        res.Add(s.Substring(j + 1, len));',
-  '        i = j + 1 + len;',
-  '    }',
-  '    return res;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_CODEC = getSolutions('encode-decode-strings-271');
 
 const PRESETS = [
   { label: 'LeetCode · leet,code,love,you', nums: 'leet,code,love,you' },
@@ -363,25 +346,14 @@ export const CodecVisualizer = () => {
         Phím tắt: Space Play/Pause · → Step · ← Back · R Reset
       </p>
 
-      <div className="code-block" style={{ marginTop: 14 }}>
-        <div className="code-head">
-          <div className="dots">
-            <i style={{ background: '#ff5f57' }} />
-            <i style={{ background: '#febc2e' }} />
-            <i style={{ background: '#28c840' }} />
-          </div>
-          <div className="name">Solution.cs<span className="live" /></div>
-          <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>O(n) · O(n)</div>
-        </div>
-        <pre>
-          <code>
-            {CSHARP_LINES.map((ln, i) => (
-              <span key={i} className={`line ${step.codeLine === i ? 'active' : ''}`}>
-                {ln || ' '}
-              </span>
-            ))}
-          </code>
-        </pre>
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_CODEC}
+          defaultLang="csharp"
+          getHighlight={(lang) => [CODEC_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(n)"
+        />
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
+  ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
 } from './shared';
+import { getSolutions, LCA_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'go' | 'found' | 'done';
@@ -89,17 +91,8 @@ const generateTrace = (arr: (number | null)[], p: number, q: number): Step[] => 
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public TreeNode LowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {',
-  '    var cur = root;',
-  '    while (cur != null) {',
-  '        if (p.val < cur.val && q.val < cur.val) cur = cur.left;',
-  '        else if (p.val > cur.val && q.val > cur.val) cur = cur.right;',
-  '        else return cur;',
-  '    }',
-  '    return null;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_LCA = getSolutions('lowest-common-ancestor-235');
 
 export const LcaVisualizer = () => {
   const [str, setStr] = useState('6,2,8,0,4,7,9,null,null,3,5');
@@ -191,7 +184,15 @@ export const LcaVisualizer = () => {
           build(t, a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(h) · O(1)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_LCA}
+          defaultLang="csharp"
+          getHighlight={(lang) => [LCA_LINE_MAP[lang][step.type]]}
+          meta="O(h) · O(1)"
+        />
+      </div>
     </div>
   );
 };

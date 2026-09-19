@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell,
+  ThinProgress, ArrCell,
 } from './shared';
+import { getSolutions, LONGESTPAL_LINE_MAP, COUNTPAL_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'center' | 'done';
@@ -77,42 +79,7 @@ const generateTrace = (s: string, mode: 'longest' | 'count'): Step[] => {
   return trace;
 };
 
-const CS_LONGEST = [
-  'public string LongestPalindrome(string s) {',
-  '    if (s.Length < 2) return s;',
-  '    int start = 0, maxLen = 1;',
-  '    void Expand(int l, int r) {',
-  '        while (l >= 0 && r < s.Length && s[l] == s[r]) {',
-  '            if (r - l + 1 > maxLen) { start = l; maxLen = r - l + 1; }',
-  '            l--; r++;',
-  '        }',
-  '    }',
-  '    for (int i = 0; i < s.Length; i++) {',
-  '        Expand(i, i);',
-  '        Expand(i, i + 1);',
-  '    }',
-  '    return s.Substring(start, maxLen);',
-  '}',
-];
-
-const CS_COUNT = [
-  'public int CountSubstrings(string s) {',
-  '    int count = 0;',
-  '    void Expand(int l, int r) {',
-  '        while (l >= 0 && r < s.Length && s[l] == s[r]) {',
-  '            count++;',
-  '            l--; r++;',
-  '        }',
-  '    }',
-  '    for (int i = 0; i < s.Length; i++) {',
-  '        Expand(i, i);',
-  '        Expand(i, i + 1);',
-  '    }',
-  '    return count;',
-  '}',
-];
-
-const PalExpand = ({ slug, backLabel, badge, title, mode, presets, stats, lines }: {
+const PalExpand = ({ slug, backLabel, badge, title, mode, presets, stats }: {
   slug: string;
   backLabel: string;
   badge: string;
@@ -120,13 +87,15 @@ const PalExpand = ({ slug, backLabel, badge, title, mode, presets, stats, lines 
   mode: 'longest' | 'count';
   presets: { label: string; value: string }[];
   stats: string;
-  lines: string[];
 }) => {
   const [str, setStr] = useState(presets[0].value);
   const [s, setS] = useState(presets[0].value);
   const trace = useMemo(() => generateTrace(s, mode), [s, mode]);
   const pb = usePlayback(trace.length);
   const step = trace[Math.min(pb.stepIdx, trace.length - 1)];
+  // SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace)
+  const solutions = getSolutions(slug);
+  const lineMap = mode === 'longest' ? LONGESTPAL_LINE_MAP : COUNTPAL_LINE_MAP;
 
   const build = (v: string) => {
     const nv = v.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10);
@@ -181,7 +150,14 @@ const PalExpand = ({ slug, backLabel, badge, title, mode, presets, stats, lines 
         items={presets}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={lines} active={step.codeLine} stats={stats} />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={solutions}
+          defaultLang="csharp"
+          getHighlight={(lang) => [lineMap[lang][step.type]]}
+          meta={stats}
+        />
+      </div>
     </div>
   );
 };
@@ -194,7 +170,6 @@ export const LongestPalVisualizer = () => (
     title="Longest Palindrome"
     mode="longest"
     stats="O(n²) · O(1)"
-    lines={CS_LONGEST}
     presets={[
       { label: 'LeetCode · babad', value: 'babad' },
       { label: 'Chẵn · cbbd → bb', value: 'cbbd' },
@@ -212,7 +187,6 @@ export const CountPalVisualizer = () => (
     title="Count Palindromes"
     mode="count"
     stats="O(n²) · O(1)"
-    lines={CS_COUNT}
     presets={[
       { label: 'LeetCode · aaa → 6', value: 'aaa' },
       { label: 'abc → 3', value: 'abc' },

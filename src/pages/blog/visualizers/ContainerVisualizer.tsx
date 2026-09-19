@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getSolutions, CONTAINER_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 // ===================== TRACE ENGINE =====================
 interface Step {
@@ -83,17 +85,8 @@ const generateTrace = (h: number[]): Step[] => {
   return trace;
 };
 
-// ===================== C# SOLUTION =====================
-const CSHARP_LINES = [
-  'public int MaxArea(int[] height) {',
-  '    int l = 0, r = height.Length - 1, best = 0;',
-  '    while (l < r) {',
-  '        best = Math.Max(best, Math.Min(height[l], height[r]) * (r - l));',
-  '        if (height[l] < height[r]) l++; else r--;',
-  '    }',
-  '    return best;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_CONTAINER = getSolutions('container-most-water-11');
 
 const PRESETS = [
   { label: 'LeetCode · [1,8,6,2,5,4,8,3,7] → 49', nums: '1,8,6,2,5,4,8,3,7' },
@@ -345,25 +338,14 @@ export const ContainerVisualizer = () => {
         Phím tắt: Space Play/Pause · → Step · ← Back · R Reset
       </p>
 
-      <div className="code-block" style={{ marginTop: 14 }}>
-        <div className="code-head">
-          <div className="dots">
-            <i style={{ background: '#ff5f57' }} />
-            <i style={{ background: '#febc2e' }} />
-            <i style={{ background: '#28c840' }} />
-          </div>
-          <div className="name">Solution.cs<span className="live" /></div>
-          <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>O(n) · O(1)</div>
-        </div>
-        <pre>
-          <code>
-            {CSHARP_LINES.map((ln, i) => (
-              <span key={i} className={`line ${step.codeLine === i ? 'active' : ''}`}>
-                {ln || ' '}
-              </span>
-            ))}
-          </code>
-        </pre>
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_CONTAINER}
+          defaultLang="csharp"
+          getHighlight={(lang) => [CONTAINER_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
       </div>
     </div>
   );

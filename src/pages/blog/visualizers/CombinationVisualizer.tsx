@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, COMBO_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, parseNumList,
+  ThinProgress, parseNumList,
 } from './shared';
 
 interface Step {
@@ -72,21 +74,8 @@ const generateTrace = (cands: number[], target: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public IList<IList<int>> CombinationSum(int[] candidates, int target) {',
-  '    var res = new List<IList<int>>();',
-  '    void Dfs(int i, List<int> cur, int sum) {',
-  '        if (sum == target) { res.Add(new List<int>(cur)); return; }',
-  '        if (sum > target || i >= candidates.Length) return;',
-  '        cur.Add(candidates[i]);',
-  '        Dfs(i, cur, sum + candidates[i]);',
-  '        cur.RemoveAt(cur.Count - 1);',
-  '        Dfs(i + 1, cur, sum);',
-  '    }',
-  '    Dfs(0, new List<int>(), 0);',
-  '    return res;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_COMBO = getSolutions('combination-sum-39');
 
 export const CombinationVisualizer = () => {
   const [cStr, setCStr] = useState('2,3,6,7');
@@ -190,7 +179,15 @@ export const CombinationVisualizer = () => {
           build(a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="Backtracking" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_COMBO}
+          defaultLang="csharp"
+          getHighlight={(lang) => [COMBO_LINE_MAP[lang][step.type]]}
+          meta="Backtracking"
+        />
+      </div>
     </div>
   );
 };

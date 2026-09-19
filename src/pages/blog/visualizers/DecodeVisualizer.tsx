@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell,
+  ThinProgress, ArrCell,
 } from './shared';
+import { getSolutions, DECODE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'visit' | 'one' | 'two' | 'roll' | 'done';
@@ -88,21 +90,8 @@ const generateTrace = (s: string): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int NumDecodings(string s) {',
-  '    int prev2 = 1;',
-  "    int prev1 = s[0] == '0' ? 0 : 1;",
-  '    for (int i = 2; i <= s.Length; i++) {',
-  '        int cur = 0;',
-  "        if (s[i-1] != '0') cur += prev1;",
-  '        int two = int.Parse(s.Substring(i-2, 2));',
-  '        if (two >= 10 && two <= 26) cur += prev2;',
-  '        prev2 = prev1;',
-  '        prev1 = cur;',
-  '    }',
-  '    return prev1;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_DECODE = getSolutions('decode-ways-91');
 
 export const DecodeVisualizer = () => {
   const [str, setStr] = useState('226');
@@ -190,7 +179,15 @@ export const DecodeVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_DECODE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [DECODE_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

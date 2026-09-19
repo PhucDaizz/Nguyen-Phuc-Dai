@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, REVERSE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, parseNumList,
+  ThinProgress, parseNumList,
 } from './shared';
 
 interface Step {
@@ -61,19 +63,8 @@ const generateTrace = (vals: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public ListNode ReverseList(ListNode head) {',
-  '    ListNode prev = null;',
-  '    ListNode curr = head;',
-  '    while (curr != null) {',
-  '        ListNode next = curr.next;',
-  '        curr.next = prev;',
-  '        prev = curr;',
-  '        curr = next;',
-  '    }',
-  '    return prev;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_REVERSE = getSolutions('reverse-linked-list-206');
 
 export const ReverseVisualizer = () => {
   const [str, setStr] = useState('1,2,3,4,5');
@@ -216,7 +207,14 @@ export const ReverseVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_REVERSE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [REVERSE_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

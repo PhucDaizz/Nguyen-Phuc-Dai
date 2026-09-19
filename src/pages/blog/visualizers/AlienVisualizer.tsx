@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, ALIEN_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, GraphSvg, type TreeNodeState,
+  ThinProgress, GraphSvg, type TreeNodeState,
 } from './shared';
 
 interface Step {
@@ -87,37 +89,8 @@ const generateTrace = (words: string[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public string AlienOrder(string[] words) {',
-  '    var adj = new Dictionary<char, HashSet<char>>();',
-  '    var indeg = new Dictionary<char, int>();',
-  '    foreach (var w in words)',
-  '        foreach (char c in w) {',
-  '            adj.TryAdd(c, new());',
-  '            indeg.TryAdd(c, 0);',
-  '        }',
-  '    for (int i = 0; i < words.Length - 1; i++) {',
-  '        string a = words[i], b = words[i+1];',
-  '        if (a.Length > b.Length && a.StartsWith(b)) return "";',
-  '        int m = Math.Min(a.Length, b.Length);',
-  '        for (int k = 0; k < m; k++)',
-  '            if (a[k] != b[k]) {',
-  '                if (adj[a[k]].Add(b[k]))',
-  '                    indeg[b[k]]++;',
-  '                break;',
-  '            }',
-  '    }',
-  '    var q = new Queue<char>(indeg.Where(p => p.Value == 0).Select(p => p.Key));',
-  '    var res = new System.Text.StringBuilder();',
-  '    while (q.Count > 0) {',
-  '        char u = q.Dequeue();',
-  '        res.Append(u);',
-  '        foreach (char v in adj[u])',
-  '            if (--indeg[v] == 0) q.Enqueue(v);',
-  '    }',
-  '    return res.Length == indeg.Count ? res.ToString() : "";',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_ALIEN = getSolutions('alien-dict-269');
 
 export const AlienVisualizer = () => {
   const [str, setStr] = useState('wrt,wrf,er,ett,rftt');
@@ -200,7 +173,15 @@ export const AlienVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(C)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_ALIEN}
+          defaultLang="csharp"
+          getHighlight={(lang) => [ALIEN_LINE_MAP[lang][step.type]]}
+          meta="O(C)"
+        />
+      </div>
     </div>
   );
 };

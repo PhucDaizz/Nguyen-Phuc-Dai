@@ -36,6 +36,23 @@ export const BlogListPage = () => {
   const guideSlugFor = (no: number) =>
     Object.values(GUIDES).find((g) => g.blindNo === no)?.slug;
 
+  // Bài có guide nhưng không thuộc Blind75 (vd binary-search-704): hiện riêng để không mồ côi
+  const blindNos = useMemo(() => new Set(BLIND75.map((p) => p.no)), []);
+  const extras = useMemo(() => {
+    const q = query.toLowerCase();
+    return Object.values(GUIDES).filter((g) => {
+      if (blindNos.has(g.blindNo) || !g.fallbackMeta) return false;
+      if (!q) return true;
+      const m = g.fallbackMeta;
+      return (
+        g.slug.toLowerCase().includes(q) ||
+        m.title.toLowerCase().includes(q) ||
+        m.viTitle.toLowerCase().includes(q) ||
+        m.pattern.toLowerCase().includes(q)
+      );
+    });
+  }, [query, blindNos]);
+
   return (
     <div>
       <Seo
@@ -130,6 +147,38 @@ export const BlogListPage = () => {
         })}
       </div>
       {posts.length === 0 && <p>Không tìm thấy bài. Thử từ khóa khác.</p>}
+
+      {extras.length > 0 && (
+        <>
+          <h2>Bài bổ trợ ({extras.length})</h2>
+          <p style={{ fontSize: 13.5 }}>
+            Bài nền tảng ngoài Blind75 nhưng được các bài khác nhắc tới — có đủ bài giảng 6 ngôn ngữ.
+          </p>
+          <div className="grid-3">
+            {extras.map((g) => {
+              const m = g.fallbackMeta!;
+              return (
+                <div key={g.slug} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div className="card-title">
+                    <span className="dot"></span>#{g.blindNo} · {m.category} · {m.pattern}
+                  </div>
+                  <h3 style={{ marginTop: 0 }}>{m.title}</h3>
+                  <p style={{ fontSize: 13.5 }}>
+                    <span style={{ color: 'var(--accent)' }}>{m.viTitle}</span> — {m.summary}
+                  </p>
+                  <div>
+                    <span className={diffPill(m.difficulty)}>{m.difficulty}</span>
+                    <span className="pill">CÓ HƯỚNG DẪN</span>
+                  </div>
+                  <div className="btn-row">
+                    <Link to={`/blog/${g.slug}`} className="btn primary">Hướng dẫn →</Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 };

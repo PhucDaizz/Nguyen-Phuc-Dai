@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, CYCLE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, Chain, parseNumList,
+  ThinProgress, Chain, parseNumList,
 } from './shared';
 
 interface Step {
@@ -87,17 +89,8 @@ const generateTrace = (vals: number[], pos: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public bool HasCycle(ListNode head) {',
-  '    ListNode slow = head, fast = head;',
-  '    while (fast != null && fast.next != null) {',
-  '        slow = slow.next;',
-  '        fast = fast.next.next;',
-  '        if (slow == fast) return true;',
-  '    }',
-  '    return false;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_CYCLE = getSolutions('linked-list-cycle-141');
 
 export const CycleVisualizer = () => {
   const [str, setStr] = useState('3,2,0,-4');
@@ -161,7 +154,14 @@ export const CycleVisualizer = () => {
           build(n, p);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_CYCLE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [CYCLE_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

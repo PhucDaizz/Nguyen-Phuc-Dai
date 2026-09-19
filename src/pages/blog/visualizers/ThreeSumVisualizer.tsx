@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getSolutions, THREESUM_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 // ===================== TRACE ENGINE =====================
 interface Step {
@@ -90,29 +92,8 @@ const generateTrace = (input: number[]): Step[] => {
   return trace;
 };
 
-// ===================== C# SOLUTION =====================
-const CSHARP_LINES = [
-  'public IList<IList<int>> ThreeSum(int[] nums) {',
-  '    Array.Sort(nums);',
-  '    var res = new List<IList<int>>();',
-  '    for (int i = 0; i < nums.Length - 2; i++) {',
-  '        if (i > 0 && nums[i] == nums[i - 1]) continue;',
-  '        int l = i + 1, r = nums.Length - 1;',
-  '        while (l < r) {',
-  '            int sum = nums[i] + nums[l] + nums[r];',
-  '            if (sum == 0) {',
-  '                res.Add(new List<int> { nums[i], nums[l], nums[r] });',
-  '                while (l < r && nums[l] == nums[l + 1]) l++;',
-  '                while (l < r && nums[r] == nums[r - 1]) r--;',
-  '                l++; r--;',
-  '            }',
-  '            else if (sum < 0) l++;',
-  '            else r--;',
-  '        }',
-  '    }',
-  '    return res;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_THREESUM = getSolutions('three-sum-15');
 
 const PRESETS = [
   { label: 'LeetCode · [-1,0,1,2,-1,-4]', nums: '-1,0,1,2,-1,-4' },
@@ -361,25 +342,14 @@ export const ThreeSumVisualizer = () => {
         Phím tắt: Space Play/Pause · → Step · ← Back · R Reset
       </p>
 
-      <div className="code-block" style={{ marginTop: 14 }}>
-        <div className="code-head">
-          <div className="dots">
-            <i style={{ background: '#ff5f57' }} />
-            <i style={{ background: '#febc2e' }} />
-            <i style={{ background: '#28c840' }} />
-          </div>
-          <div className="name">Solution.cs<span className="live" /></div>
-          <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>O(n²) · O(1)</div>
-        </div>
-        <pre>
-          <code>
-            {CSHARP_LINES.map((ln, i) => (
-              <span key={i} className={`line ${step.codeLine === i ? 'active' : ''}`}>
-                {ln || ' '}
-              </span>
-            ))}
-          </code>
-        </pre>
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_THREESUM}
+          defaultLang="csharp"
+          getHighlight={(lang) => [THREESUM_LINE_MAP[lang][step.type]]}
+          meta="O(n²) · O(1)"
+        />
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell,
+  ThinProgress, ArrCell,
 } from './shared';
+import { getSolutions, STAIRS_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'step' | 'done';
@@ -55,18 +57,8 @@ const generateTrace = (n: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int ClimbStairs(int n) {',
-  '    if (n <= 2) return n;',
-  '    int a = 1, b = 2;',
-  '    for (int i = 3; i <= n; i++) {',
-  '        int c = a + b;',
-  '        a = b;',
-  '        b = c;',
-  '    }',
-  '    return b;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_STAIRS = getSolutions('climbing-stairs-70');
 
 export const StairsVisualizer = () => {
   const [str, setStr] = useState('5');
@@ -161,7 +153,15 @@ export const StairsVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_STAIRS}
+          defaultLang="csharp"
+          getHighlight={(lang) => [STAIRS_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

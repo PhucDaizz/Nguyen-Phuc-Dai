@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
+  ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
 } from './shared';
+import { getSolutions, MAXDEPTH_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'visit' | 'done';
@@ -63,12 +65,8 @@ const generateTrace = (arr: (number | null)[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int MaxDepth(TreeNode root) {',
-  '    if (root == null) return 0;',
-  '    return 1 + Math.Max(MaxDepth(root.left), MaxDepth(root.right));',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_MAXDEPTH = getSolutions('max-depth-104');
 
 export const MaxDepthVisualizer = () => {
   const [str, setStr] = useState('3,9,20,null,null,15,7');
@@ -136,7 +134,15 @@ export const MaxDepthVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(h)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_MAXDEPTH}
+          defaultLang="csharp"
+          getHighlight={(lang) => [MAXDEPTH_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(h)"
+        />
+      </div>
     </div>
   );
 };

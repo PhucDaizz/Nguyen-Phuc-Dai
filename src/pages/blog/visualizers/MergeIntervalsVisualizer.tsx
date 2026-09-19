@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, MERGE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, IntervalBars,
+  ThinProgress, IntervalBars,
 } from './shared';
 
 interface Step {
@@ -66,19 +68,8 @@ const generateTrace = (input: [number, number][]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int[][] Merge(int[][] intervals) {',
-  '    Array.Sort(intervals, (a, b) => a[0] - b[0]);',
-  '    var res = new List<int[]> { intervals[0] };',
-  '    for (int i = 1; i < intervals.Length; i++) {',
-  '        int s = intervals[i][0], e = intervals[i][1];',
-  '        var last = res[^1];',
-  '        if (s <= last[1]) last[1] = Math.Max(last[1], e);',
-  '        else res.Add(new[] { s, e });',
-  '    }',
-  '    return res.ToArray();',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_MERGE = getSolutions('merge-intervals-56');
 
 export const MergeIntervalsVisualizer = () => {
   const [str, setStr] = useState('1,3;2,6;8,10;15,18');
@@ -133,7 +124,14 @@ export const MergeIntervalsVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n log n)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_MERGE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [MERGE_LINE_MAP[lang][step.type]]}
+          meta="O(n log n)"
+        />
+      </div>
     </div>
   );
 };

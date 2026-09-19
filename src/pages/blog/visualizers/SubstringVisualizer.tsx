@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, SUBSTR_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress,
+  ThinProgress,
 } from './shared';
 
 interface Step {
@@ -50,21 +52,8 @@ const generateTrace = (s: string): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int LengthOfLongestSubstring(string s) {',
-  '    var seen = new HashSet<char>();',
-  '    int l = 0, best = 0;',
-  '    for (int r = 0; r < s.Length; r++) {',
-  '        while (seen.Contains(s[r])) {',
-  '            seen.Remove(s[l]);',
-  '            l++;',
-  '        }',
-  '        seen.Add(s[r]);',
-  '        best = Math.Max(best, r - l + 1);',
-  '    }',
-  '    return best;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_SUBSTR = getSolutions('longest-substring-3');
 
 export const SubstringVisualizer = () => {
   const [str, setStr] = useState('abcabcbb');
@@ -133,7 +122,14 @@ export const SubstringVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_SUBSTR}
+          defaultLang="csharp"
+          getHighlight={(lang) => [SUBSTR_LINE_MAP[lang][step.type]]}
+          meta="O(n)"
+        />
+      </div>
     </div>
   );
 };

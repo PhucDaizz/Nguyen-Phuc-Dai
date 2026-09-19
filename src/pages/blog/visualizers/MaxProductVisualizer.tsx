@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell, parseNumList,
+  ThinProgress, ArrCell, parseNumList,
 } from './shared';
+import { getSolutions, MAXPRODUCT_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'calc' | 'done';
@@ -58,19 +60,8 @@ const generateTrace = (nums: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int MaxProduct(int[] nums) {',
-  '    int curMax = nums[0], curMin = nums[0], best = nums[0];',
-  '    for (int i = 1; i < nums.Length; i++) {',
-  '        int x = nums[i];',
-  '        int[] c = { x, curMax * x, curMin * x };',
-  '        curMax = c.Max();',
-  '        curMin = c.Min();',
-  '        best = Math.Max(best, curMax);',
-  '    }',
-  '    return best;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_MAXPRODUCT = getSolutions('max-product-152');
 
 export const MaxProductVisualizer = () => {
   const [str, setStr] = useState('2,3,-2,4');
@@ -143,7 +134,15 @@ export const MaxProductVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_MAXPRODUCT}
+          defaultLang="csharp"
+          getHighlight={(lang) => [MAXPRODUCT_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

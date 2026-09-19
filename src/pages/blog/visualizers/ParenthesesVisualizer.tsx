@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getSolutions, PARENS_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 // ===================== TRACE ENGINE =====================
 interface Step {
@@ -93,18 +95,8 @@ const generateTrace = (s: string): Step[] => {
   return trace;
 };
 
-// ===================== C# SOLUTION =====================
-const CSHARP_LINES = [
-  'public bool IsValid(string s) {',
-  '    var st = new Stack<char>();',
-  "    var pair = new Dictionary<char, char> { [')'] = '(', [']'] = '[', ['}'] = '{' };",
-  '    foreach (char c in s) {',
-  "        if (c == '(' || c == '[' || c == '{') st.Push(c);",
-  '        else if (st.Count == 0 || st.Pop() != pair[c]) return false;',
-  '    }',
-  '    return st.Count == 0;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_PARENS = getSolutions('valid-parentheses-20');
 
 const PRESETS = [
   { label: 'Chuẩn · ()[]{} → true', s: '()[]{}' },
@@ -369,25 +361,14 @@ export const ParenthesesVisualizer = () => {
         Phím tắt: Space Play/Pause · → Step · ← Back · R Reset
       </p>
 
-      <div className="code-block" style={{ marginTop: 14 }}>
-        <div className="code-head">
-          <div className="dots">
-            <i style={{ background: '#ff5f57' }} />
-            <i style={{ background: '#febc2e' }} />
-            <i style={{ background: '#28c840' }} />
-          </div>
-          <div className="name">Solution.cs<span className="live" /></div>
-          <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>O(n) · O(n)</div>
-        </div>
-        <pre>
-          <code>
-            {CSHARP_LINES.map((ln, i) => (
-              <span key={i} className={`line ${step.codeLine === i ? 'active' : ''}`}>
-                {ln || ' '}
-              </span>
-            ))}
-          </code>
-        </pre>
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_PARENS}
+          defaultLang="csharp"
+          getHighlight={(lang) => [PARENS_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(n)"
+        />
       </div>
     </div>
   );

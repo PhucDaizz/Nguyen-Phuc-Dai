@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, MERGEK_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, TreeSvg, Chain, type TreeNodeState,
+  ThinProgress, TreeSvg, Chain, type TreeNodeState,
 } from './shared';
 
 interface HItem {
@@ -148,22 +150,8 @@ const generateTrace = (lists: number[][]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public ListNode MergeKLists(ListNode[] lists) {',
-  '    var heap = new PriorityQueue<ListNode, int>();',
-  '    foreach (var node in lists)',
-  '        if (node != null) heap.Enqueue(node, node.val);',
-  '    var dummy = new ListNode();',
-  '    var cur = dummy;',
-  '    while (heap.Count > 0) {',
-  '        var node = heap.Dequeue();',
-  '        cur.next = node;',
-  '        cur = cur.next;',
-  '        if (node.next != null) heap.Enqueue(node.next, node.next.val);',
-  '    }',
-  '    return dummy.next;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_MERGEK = getSolutions('merge-k-lists-23');
 
 export const MergeKVisualizer = () => {
   const [str, setStr] = useState('1,4,5;1,3,4;2,6');
@@ -259,7 +247,14 @@ export const MergeKVisualizer = () => {
           build(v);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(N log k) · O(k)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_MERGEK}
+          defaultLang="csharp"
+          getHighlight={(lang) => [MERGEK_LINE_MAP[lang][step.type]]}
+          meta="O(N log k) · O(k)"
+        />
+      </div>
     </div>
   );
 };

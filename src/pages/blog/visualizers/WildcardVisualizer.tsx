@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, type TreeNodeState,
+  ThinProgress, type TreeNodeState,
 } from './shared';
+import { getSolutions, WILDCARD_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import { TrieSvg, newTrie, type TrieObj } from './TrieView';
 
 interface Step {
@@ -113,36 +115,8 @@ const generateTrace = (root: TrieObj, pattern: string): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public class WordDictionary {',
-  '    private class Node {',
-  '        public Dictionary<char, Node> Next = new();',
-  '        public bool End;',
-  '    }',
-  '    private readonly Node root = new();',
-  '    public void AddWord(string word) {',
-  '        var n = root;',
-  '        foreach (char c in word) {',
-  '            if (!n.Next.ContainsKey(c)) n.Next[c] = new Node();',
-  '            n = n.Next[c];',
-  '        }',
-  '        n.End = true;',
-  '    }',
-  '    public bool Search(string word) {',
-  '        return Dfs(root, word, 0);',
-  '    }',
-  '    private bool Dfs(Node n, string w, int k) {',
-  '        if (n == null) return false;',
-  '        if (k == w.Length) return n.End;',
-  '        if (w[k] == \'.\') {',
-  '            foreach (var child in n.Next.Values)',
-  '                if (Dfs(child, w, k + 1)) return true;',
-  '            return false;',
-  '        }',
-  '        return Dfs(n.Next.GetValueOrDefault(w[k]), w, k + 1);',
-  '    }',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_WILDCARD = getSolutions('add-search-words-211');
 
 const DEFAULT_WORDS = ['bad', 'dad', 'mad'];
 
@@ -210,7 +184,15 @@ export const WildcardVisualizer = () => {
           build(w, p);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(26^m)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_WILDCARD}
+          defaultLang="csharp"
+          getHighlight={(lang) => [WILDCARD_LINE_MAP[lang][step.type]]}
+          meta="O(26^m)"
+        />
+      </div>
     </div>
   );
 };

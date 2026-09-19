@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, GridBoard, type TreeNodeState,
+  ThinProgress, GridBoard, type TreeNodeState,
 } from './shared';
+import { getSolutions, LCS_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'cell' | 'done';
@@ -53,18 +55,8 @@ const generateTrace = (a: string, b: string): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int LongestCommonSubsequence(string a, string b) {',
-  '    int m = a.Length, n = b.Length;',
-  '    var dp = new int[m+1, n+1];',
-  '    for (int i = 1; i <= m; i++)',
-  '        for (int j = 1; j <= n; j++)',
-  '            dp[i,j] = a[i-1] == b[j-1]',
-  '                ? dp[i-1,j-1] + 1',
-  '                : Math.Max(dp[i-1,j], dp[i,j-1]);',
-  '    return dp[m,n];',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_LCS = getSolutions('lcs-1143');
 
 export const LcsVisualizer = () => {
   const [aStr, setAStr] = useState('abcde');
@@ -134,7 +126,15 @@ export const LcsVisualizer = () => {
           build(x, y);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(m·n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_LCS}
+          defaultLang="csharp"
+          getHighlight={(lang) => [LCS_LINE_MAP[lang][step.type]]}
+          meta="O(m·n)"
+        />
+      </div>
     </div>
   );
 };

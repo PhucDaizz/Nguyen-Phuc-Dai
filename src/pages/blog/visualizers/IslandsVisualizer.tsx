@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, ISLANDS_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, GridBoard, type TreeNodeState,
+  ThinProgress, GridBoard, type TreeNodeState,
 } from './shared';
 
 interface Step {
@@ -82,28 +84,8 @@ const generateTrace = (init: string[][]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int NumIslands(char[][] grid) {',
-  '    int R = grid.Length, C = grid[0].Length;',
-  '    int count = 0;',
-  '    void Sink(int r, int c) {',
-  '        if (r < 0 || c < 0 || r >= R || c >= C) return;',
-  '        if (grid[r][c] != \'1\') return;',
-  '        grid[r][c] = \'0\';',
-  '        Sink(r+1, c);',
-  '        Sink(r-1, c);',
-  '        Sink(r, c+1);',
-  '        Sink(r, c-1);',
-  '    }',
-  '    for (int r = 0; r < R; r++)',
-  '        for (int c = 0; c < C; c++)',
-  '            if (grid[r][c] == \'1\') {',
-  '                count++;',
-  '                Sink(r, c);',
-  '            }',
-  '    return count;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_ISLANDS = getSolutions('number-of-islands-200');
 
 export const IslandsVisualizer = () => {
   const [str, setStr] = useState('1,1,0;1,0,0;0,0,1');
@@ -173,7 +155,15 @@ export const IslandsVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(m·n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_ISLANDS}
+          defaultLang="csharp"
+          getHighlight={(lang) => [ISLANDS_LINE_MAP[lang][step.type]]}
+          meta="O(m·n)"
+        />
+      </div>
     </div>
   );
 };

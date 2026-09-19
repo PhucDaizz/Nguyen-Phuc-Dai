@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, INSERT_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, IntervalBars,
+  ThinProgress, IntervalBars,
 } from './shared';
 
 interface Step {
@@ -71,22 +73,8 @@ const generateTrace = (a: [number, number][], nw0: [number, number]): Step[] => 
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int[][] Insert(int[][] intervals, int[] nw) {',
-  '    var res = new List<int[]>();',
-  '    int i = 0;',
-  '    while (i < intervals.Length && intervals[i][1] < nw[0])',
-  '        res.Add(intervals[i++]);',
-  '    while (i < intervals.Length && intervals[i][0] <= nw[1]) {',
-  '        nw = new[] { Math.Min(nw[0], intervals[i][0]),',
-  '                     Math.Max(nw[1], intervals[i][1]) };',
-  '        i++;',
-  '    }',
-  '    res.Add(nw);',
-  '    while (i < intervals.Length) res.Add(intervals[i++]);',
-  '    return res.ToArray();',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_INSERT = getSolutions('insert-interval-57');
 
 export const InsertIntervalVisualizer = () => {
   const [aStr, setAStr] = useState('1,3;6,9');
@@ -157,7 +145,14 @@ export const InsertIntervalVisualizer = () => {
           build(x, y);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_INSERT}
+          defaultLang="csharp"
+          getHighlight={(lang) => [INSERT_LINE_MAP[lang][step.type]]}
+          meta="O(n)"
+        />
+      </div>
     </div>
   );
 };

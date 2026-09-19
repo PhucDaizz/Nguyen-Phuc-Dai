@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress,
+  ThinProgress,
 } from './shared';
+import { getSolutions, WORDSEARCH2_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import { newTrie, type TrieObj } from './TrieView';
 
 interface Step {
@@ -120,32 +122,8 @@ const generateTrace = (board: string[][], words: string[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public IList<string> FindWords(char[][] board, string[] words) {',
-  '    var root = BuildTrie(words);',
-  '    var res = new List<string>();',
-  '    int R = board.Length, C = board[0].Length;',
-  '    void Dfs(int r, int c, TrieNode node) {',
-  '        if (r < 0 || c < 0 || r >= R || c >= C) return;',
-  '        char ch = board[r][c];',
-  '        if (ch == \'#\' || !node.Next.ContainsKey(ch)) return;',
-  '        var next = node.Next[ch];',
-  '        if (next.Word != null) {',
-  '            res.Add(next.Word);',
-  '            next.Word = null;',
-  '        }',
-  '        board[r][c] = \'#\';',
-  '        Dfs(r + 1, c, next);',
-  '        Dfs(r - 1, c, next);',
-  '        Dfs(r, c + 1, next);',
-  '        Dfs(r, c - 1, next);',
-  '        board[r][c] = ch;',
-  '    }',
-  '    for (int r = 0; r < R; r++)',
-  '        for (int c = 0; c < C; c++) Dfs(r, c, root);',
-  '    return res;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_WORDSEARCH2 = getSolutions('word-search-ii-212');
 
 const parseBoard = (str: string): string[][] =>
   str
@@ -274,7 +252,15 @@ export const WordSearch2Visualizer = () => {
           build(b, w);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="Trie + DFS" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_WORDSEARCH2}
+          defaultLang="csharp"
+          getHighlight={(lang) => [WORDSEARCH2_LINE_MAP[lang][step.type]]}
+          meta="Trie + DFS"
+        />
+      </div>
     </div>
   );
 };

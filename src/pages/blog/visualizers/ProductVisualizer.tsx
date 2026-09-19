@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getSolutions, PRODUCT_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 // ===================== TRACE ENGINE =====================
 interface Step {
@@ -65,22 +67,8 @@ const generateTrace = (nums: number[]): Step[] => {
   return trace;
 };
 
-// ===================== C# SOLUTION =====================
-const CSHARP_LINES = [
-  'public int[] ProductExceptSelf(int[] nums) {',
-  '    int n = nums.Length;',
-  '    int[] answer = new int[n];',
-  '    answer[0] = 1;',
-  '    for (int i = 1; i < n; i++)',
-  '        answer[i] = answer[i - 1] * nums[i - 1];',
-  '    int suffix = 1;',
-  '    for (int i = n - 1; i >= 0; i--) {',
-  '        answer[i] *= suffix;',
-  '        suffix *= nums[i];',
-  '    }',
-  '    return answer;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_PRODUCT = getSolutions('product-except-self-238');
 
 const PRESETS = [
   { label: 'Cơ bản · [1,2,3,4]', nums: '1,2,3,4' },
@@ -319,25 +307,14 @@ export const ProductVisualizer = () => {
         Phím tắt: Space Play/Pause · → Step · ← Back · R Reset
       </p>
 
-      <div className="code-block" style={{ marginTop: 14 }}>
-        <div className="code-head">
-          <div className="dots">
-            <i style={{ background: '#ff5f57' }} />
-            <i style={{ background: '#febc2e' }} />
-            <i style={{ background: '#28c840' }} />
-          </div>
-          <div className="name">Solution.cs<span className="live" /></div>
-          <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>O(n) · O(1)</div>
-        </div>
-        <pre>
-          <code>
-            {CSHARP_LINES.map((ln, i) => (
-              <span key={i} className={`line ${step.codeLine === i ? 'active' : ''}`}>
-                {ln || ' '}
-              </span>
-            ))}
-          </code>
-        </pre>
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_PRODUCT}
+          defaultLang="csharp"
+          getHighlight={(lang) => [PRODUCT_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
       </div>
     </div>
   );

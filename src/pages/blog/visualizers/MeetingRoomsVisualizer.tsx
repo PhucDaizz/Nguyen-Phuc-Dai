@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, MEETING_LINE_MAP, MEETING2_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, IntervalBars,
+  ThinProgress, IntervalBars,
 } from './shared';
 
 interface Step {
@@ -21,31 +23,9 @@ const parseIntervals = (str: string): [number, number][] => {
   return out;
 };
 
-const CSHARP_LINES = [
-  'public bool CanAttendMeetings(int[][] intervals) {',
-  '    Array.Sort(intervals, (a, b) => a[0] - b[0]);',
-  '    for (int i = 1; i < intervals.Length; i++)',
-  '        if (intervals[i][0] < intervals[i-1][1]) return false;',
-  '    return true;',
-  '}',
-];
-
-const CSHARP_LINES_2 = [
-  'public int MinMeetingRooms(int[][] intervals) {',
-  '    var ev = new List<(int t, int d)>();',
-  '    foreach (var (s, e) in intervals.Select(p => (p[0], p[1]))) {',
-  '        ev.Add((s, 1));',
-  '        ev.Add((e, -1));',
-  '    }',
-  '    ev.Sort((a, b) => a.t != b.t ? a.t - b.t : a.d - b.d);',
-  '    int cur = 0, best = 0;',
-  '    foreach (var (_, d) in ev) {',
-  '        cur += d;',
-  '        best = Math.Max(best, cur);',
-  '    }',
-  '    return best;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_MEETING = getSolutions('meeting-rooms-252');
+const SOLUTIONS_MEETING2 = getSolutions('meeting-rooms-ii-253');
 
 interface Cfg {
   mode: 'one' | 'many';
@@ -55,7 +35,6 @@ interface Cfg {
   title: string;
   sub: string;
   presets: { label: string; value: string }[];
-  lines: string[];
   stats: string;
 }
 
@@ -149,6 +128,10 @@ const MeetingRooms = ({ cfg }: { cfg: Cfg }) => {
     setA(na);
   };
 
+  const isOne = cfg.mode === 'one';
+  const LINE_MAP = isOne ? MEETING_LINE_MAP : MEETING2_LINE_MAP;
+  const SOLUTIONS_X = isOne ? SOLUTIONS_MEETING : SOLUTIONS_MEETING2;
+
   const sorted = [...a].sort((x, y) => x[0] - y[0]);
   const items = sorted.map(([s, e], i) => {
     const isCur =
@@ -230,7 +213,14 @@ const MeetingRooms = ({ cfg }: { cfg: Cfg }) => {
         items={cfg.presets}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={cfg.lines} active={step.codeLine} stats={cfg.stats} />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_X}
+          defaultLang="csharp"
+          getHighlight={(lang) => [LINE_MAP[lang][step.type]]}
+          meta={cfg.stats}
+        />
+      </div>
     </div>
   );
 };
@@ -249,7 +239,6 @@ export const MeetingRoomsVisualizer = () => (
         { label: 'Ổn · true', value: '7,10;2,4' },
         { label: 'Nối đuôi · true', value: '0,5;5,10' },
       ],
-      lines: CSHARP_LINES,
       stats: 'O(n log n)',
     }}
   />
@@ -269,7 +258,6 @@ export const MeetingRooms2Visualizer = () => (
         { label: 'Rời nhau · 1 phòng', value: '7,10;2,4' },
         { label: 'Chồng 3 · 3 phòng', value: '1,5;2,6;4,8' },
       ],
-      lines: CSHARP_LINES_2,
       stats: 'O(n log n)',
     }}
   />

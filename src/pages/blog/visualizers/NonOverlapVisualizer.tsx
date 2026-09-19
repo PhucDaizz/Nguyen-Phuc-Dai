@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, NONOVERLAP_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, IntervalBars,
+  ThinProgress, IntervalBars,
 } from './shared';
 
 interface Step {
@@ -62,18 +64,8 @@ const generateTrace = (input: [number, number][]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int EraseOverlapIntervals(int[][] intervals) {',
-  '    Array.Sort(intervals, (a, b) => a[1] - b[1]);',
-  '    int removed = 0;',
-  '    int end = int.MinValue;',
-  '    foreach (var (s, e) in intervals.Select(p => (p[0], p[1]))) {',
-  '        if (s >= end) end = e;',
-  '        else removed++;',
-  '    }',
-  '    return removed;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_NONOVERLAP = getSolutions('non-overlapping-435');
 
 export const NonOverlapVisualizer = () => {
   const [str, setStr] = useState('1,2;2,3;3,4;1,3');
@@ -140,7 +132,14 @@ export const NonOverlapVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n log n)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_NONOVERLAP}
+          defaultLang="csharp"
+          getHighlight={(lang) => [NONOVERLAP_LINE_MAP[lang][step.type]]}
+          meta="O(n log n)"
+        />
+      </div>
     </div>
   );
 };

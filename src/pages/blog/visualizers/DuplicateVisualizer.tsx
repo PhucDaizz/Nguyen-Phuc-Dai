@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getSolutions, DUPLICATE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 // ===================== TRACE ENGINE =====================
 interface Step {
@@ -79,17 +81,8 @@ const generateTrace = (nums: number[]): Step[] => {
   return trace;
 };
 
-// ===================== C# SOLUTION =====================
-const CSHARP_LINES = [
-  'public bool ContainsDuplicate(int[] nums) {',
-  '    var seen = new HashSet<int>();',
-  '    foreach (int x in nums) {',
-  '        if (!seen.Add(x))',
-  '            return true;',
-  '    }',
-  '    return false;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_DUP = getSolutions('contains-duplicate-217');
 
 const PRESETS = [
   { label: 'LeetCode · [1,2,3,1] → true', nums: '1,2,3,1' },
@@ -352,26 +345,14 @@ export const DuplicateVisualizer = () => {
         Phím tắt: Space Play/Pause · → Step · ← Back · R Reset
       </p>
 
-      {/* 6. CODE PANEL C# */}
-      <div className="code-block" style={{ marginTop: 14 }}>
-        <div className="code-head">
-          <div className="dots">
-            <i style={{ background: '#ff5f57' }} />
-            <i style={{ background: '#febc2e' }} />
-            <i style={{ background: '#28c840' }} />
-          </div>
-          <div className="name">Solution.cs<span className="live" /></div>
-          <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>O(n) · O(n)</div>
-        </div>
-        <pre>
-          <code>
-            {CSHARP_LINES.map((ln, i) => (
-              <span key={i} className={`line ${step.codeLine === i ? 'active' : ''}`}>
-                {ln || ' '}
-              </span>
-            ))}
-          </code>
-        </pre>
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_DUP}
+          defaultLang="csharp"
+          getHighlight={(lang) => [DUPLICATE_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(n)"
+        />
       </div>
     </div>
   );

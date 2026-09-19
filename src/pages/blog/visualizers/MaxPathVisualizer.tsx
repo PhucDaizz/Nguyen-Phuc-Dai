@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
+  ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
 } from './shared';
+import { getSolutions, MAXPATH_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'visit' | 'done';
@@ -80,17 +82,8 @@ const generateTrace = (arr: (number | null)[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'int best = int.MinValue;',
-  'public int MaxPathSum(TreeNode root) { Dfs(root); return best; }',
-  'int Dfs(TreeNode node) {',
-  '    if (node == null) return 0;',
-  '    int l = Math.Max(0, Dfs(node.left));',
-  '    int r = Math.Max(0, Dfs(node.right));',
-  '    best = Math.Max(best, node.val + l + r);',
-  '    return node.val + Math.Max(l, r);',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_MAXPATH = getSolutions('max-path-sum-124');
 
 export const MaxPathVisualizer = () => {
   const [str, setStr] = useState('-10,9,20,null,null,15,7');
@@ -160,7 +153,15 @@ export const MaxPathVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(h)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_MAXPATH}
+          defaultLang="csharp"
+          getHighlight={(lang) => [MAXPATH_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(h)"
+        />
+      </div>
     </div>
   );
 };

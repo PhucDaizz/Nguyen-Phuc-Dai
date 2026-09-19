@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, ROTSEARCH_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell, parseNumList,
+  ThinProgress, ArrCell, parseNumList,
 } from './shared';
 
 interface Step {
@@ -77,23 +79,8 @@ const generateTrace = (nums: number[], target: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int Search(int[] nums, int target) {',
-  '    int l = 0, r = nums.Length - 1;',
-  '    while (l <= r) {',
-  '        int m = l + (r - l) / 2;',
-  '        if (nums[m] == target) return m;',
-  '        if (nums[l] <= nums[m]) {',
-  '            if (nums[l] <= target && target < nums[m]) r = m - 1;',
-  '            else l = m + 1;',
-  '        } else {',
-  '            if (nums[m] < target && target <= nums[r]) l = m + 1;',
-  '            else r = m - 1;',
-  '        }',
-  '    }',
-  '    return -1;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_ROTSEARCH = getSolutions('search-rotated-33');
 
 export const RotatedSearchVisualizer = () => {
   const [str, setStr] = useState('4,5,6,7,0,1,2');
@@ -163,7 +150,14 @@ export const RotatedSearchVisualizer = () => {
           build(n, t);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(log n) · O(1)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_ROTSEARCH}
+          defaultLang="csharp"
+          getHighlight={(lang) => [ROTSEARCH_LINE_MAP[lang][step.type]]}
+          meta="O(log n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

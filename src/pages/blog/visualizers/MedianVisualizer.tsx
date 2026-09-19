@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, MEDIAN_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, parseNumList,
+  ThinProgress, parseNumList,
 } from './shared';
 
 interface Step {
@@ -59,26 +61,8 @@ const generateTrace = (seq: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public class MedianFinder {',
-  '    private readonly PriorityQueue<int, int> lo; // max-heap: priority = -val',
-  '    private readonly PriorityQueue<int, int> hi; // min-heap',
-  '    public MedianFinder() {',
-  '        lo = new PriorityQueue<int, int>();',
-  '        hi = new PriorityQueue<int, int>();',
-  '    }',
-  '    public void AddNum(int x) {',
-  '        lo.Enqueue(x, -x);',
-  '        hi.Enqueue(lo.Peek(), lo.Dequeue());',
-  '        if (lo.Count < hi.Count)',
-  '            lo.Enqueue(hi.Peek(), -hi.Dequeue());',
-  '    }',
-  '    public double FindMedian() {',
-  '        if (lo.Count > hi.Count) return lo.Peek();',
-  '        return (lo.Peek() + hi.Peek()) / 2.0;',
-  '    }',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_MEDIAN = getSolutions('find-median-295');
 
 const HeapRow = ({ label, values, color, top }: {
   label: string; values: number[]; color: string; top: boolean;
@@ -175,7 +159,15 @@ export const MedianVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(log n) add" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_MEDIAN}
+          defaultLang="csharp"
+          getHighlight={(lang) => [MEDIAN_LINE_MAP[lang][step.type]]}
+          meta="O(log n) add"
+        />
+      </div>
     </div>
   );
 };

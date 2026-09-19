@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, MISSING_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell, parseNumList,
+  ThinProgress, ArrCell, parseNumList,
 } from './shared';
 
 interface Step {
@@ -38,14 +40,8 @@ const generateTrace = (nums: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int MissingNumber(int[] nums) {',
-  '    int xor = nums.Length;',
-  '    for (int i = 0; i < nums.Length; i++)',
-  '        xor ^= i ^ nums[i];',
-  '    return xor;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_MISSING = getSolutions('missing-number-268');
 
 export const MissingVisualizer = () => {
   const [str, setStr] = useState('3,0,1');
@@ -117,7 +113,14 @@ export const MissingVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_MISSING}
+          defaultLang="csharp"
+          getHighlight={(lang) => [MISSING_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

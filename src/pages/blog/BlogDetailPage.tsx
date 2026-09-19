@@ -5,6 +5,8 @@ import { getGuide } from '../../data/guides';
 import { ProblemStatement } from './ProblemStatement';
 import { hasVisualizer } from './visualizers';
 import { diffPill } from './visualizers/shared';
+import { getSolutions } from '../../data/solutions';
+import { SolutionTabs } from './SolutionTabs';
 import { Seo, articleJsonLd } from '../../components/Seo';
 
 const STUDY_STEPS = [
@@ -120,7 +122,12 @@ export const BlogDetailPage = () => {
     lcSlug: '',
     ...guide.fallbackMeta!,
   };
-  const lines = guide.code.split('\n');
+  // Tab solution: TS (từ guide, giữ highlightLines) + các ngôn ngữ khác (nếu có entry đa ngôn ngữ)
+  const extraSolutions = getSolutions(slug ?? '').filter((s) => s.lang !== 'ts');
+  const tabSolutions = [
+    { lang: 'ts' as const, label: 'TypeScript', filename: guide.filename, code: guide.code },
+    ...extraSolutions,
+  ];
   // Cùng nhánh: ưu tiên theo pattern (relatedSlugs) rồi mới cùng category
   const bySlugs = (guide.relatedSlugs ?? [])
     .flatMap((gs) => {
@@ -235,26 +242,12 @@ export const BlogDetailPage = () => {
               </ul>
             </div>
           )}
-          <div className="code-block">
-            <div className="code-head">
-              <div className="dots">
-                <i style={{ background: '#ff5f57' }} />
-                <i style={{ background: '#febc2e' }} />
-                <i style={{ background: '#28c840' }} />
-              </div>
-              <div className="name">{guide.filename}<span className="live" /></div>
-              <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>{guide.time} · {guide.space}</div>
-            </div>
-            <pre>
-              <code>
-                {lines.map((ln, i) => (
-                  <span key={i} className={`line ${guide.highlightLines.includes(i + 1) ? 'active' : ''}`}>
-                    {ln || ' '}
-                  </span>
-                ))}
-              </code>
-            </pre>
-          </div>
+          <SolutionTabs
+            solutions={tabSolutions}
+            defaultLang="ts"
+            getHighlight={(lang) => (lang === 'ts' ? guide.highlightLines.map((n) => n - 1) : [])}
+            meta={`${guide.time} · ${guide.space}`}
+          />
 
           {guide.complexityWhy && (
             <div className="demo" style={{ marginTop: 14 }}>

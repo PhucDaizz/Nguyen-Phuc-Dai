@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, COUNTING_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell,
+  ThinProgress, ArrCell,
 } from './shared';
 
 interface Step {
@@ -39,14 +41,8 @@ const generateTrace = (n: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int[] CountBits(int n) {',
-  '    var dp = new int[n + 1];',
-  '    for (int i = 1; i <= n; i++)',
-  '        dp[i] = dp[i >> 1] + (i & 1);',
-  '    return dp;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_COUNTING = getSolutions('counting-bits-338');
 
 export const CountingBitsVisualizer = () => {
   const [str, setStr] = useState('5');
@@ -103,7 +99,14 @@ export const CountingBitsVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(n)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_COUNTING}
+          defaultLang="csharp"
+          getHighlight={(lang) => [COUNTING_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(n)"
+        />
+      </div>
     </div>
   );
 };

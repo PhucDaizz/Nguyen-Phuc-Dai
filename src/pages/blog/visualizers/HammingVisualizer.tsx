@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, HAMMING_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, BitRow,
+  ThinProgress, BitRow,
 } from './shared';
 
 interface Step {
@@ -50,16 +52,8 @@ const generateTrace = (n0: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int HammingWeight(uint n) {',
-  '    int count = 0;',
-  '    while (n != 0) {',
-  '        n &= n - 1;',
-  '        count++;',
-  '    }',
-  '    return count;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_HAMMING = getSolutions('number-of-1-bits-191');
 
 export const HammingVisualizer = () => {
   const [str, setStr] = useState('11');
@@ -121,7 +115,14 @@ export const HammingVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(k) bit 1" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_HAMMING}
+          defaultLang="csharp"
+          getHighlight={(lang) => [HAMMING_LINE_MAP[lang][step.type]]}
+          meta="O(k) bit 1"
+        />
+      </div>
     </div>
   );
 };

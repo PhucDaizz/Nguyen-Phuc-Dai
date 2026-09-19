@@ -88,6 +88,8 @@ shadows, every decorative detail purposeful.
   (header+stats, visualization SVG, state cards, description-bar, controls
   Play/Back/Step/Reset + speed + custom input, presets, shortcuts, code panel),
   node visuals theo cấu trúc dữ liệu. Solution code luôn viết bằng **C#**.
+- [references/multilang-solutions.md](references/multilang-solutions.md) — mở rộng code panel
+  thành tab 6 ngôn ngữ (SolutionTabs) + line map highlight từng tab.
 - [assets/visualizer-reference.html](assets/visualizer-reference.html) — reference
   implementation hoàn chỉnh (BFS Level Order Traversal): copy cấu trúc + CSS trạng thái
   node (`idle/in-queue/current/child-enqueue/processed`), đổi data + trace theo bài mới.

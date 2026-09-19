@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
+  ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
 } from './shared';
+import { getSolutions, SERIALIZE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'emit' | 'decode' | 'done';
@@ -132,31 +134,8 @@ const generateTrace = (arr: (number | null)[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public string Serialize(TreeNode root) {',
-  '    var sb = new StringBuilder();',
-  '    void Pre(TreeNode n) {',
-  "        if (n == null) { sb.Append(\"#, \"); return; }",
-  '        sb.Append(n.val).Append(",");',
-  '        Pre(n.left);',
-  '        Pre(n.right);',
-  '    }',
-  '    Pre(root);',
-  '    return sb.ToString();',
-  '}',
-  'public TreeNode Deserialize(string data) {',
-  '    var toks = new Queue<string>(data.Split(","));',
-  '    TreeNode Build() {',
-  '        var t = toks.Dequeue();',
-  '        if (t == "#") return null;',
-  '        var n = new TreeNode(int.Parse(t));',
-  '        n.left = Build();',
-  '        n.right = Build();',
-  '        return n;',
-  '    }',
-  '    return Build();',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_SERIALIZE = getSolutions('serialize-tree-297');
 
 export const SerializeVisualizer = () => {
   const [str, setStr] = useState('1,2,3,null,null,4,5');
@@ -239,7 +218,15 @@ export const SerializeVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_SERIALIZE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [SERIALIZE_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(n)"
+        />
+      </div>
     </div>
   );
 };

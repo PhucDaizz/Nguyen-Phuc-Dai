@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, TreeSvg, parseTreeList, type TreeNodeState,
+  TreeSvg, parseTreeList, type TreeNodeState,
 } from './shared';
+import { getSolutions, SUBTREE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'cand' | 'pair' | 'found' | 'fail' | 'done';
@@ -162,14 +164,8 @@ const generateTrace = (R: (number | null)[], S: (number | null)[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public bool IsSubtree(TreeNode root, TreeNode subRoot) {',
-  '    if (subRoot == null) return true;',
-  '    if (root == null) return false;',
-  '    if (IsSameTree(root, subRoot)) return true;',
-  '    return IsSubtree(root.left, subRoot) || IsSubtree(root.right, subRoot);',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_SUBTREE = getSolutions('subtree-572');
 
 export const SubtreeVisualizer = () => {
   const [rStr, setRStr] = useState('3,4,5,1,2');
@@ -245,7 +241,15 @@ export const SubtreeVisualizer = () => {
           build(a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(m·n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_SUBTREE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [SUBTREE_LINE_MAP[lang][step.type]]}
+          meta="O(m·n)"
+        />
+      </div>
     </div>
   );
 };

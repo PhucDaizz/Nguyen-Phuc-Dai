@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
+  ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
 } from './shared';
+import { getSolutions, KTHSMALLEST_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'visit' | 'found' | 'done';
@@ -90,19 +92,8 @@ const generateTrace = (arr: (number | null)[], k: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int KthSmallest(TreeNode root, int k) {',
-  '    int count = 0, answer = -1;',
-  '    void Inorder(TreeNode node) {',
-  '        if (node == null || answer != -1) return;',
-  '        Inorder(node.left);',
-  '        if (++count == k) { answer = node.val; return; }',
-  '        Inorder(node.right);',
-  '    }',
-  '    Inorder(root);',
-  '    return answer;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_KTHSMALLEST = getSolutions('kth-smallest-230');
 
 export const KthSmallestVisualizer = () => {
   const [str, setStr] = useState('3,1,4,null,2');
@@ -180,7 +171,15 @@ export const KthSmallestVisualizer = () => {
           build(a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(h+k)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_KTHSMALLEST}
+          defaultLang="csharp"
+          getHighlight={(lang) => [KTHSMALLEST_LINE_MAP[lang][step.type]]}
+          meta="O(h+k)"
+        />
+      </div>
     </div>
   );
 };

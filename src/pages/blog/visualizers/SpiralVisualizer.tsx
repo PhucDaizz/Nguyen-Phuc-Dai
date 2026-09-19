@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, SPIRAL_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, GridBoard, type TreeNodeState,
+  ThinProgress, GridBoard, type TreeNodeState,
 } from './shared';
 
 interface Step {
@@ -86,28 +88,8 @@ const generateTrace = (m: number[][]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public IList<int> SpiralOrder(int[][] m) {',
-  '    var res = new List<int>();',
-  '    int top = 0, bot = m.Length - 1;',
-  '    int left = 0, right = m[0].Length - 1;',
-  '    while (top <= bot && left <= right) {',
-  '        for (int c = left; c <= right; c++) res.Add(m[top][c]);',
-  '        top++;',
-  '        for (int r = top; r <= bot; r++) res.Add(m[r][right]);',
-  '        right--;',
-  '        if (top <= bot) {',
-  '            for (int c = right; c >= left; c--) res.Add(m[bot][c]);',
-  '            bot--;',
-  '        }',
-  '        if (left <= right) {',
-  '            for (int r = bot; r >= top; r--) res.Add(m[r][left]);',
-  '            left++;',
-  '        }',
-  '    }',
-  '    return res;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_SPIRAL = getSolutions('spiral-matrix-54');
 
 export const SpiralVisualizer = () => {
   const [str, setStr] = useState('1,2,3;4,5,6;7,8,9');
@@ -173,7 +155,14 @@ export const SpiralVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(m·n)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_SPIRAL}
+          defaultLang="csharp"
+          getHighlight={(lang) => [SPIRAL_LINE_MAP[lang][step.type]]}
+          meta="O(m·n)"
+        />
+      </div>
     </div>
   );
 };

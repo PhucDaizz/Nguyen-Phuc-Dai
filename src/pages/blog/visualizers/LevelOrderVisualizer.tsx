@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
+  ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
 } from './shared';
+import { getSolutions, LEVELORDER_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'level' | 'visit' | 'levelEnd' | 'done';
@@ -75,26 +77,8 @@ const generateTrace = (arr: (number | null)[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public IList<IList<int>> LevelOrder(TreeNode root) {',
-  '    var res = new List<IList<int>>();',
-  '    if (root == null) return res;',
-  '    var q = new Queue<TreeNode>();',
-  '    q.Enqueue(root);',
-  '    while (q.Count > 0) {',
-  '        int size = q.Count;',
-  '        var level = new List<int>();',
-  '        for (int i = 0; i < size; i++) {',
-  '            var node = q.Dequeue();',
-  '            level.Add(node.val);',
-  '            if (node.left != null) q.Enqueue(node.left);',
-  '            if (node.right != null) q.Enqueue(node.right);',
-  '        }',
-  '        res.Add(level);',
-  '    }',
-  '    return res;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_LEVELORDER = getSolutions('level-order-102');
 
 export const LevelOrderVisualizer = () => {
   const [str, setStr] = useState('3,9,20,null,null,15,7');
@@ -198,7 +182,15 @@ export const LevelOrderVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_LEVELORDER}
+          defaultLang="csharp"
+          getHighlight={(lang) => [LEVELORDER_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(n)"
+        />
+      </div>
     </div>
   );
 };

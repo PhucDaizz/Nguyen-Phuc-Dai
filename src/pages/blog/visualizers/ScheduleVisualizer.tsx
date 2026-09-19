@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, SCHEDULE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, GraphSvg, type TreeNodeState,
+  ThinProgress, GraphSvg, type TreeNodeState,
 } from './shared';
 
 interface Step {
@@ -73,28 +75,8 @@ const generateTrace = (n: number, pre: [number, number][]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public bool CanFinish(int n, int[][] pre) {',
-  '    var adj = new List<int>[n];',
-  '    for (int i = 0; i < n; i++) adj[i] = new();',
-  '    var indeg = new int[n];',
-  '    foreach (var (a, b) in pre.Select(p => (p[0], p[1]))) {',
-  '        adj[b].Add(a);',
-  '        indeg[a]++;',
-  '    }',
-  '    var q = new Queue<int>();',
-  '    for (int i = 0; i < n; i++)',
-  '        if (indeg[i] == 0) q.Enqueue(i);',
-  '    int taken = 0;',
-  '    while (q.Count > 0) {',
-  '        int u = q.Dequeue();',
-  '        taken++;',
-  '        foreach (int v in adj[u])',
-  '            if (--indeg[v] == 0) q.Enqueue(v);',
-  '    }',
-  '    return taken == n;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_SCHEDULE = getSolutions('course-schedule-207');
 
 export const ScheduleVisualizer = () => {
   const [nStr, setNStr] = useState('4');
@@ -182,7 +164,15 @@ export const ScheduleVisualizer = () => {
           build(a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(V+E)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_SCHEDULE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [SCHEDULE_LINE_MAP[lang][step.type]]}
+          meta="O(V+E)"
+        />
+      </div>
     </div>
   );
 };

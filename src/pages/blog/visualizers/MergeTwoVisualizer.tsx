@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, MERGETWO_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, Chain, parseNumList,
+  ThinProgress, Chain, parseNumList,
 } from './shared';
 
 interface Step {
@@ -59,26 +61,9 @@ const generateTrace = (a: number[], b: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public ListNode MergeTwoLists(ListNode l1, ListNode l2) {',
-  '    var dummy = new ListNode();',
-  '    var cur = dummy;',
-  '    while (l1 != null && l2 != null) {',
-  '        if (l1.val <= l2.val) {',
-  '            cur.next = l1;',
-  '            l1 = l1.next;',
-  '        } else {',
-  '            cur.next = l2;',
-  '            l2 = l2.next;',
-  '        }',
-  '        cur = cur.next;',
-  '    }',
-  '    cur.next = l1 ?? l2;',
-  '    return dummy.next;',
-  '}',
-];
-
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
 const isSorted = (a: number[]) => a.every((v, i) => i === 0 || a[i - 1] <= v);
+const SOLUTIONS_MERGETWO = getSolutions('merge-two-lists-21');
 
 export const MergeTwoVisualizer = () => {
   const [aStr, setAStr] = useState('1,2,4');
@@ -147,7 +132,14 @@ export const MergeTwoVisualizer = () => {
           build(na, nb);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n+m) · O(1)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_MERGETWO}
+          defaultLang="csharp"
+          getHighlight={(lang) => [MERGETWO_LINE_MAP[lang][step.type]]}
+          meta="O(n+m) · O(1)"
+        />
+      </div>
     </div>
   );
 };

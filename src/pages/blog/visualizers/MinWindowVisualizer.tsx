@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, MINWIN_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress,
+  ThinProgress,
 } from './shared';
 
 interface Step {
@@ -78,29 +80,8 @@ const generateTrace = (s: string, t: string): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public string MinWindow(string s, string t) {',
-  '    if (t.Length > s.Length) return "";',
-  '    var need = new Dictionary<char, int>();',
-  '    foreach (char c in t) need[c] = need.GetValueOrDefault(c) + 1;',
-  '    var win = new Dictionary<char, int>();',
-  '    int have = 0, l = 0;',
-  '    string best = "";',
-  '    for (int r = 0; r < s.Length; r++) {',
-  '        char c = s[r];',
-  '        win[c] = win.GetValueOrDefault(c) + 1;',
-  '        if (need.ContainsKey(c) && win[c] == need[c]) have++;',
-  '        while (have == need.Count) {',
-  '            if (best == "" || r - l + 1 < best.Length) best = s.Substring(l, r - l + 1);',
-  '            char d = s[l];',
-  '            win[d]--;',
-  '            if (need.ContainsKey(d) && win[d] < need[d]) have--;',
-  '            l++;',
-  '        }',
-  '    }',
-  '    return best;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_MINWIN = getSolutions('min-window-76');
 
 export const MinWindowVisualizer = () => {
   const [sStr, setSStr] = useState('ADOBECODEBANC');
@@ -183,7 +164,14 @@ export const MinWindowVisualizer = () => {
           build(ns, nt);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(m+n)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_MINWIN}
+          defaultLang="csharp"
+          getHighlight={(lang) => [MINWIN_LINE_MAP[lang][step.type]]}
+          meta="O(m+n)"
+        />
+      </div>
     </div>
   );
 };

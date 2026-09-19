@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, REPLACE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress,
+  ThinProgress,
 } from './shared';
 
 interface Step {
@@ -54,21 +56,8 @@ const generateTrace = (s: string, k: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int CharacterReplacement(string s, int k) {',
-  '    int[] count = new int[26];',
-  '    int l = 0, maxFreq = 0, best = 0;',
-  '    for (int r = 0; r < s.Length; r++) {',
-  "        maxFreq = Math.Max(maxFreq, ++count[s[r] - 'A']);",
-  '        while (r - l + 1 - maxFreq > k) {',
-  "            count[s[l] - 'A']--;",
-  '            l++;',
-  '        }',
-  '        best = Math.Max(best, r - l + 1);',
-  '    }',
-  '    return best;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_REPLACE = getSolutions('char-replacement-424');
 
 export const ReplacementVisualizer = () => {
   const [sStr, setSStr] = useState('ABAB');
@@ -154,7 +143,14 @@ export const ReplacementVisualizer = () => {
           build(ns, nk);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_REPLACE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [REPLACE_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

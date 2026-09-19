@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, PACIFIC_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, GridBoard, type TreeNodeState,
+  ThinProgress, GridBoard, type TreeNodeState,
 } from './shared';
 
 interface Step {
@@ -124,38 +126,8 @@ const generateTrace = (h: number[][]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public IList<IList<int>> PacificAtlantic(int[][] h) {',
-  '    int R = h.Length, C = h[0].Length;',
-  '    var pac = new HashSet<string>();',
-  '    var atl = new HashSet<string>();',
-  '    void Dfs(int r, int c, HashSet<string> seen, int prev) {',
-  '        if (r < 0 || c < 0 || r >= R || c >= C) return;',
-  '        string k = r + "," + c;',
-  '        if (seen.Contains(k) || h[r][c] < prev) return;',
-  '        seen.Add(k);',
-  '        Dfs(r+1, c, seen, h[r][c]);',
-  '        Dfs(r-1, c, seen, h[r][c]);',
-  '        Dfs(r, c+1, seen, h[r][c]);',
-  '        Dfs(r, c-1, seen, h[r][c]);',
-  '    }',
-  '    for (int c = 0; c < C; c++) {',
-  '        Dfs(0, c, pac, h[0][c]);',
-  '        Dfs(R-1, c, atl, h[R-1][c]);',
-  '    }',
-  '    for (int r = 0; r < R; r++) {',
-  '        Dfs(r, 0, pac, h[r][0]);',
-  '        Dfs(r, C-1, atl, h[r][C-1]);',
-  '    }',
-  '    var res = new List<IList<int>>();',
-  '    foreach (var k in pac)',
-  '        if (atl.Contains(k)) {',
-  '            var p = k.Split(",");',
-  '            res.Add(new List<int> { int.Parse(p[0]), int.Parse(p[1]) });',
-  '        }',
-  '    return res;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_PACIFIC = getSolutions('pacific-atlantic-417');
 
 export const PacificVisualizer = () => {
   const [str, setStr] = useState('1,2,2,3,5;3,2,3,4,4;2,4,5,3,1;6,7,1,4,5;5,1,1,2,4');
@@ -223,7 +195,15 @@ export const PacificVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(m·n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_PACIFIC}
+          defaultLang="csharp"
+          getHighlight={(lang) => [PACIFIC_LINE_MAP[lang][step.type]]}
+          meta="O(m·n)"
+        />
+      </div>
     </div>
   );
 };

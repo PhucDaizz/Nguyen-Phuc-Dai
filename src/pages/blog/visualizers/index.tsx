@@ -73,6 +73,7 @@ import { RotateVisualizer } from './RotateVisualizer';
 import { SpiralVisualizer } from './SpiralVisualizer';
 import { ZeroesVisualizer } from './ZeroesVisualizer';
 import { MaxProductVisualizer } from './MaxProductVisualizer';
+import { BinarySearchVisualizer } from './BinarySearchVisualizer';
 
 // Registry: slug bài giảng → visualizer tương ứng.
 // Thêm bài mới: import component + thêm 1 dòng vào map.
@@ -151,6 +152,7 @@ const VISUALIZERS: Record<string, () => React.JSX.Element> = {
   'spiral-matrix-54': SpiralVisualizer,
   'set-zeroes-73': ZeroesVisualizer,
   'max-product-152': MaxProductVisualizer,
+  'binary-search-704': BinarySearchVisualizer,
 };
 
 export const hasVisualizer = (slug: string) => slug in VISUALIZERS;

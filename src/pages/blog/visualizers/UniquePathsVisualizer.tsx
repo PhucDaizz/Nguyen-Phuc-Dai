@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, GridBoard, type TreeNodeState,
+  ThinProgress, GridBoard, type TreeNodeState,
 } from './shared';
+import { getSolutions, UNIQUEPATHS_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'cell' | 'done';
@@ -52,16 +54,8 @@ const generateTrace = (m: number, n: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int UniquePaths(int m, int n) {',
-  '    var dp = new int[n];',
-  '    Array.Fill(dp, 1);',
-  '    for (int i = 1; i < m; i++)',
-  '        for (int j = 1; j < n; j++)',
-  '            dp[j] += dp[j - 1];',
-  '    return dp[n - 1];',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_UNIQUEPATHS = getSolutions('unique-paths-62');
 
 export const UniquePathsVisualizer = () => {
   const [mStr, setMStr] = useState('3');
@@ -121,7 +115,15 @@ export const UniquePathsVisualizer = () => {
           build(a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(m·n) · O(n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_UNIQUEPATHS}
+          defaultLang="csharp"
+          getHighlight={(lang) => [UNIQUEPATHS_LINE_MAP[lang][step.type]]}
+          meta="O(m·n) · O(n)"
+        />
+      </div>
     </div>
   );
 };

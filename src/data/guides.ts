@@ -1351,23 +1351,40 @@ class Trie {
     takeaway: 'Khi search có ký tự đại diện trên tập từ điển cố định: Trie + DFS thử mọi nhánh.',
     relatedSlugs: ['implement-trie-208', 'word-search-ii-212'],
     filename: 'add-search-words.ts',
-    code: `function searchWord(root: TrieNode, word: string, i: number): boolean {
-  let node: TrieNode | null = root;
-  const dfs = (n: TrieNode | null, k: number): boolean => {
-    if (n === null) return false;
-    if (k === word.length) return n.isEnd;
-    const c = word[k];
-    if (c === '.') {
-      for (const child of n.children.values()) {
-        if (dfs(child, k + 1)) return true;
-      }
-      return false;
+    code: `class TrieNode {
+  children = new Map<string, TrieNode>();
+  isEnd = false;
+}
+
+class WordDictionary {
+  root = new TrieNode();
+
+  addWord(word: string): void {
+    let node = this.root;
+    for (const c of word) {
+      if (!node.children.has(c)) node.children.set(c, new TrieNode());
+      node = node.children.get(c)!;
     }
-    return dfs(n.children.get(c) ?? null, k + 1);
-  };
-  return dfs(node, i);
+    node.isEnd = true;
+  }
+
+  search(word: string): boolean {
+    const dfs = (n: TrieNode | null, k: number): boolean => {
+      if (n === null) return false;
+      if (k === word.length) return n.isEnd;
+      const c = word[k];
+      if (c === '.') {
+        for (const child of n.children.values()) {
+          if (dfs(child, k + 1)) return true;
+        }
+        return false;
+      }
+      return dfs(n.children.get(c) ?? null, k + 1);
+    };
+    return dfs(this.root, 0);
+  }
 }`,
-    highlightLines: [8],
+    highlightLines: [23],
     dryRun: {
       input: 'add bad/dad/mad; search("b.d")',
       trace: ['b → nhánh b', '. → thử b-a-d...: a khớp', 'd khớp, hết chuỗi, end=true → true'],
@@ -1390,12 +1407,30 @@ class Trie {
     takeaway: 'Nhiều từ trên cùng một lưới → một Trie chung + một DFS; prefix vắng mặt trong Trie là cắt nhánh.',
     relatedSlugs: ['word-search-79', 'implement-trie-208'],
     filename: 'word-search-ii.ts',
-    code: `function findWords(board: string[][], words: string[]): string[] {
-  const root = buildTrie(words);
+    code: `class WsTrieNode {
+  children = new Map<string, WsTrieNode>();
+  word: string | null = null;
+}
+
+function buildWsTrie(words: string[]): WsTrieNode {
+  const root = new WsTrieNode();
+  for (const w of words) {
+    let n = root;
+    for (const c of w) {
+      if (!n.children.has(c)) n.children.set(c, new WsTrieNode());
+      n = n.children.get(c)!;
+    }
+    n.word = w;
+  }
+  return root;
+}
+
+function findWords(board: string[][], words: string[]): string[] {
+  const root = buildWsTrie(words);
   const res: string[] = [];
   const R = board.length, C = board[0].length;
 
-  const dfs = (r: number, c: number, node: TrieNode): void => {
+  const dfs = (r: number, c: number, node: WsTrieNode): void => {
     if (r < 0 || c < 0 || r >= R || c >= C) return;
     const ch = board[r][c];
     if (ch === '#' || !node.children.has(ch)) return;
@@ -1416,7 +1451,7 @@ class Trie {
     for (let c = 0; c < C; c++) dfs(r, c, root);
   return res;
 }`,
-    highlightLines: [10],
+    highlightLines: [27],
     dryRun: {
       input: 'board 4×4 (oath/pea/eat/rain), words = ["oath","pea","eat","rain"]',
       trace: ['DFS từ o(0,0): o→a→t→h khớp Trie → thu "oath"', 'Từ e(1,0)... nhánh "pea": p không kề → cắt', 'Từ e(2,3)... à e(1,3)→a→t: "eat" → thu', '"rain" không đi được → bỏ'],

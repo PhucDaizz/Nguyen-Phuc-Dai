@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, REMOVENTH_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, Chain, parseNumList,
+  ThinProgress, Chain, parseNumList,
 } from './shared';
 
 interface Step {
@@ -97,17 +99,8 @@ const generateTrace = (vals: number[], n: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public ListNode RemoveNthFromEnd(ListNode head, int n) {',
-  '    var dummy = new ListNode(0, head);',
-  '    var fast = dummy;',
-  '    var slow = dummy;',
-  '    for (int i = 0; i <= n; i++) fast = fast.next;',
-  '    while (fast != null) { fast = fast.next; slow = slow.next; }',
-  '    slow.next = slow.next.next;',
-  '    return dummy.next;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_REMOVENTH = getSolutions('remove-nth-19');
 // codeLine map thực tế: init→1, gap→4, move→5, remove→6, done→7 — chỉnh dưới trace
 // (dùng index dòng C# thật)
 const fixLine = (s: Step): Step => {
@@ -193,7 +186,14 @@ export const RemoveNthVisualizer = () => {
           build(nv, nn);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_REMOVENTH}
+          defaultLang="csharp"
+          getHighlight={(lang) => [REMOVENTH_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

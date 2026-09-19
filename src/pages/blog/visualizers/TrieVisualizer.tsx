@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, type TreeNodeState,
+  ThinProgress, type TreeNodeState,
 } from './shared';
+import { getSolutions, TRIE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import { TrieSvg, newTrie, type TrieObj } from './TrieView';
 
 interface Step {
@@ -113,37 +115,8 @@ const opTrace = (root: TrieObj, op: Step['op'], word: string): { steps: Step[]; 
   return { steps, next };
 };
 
-const CSHARP_LINES = [
-  'public class Trie {',
-  '    private class Node {',
-  '        public Dictionary<char, Node> Next = new();',
-  '        public bool End;',
-  '    }',
-  '    private readonly Node root = new();',
-  '    public void Insert(string word) {',
-  '        var n = root;',
-  '        foreach (char c in word) {',
-  '            if (!n.Next.ContainsKey(c)) n.Next[c] = new Node();',
-  '            n = n.Next[c];',
-  '        }',
-  '        n.End = true;',
-  '    }',
-  '    public bool Search(string word) {',
-  '        var n = Walk(word);',
-  '        return n != null && n.End;',
-  '    }',
-  '    public bool StartsWith(string prefix) {',
-  '        return Walk(prefix) != null;',
-  '    }',
-  '    private Node Walk(string s) {',
-  '        var n = root;',
-  '        foreach (char c in s) {',
-  '            if (!n.Next.TryGetValue(c, out n)) return null;',
-  '        }',
-  '        return n;',
-  '    }',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_TRIE = getSolutions('implement-trie-208');
 
 type Op = 'insert' | 'search' | 'startsWith';
 
@@ -247,7 +220,15 @@ export const TrieVisualizer = () => {
           run(o as Op, w);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(m)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_TRIE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [TRIE_LINE_MAP[lang][step.type]]}
+          meta="O(m)"
+        />
+      </div>
     </div>
   );
 };

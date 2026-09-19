@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, TreeSvg, type TreeNodeState,
+  ThinProgress, TreeSvg, type TreeNodeState,
 } from './shared';
+import { getSolutions, CONSTRUCT_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'pick' | 'done';
@@ -142,22 +144,8 @@ const generateTrace = (pre: number[], ino: number[]): Step[] => {
   });
   return trace;
 };
-const CSHARP_LINES = [
-  'public TreeNode BuildTree(int[] preorder, int[] inorder) {',
-  '    var pos = new Dictionary<int, int>();',
-  '    for (int i = 0; i < inorder.Length; i++) pos[inorder[i]] = i;',
-  '    int pi = 0;',
-  '    TreeNode Build(int l, int r) {',
-  '        if (l > r) return null;',
-  '        var root = new TreeNode(preorder[pi++]);',
-  '        int k = pos[root.val];',
-  '        root.left = Build(l, k - 1);',
-  '        root.right = Build(k + 1, r);',
-  '        return root;',
-  '    }',
-  '    return Build(0, inorder.Length - 1);',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_CONSTRUCT = getSolutions('construct-tree-105');
 
 export const ConstructVisualizer = () => {
   const [preStr, setPreStr] = useState('3,9,20,15,7');
@@ -283,7 +271,15 @@ export const ConstructVisualizer = () => {
           build(a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_CONSTRUCT}
+          defaultLang="csharp"
+          getHighlight={(lang) => [CONSTRUCT_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(n)"
+        />
+      </div>
     </div>
   );
 };

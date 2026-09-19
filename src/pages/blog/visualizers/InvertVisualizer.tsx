@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
+  ThinProgress, TreeSvg, parseTreeList, type TreeNodeState,
 } from './shared';
+import { getSolutions, INVERT_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'swap' | 'done';
@@ -120,15 +122,8 @@ const generateTrace = (init: (number | null)[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public TreeNode InvertTree(TreeNode root) {',
-  '    if (root == null) return null;',
-  '    (root.left, root.right) = (root.right, root.left);',
-  '    InvertTree(root.left);',
-  '    InvertTree(root.right);',
-  '    return root;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_INVERT = getSolutions('invert-tree-226');
 
 export const InvertVisualizer = () => {
   const [str, setStr] = useState('4,2,7,1,3,6,9');
@@ -175,7 +170,15 @@ export const InvertVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(h)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_INVERT}
+          defaultLang="csharp"
+          getHighlight={(lang) => [INVERT_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(h)"
+        />
+      </div>
     </div>
   );
 };

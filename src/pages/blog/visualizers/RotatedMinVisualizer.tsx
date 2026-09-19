@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, ROTMIN_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell, parseNumList,
+  ThinProgress, ArrCell, parseNumList,
 } from './shared';
 
 interface Step {
@@ -46,18 +48,6 @@ const generateTrace = (nums: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int FindMin(int[] nums) {',
-  '    int l = 0, r = nums.Length - 1;',
-  '    while (l < r) {',
-  '        int m = l + (r - l) / 2;',
-  '        if (nums[m] > nums[r]) l = m + 1;',
-  '        else r = m;',
-  '    }',
-  '    return nums[l];',
-  '}',
-];
-
 const isRotatedSorted = (a: number[]) => {
   if (a.length < 2) return true;
   const s = [...a].sort((x, y) => x - y);
@@ -68,6 +58,9 @@ const isRotatedSorted = (a: number[]) => {
   }
   return false;
 };
+
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_ROTMIN = getSolutions('find-min-rotated-153');
 
 export const RotatedMinVisualizer = () => {
   const [str, setStr] = useState('3,4,5,1,2');
@@ -133,7 +126,14 @@ export const RotatedMinVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(log n) · O(1)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_ROTMIN}
+          defaultLang="csharp"
+          getHighlight={(lang) => [ROTMIN_LINE_MAP[lang][step.type]]}
+          meta="O(log n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

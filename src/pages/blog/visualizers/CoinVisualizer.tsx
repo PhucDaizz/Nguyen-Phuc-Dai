@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell, parseNumList,
+  ThinProgress, ArrCell, parseNumList,
 } from './shared';
+import { getSolutions, COIN_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'calc' | 'done';
@@ -52,18 +54,8 @@ const generateTrace = (coins: number[], amount: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int CoinChange(int[] coins, int amount) {',
-  '    const int INF = int.MaxValue / 2;',
-  '    var dp = new int[amount + 1];',
-  '    Array.Fill(dp, INF);',
-  '    dp[0] = 0;',
-  '    for (int x = 1; x <= amount; x++)',
-  '        foreach (int c in coins)',
-  '            if (x - c >= 0) dp[x] = Math.Min(dp[x], dp[x - c] + 1);',
-  '    return dp[amount] >= INF ? -1 : dp[amount];',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_COIN = getSolutions('coin-change-322');
 
 export const CoinVisualizer = () => {
   const [cStr, setCStr] = useState('1,2,5');
@@ -125,7 +117,15 @@ export const CoinVisualizer = () => {
           build(a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(amount·n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_COIN}
+          defaultLang="csharp"
+          getHighlight={(lang) => [COIN_LINE_MAP[lang][step.type]]}
+          meta="O(amount·n)"
+        />
+      </div>
     </div>
   );
 };

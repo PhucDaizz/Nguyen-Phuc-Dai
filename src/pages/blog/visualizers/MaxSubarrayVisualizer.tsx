@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell, parseNumList,
+  ThinProgress, ArrCell, parseNumList,
 } from './shared';
+import { getSolutions, MAXSUBARRAY_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'calc' | 'done';
@@ -53,16 +55,8 @@ const generateTrace = (nums: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int MaxSubArray(int[] nums) {',
-  '    int cur = nums[0], best = nums[0];',
-  '    for (int i = 1; i < nums.Length; i++) {',
-  '        cur = Math.Max(nums[i], cur + nums[i]);',
-  '        best = Math.Max(best, cur);',
-  '    }',
-  '    return best;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_MAXSUBARRAY = getSolutions('max-subarray-53');
 
 export const MaxSubarrayVisualizer = () => {
   const [str, setStr] = useState('-2,1,-3,4,-1,2,1,-5,4');
@@ -129,7 +123,15 @@ export const MaxSubarrayVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_MAXSUBARRAY}
+          defaultLang="csharp"
+          getHighlight={(lang) => [MAXSUBARRAY_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

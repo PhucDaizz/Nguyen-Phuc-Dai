@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, WORDSEARCH_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress,
+  ThinProgress,
 } from './shared';
 
 interface Step {
@@ -111,26 +113,8 @@ const generateTrace = (board: string[][], word: string): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public bool Exist(char[][] board, string word) {',
-  '    int R = board.Length, C = board[0].Length;',
-  '    bool Dfs(int r, int c, int k) {',
-  '        if (k == word.Length) return true;',
-  '        if (r < 0 || c < 0 || r >= R || c >= C) return false;',
-  '        if (board[r][c] != word[k]) return false;',
-  '        char tmp = board[r][c];',
-  '        board[r][c] = \'#\';',
-  '        bool found = Dfs(r+1,c,k+1) || Dfs(r-1,c,k+1)',
-  '                   || Dfs(r,c+1,k+1) || Dfs(r,c-1,k+1);',
-  '        board[r][c] = tmp;',
-  '        return found;',
-  '    }',
-  '    for (int r = 0; r < R; r++)',
-  '        for (int c = 0; c < C; c++)',
-  '            if (board[r][c] == word[0] && Dfs(r, c, 0)) return true;',
-  '    return false;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_WORDSEARCH = getSolutions('word-search-79');
 
 const parseBoard = (str: string): string[][] =>
   str
@@ -238,7 +222,15 @@ export const WordSearchVisualizer = () => {
           build(b, w);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(m·n·4^L)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_WORDSEARCH}
+          defaultLang="csharp"
+          getHighlight={(lang) => [WORDSEARCH_LINE_MAP[lang][step.type]]}
+          meta="O(m·n·4^L)"
+        />
+      </div>
     </div>
   );
 };

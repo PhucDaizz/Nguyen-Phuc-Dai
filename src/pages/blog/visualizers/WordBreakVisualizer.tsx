@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell,
+  ThinProgress, ArrCell,
 } from './shared';
+import { getSolutions, WORDBREAK_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'calc' | 'done';
@@ -47,20 +49,8 @@ const generateTrace = (s: string, dict: Set<string>): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public bool WordBreak(string s, IList<string> dict) {',
-  '    var set = new HashSet<string>(dict);',
-  '    var dp = new bool[s.Length + 1];',
-  '    dp[0] = true;',
-  '    for (int i = 1; i <= s.Length; i++)',
-  '        for (int j = 0; j < i; j++)',
-  '            if (dp[j] && set.Contains(s.Substring(j, i - j))) {',
-  '                dp[i] = true;',
-  '                break;',
-  '            }',
-  '    return dp[s.Length];',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_WORDBREAK = getSolutions('word-break-139');
 
 export const WordBreakVisualizer = () => {
   const [sStr, setSStr] = useState('leetcode');
@@ -144,7 +134,15 @@ export const WordBreakVisualizer = () => {
           build(a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n²)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_WORDBREAK}
+          defaultLang="csharp"
+          getHighlight={(lang) => [WORDBREAK_LINE_MAP[lang][step.type]]}
+          meta="O(n²)"
+        />
+      </div>
     </div>
   );
 };

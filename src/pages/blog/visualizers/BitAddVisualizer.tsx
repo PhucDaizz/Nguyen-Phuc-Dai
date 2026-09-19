@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, BITADD_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, BitRow,
+  ThinProgress, BitRow,
 } from './shared';
 
 interface Step {
@@ -43,16 +45,8 @@ const generateTrace = (a0: number, b0: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int GetSum(int a, int b) {',
-  '    while (b != 0) {',
-  '        int carry = (a & b) << 1;',
-  '        a = a ^ b;',
-  '        b = carry;',
-  '    }',
-  '    return a;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_BITADD = getSolutions('sum-two-integers-371');
 
 const BITS = 8;
 
@@ -112,7 +106,14 @@ export const BitAddVisualizer = () => {
           build(x, y);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(1) · 32 bước" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_BITADD}
+          defaultLang="csharp"
+          getHighlight={(lang) => [BITADD_LINE_MAP[lang][step.type]]}
+          meta="O(1) · 32 bước"
+        />
+      </div>
     </div>
   );
 };

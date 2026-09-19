@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, TOPK_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, parseNumList,
+  ThinProgress, parseNumList,
 } from './shared';
 
 interface Step {
@@ -54,19 +56,8 @@ const generateTrace = (nums: number[], k: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int[] TopKFrequent(int[] nums, int k) {',
-  '    var freq = new Dictionary<int, int>();',
-  '    foreach (int x in nums) freq[x] = freq.GetValueOrDefault(x) + 1;',
-  '    var bucket = new List<int>[nums.Length + 1];',
-  '    for (int i = 0; i < bucket.Length; i++) bucket[i] = new();',
-  '    foreach (var (val, c) in freq) bucket[c].Add(val);',
-  '    var res = new List<int>();',
-  '    for (int f = nums.Length; f >= 1 && res.Count < k; f--)',
-  '        res.AddRange(bucket[f]);',
-  '    return res.ToArray();',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_TOPK = getSolutions('top-k-frequent-347');
 
 export const TopKVisualizer = () => {
   const [str, setStr] = useState('1,1,1,2,2,3');
@@ -163,7 +154,15 @@ export const TopKVisualizer = () => {
           build(a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_TOPK}
+          defaultLang="csharp"
+          getHighlight={(lang) => [TOPK_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(n)"
+        />
+      </div>
     </div>
   );
 };

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getSolutions, TWOSUM_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 // ===================== TRACE ENGINE (build → generateTrace → render) =====================
 interface MapEntry {
@@ -114,19 +116,8 @@ const generateTrace = (nums: number[], target: number): Step[] => {
   return trace;
 };
 
-// ===================== C# SOLUTION (hiển thị + highlight) =====================
-const CSHARP_LINES = [
-  'public int[] TwoSum(int[] nums, int target) {',
-  '    var seen = new Dictionary<int, int>();',
-  '    for (int i = 0; i < nums.Length; i++) {',
-  '        int need = target - nums[i];',
-  '        if (seen.ContainsKey(need))',
-  '            return new int[] { seen[need], i };',
-  '        seen[nums[i]] = i;',
-  '    }',
-  '    return Array.Empty<int>();',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_TWOSUM = getSolutions('two-sum-1');
 
 const PRESETS = [
   { label: 'Cơ bản · [2,7,11,15], t=9', nums: '2,7,11,15', target: 9 },
@@ -403,26 +394,14 @@ export const TwoSumVisualizer = () => {
         Phím tắt: Space Play/Pause · → Step · ← Back · R Reset
       </p>
 
-      {/* 6. CODE PANEL C# */}
-      <div className="code-block" style={{ marginTop: 14 }}>
-        <div className="code-head">
-          <div className="dots">
-            <i style={{ background: '#ff5f57' }} />
-            <i style={{ background: '#febc2e' }} />
-            <i style={{ background: '#28c840' }} />
-          </div>
-          <div className="name">Solution.cs<span className="live" /></div>
-          <div className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>O(n) · O(n)</div>
-        </div>
-        <pre>
-          <code>
-            {CSHARP_LINES.map((ln, i) => (
-              <span key={i} className={`line ${step.codeLine === i ? 'active' : ''}`}>
-                {ln || ' '}
-              </span>
-            ))}
-          </code>
-        </pre>
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_TWOSUM}
+          defaultLang="csharp"
+          getHighlight={(lang) => [TWOSUM_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(n)"
+        />
       </div>
     </div>
   );

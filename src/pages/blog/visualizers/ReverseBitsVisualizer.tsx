@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, REVERSEBITS_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, BitRow,
+  ThinProgress, BitRow,
 } from './shared';
 
 interface Step {
@@ -39,16 +41,8 @@ const generateTrace = (n0: number): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public uint ReverseBits(uint n) {',
-  '    uint res = 0;',
-  '    for (int i = 0; i < 32; i++) {',
-  '        res = (res << 1) | (n & 1);',
-  '        n >>= 1;',
-  '    }',
-  '    return res;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_REVERSEBITS = getSolutions('reverse-bits-190');
 
 export const ReverseBitsVisualizer = () => {
   const [str, setStr] = useState('43261596');
@@ -93,7 +87,14 @@ export const ReverseBitsVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(1) · 32" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_REVERSEBITS}
+          defaultLang="csharp"
+          getHighlight={(lang) => [REVERSEBITS_LINE_MAP[lang][step.type]]}
+          meta="O(1) · 32"
+        />
+      </div>
     </div>
   );
 };

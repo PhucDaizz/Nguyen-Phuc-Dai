@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell, parseNumList,
+  ThinProgress, ArrCell, parseNumList,
 } from './shared';
+import { getSolutions, JUMP_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'jump' | 'done';
@@ -41,15 +43,8 @@ const generateTrace = (nums: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public bool CanJump(int[] nums) {',
-  '    int goal = nums.Length - 1;',
-  '    for (int i = nums.Length - 1; i >= 0; i--) {',
-  '        if (i + nums[i] >= goal) goal = i;',
-  '    }',
-  '    return goal == 0;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_JUMP = getSolutions('jump-game-55');
 
 export const JumpVisualizer = () => {
   const [str, setStr] = useState('2,3,1,1,4');
@@ -109,7 +104,15 @@ export const JumpVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_JUMP}
+          defaultLang="csharp"
+          getHighlight={(lang) => [JUMP_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

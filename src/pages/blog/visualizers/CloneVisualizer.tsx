@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, CLONE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, GraphSvg, type TreeNodeState,
+  ThinProgress, GraphSvg, type TreeNodeState,
 } from './shared';
 
 interface Step {
@@ -89,20 +91,8 @@ const generateTrace = (ids: number[], edges: [number, number][]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public Node CloneGraph(Node node) {',
-  '    var seen = new Dictionary<Node, Node>();',
-  '    Node Dfs(Node n) {',
-  '        if (seen.ContainsKey(n)) return seen[n];',
-  '        var copy = new Node(n.val);',
-  '        seen[n] = copy;',
-  '        foreach (var nb in n.neighbors)',
-  '            copy.neighbors.Add(Dfs(nb));',
-  '        return copy;',
-  '    }',
-  '    return node == null ? null : Dfs(node);',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_CLONE = getSolutions('clone-graph-133');
 
 export const CloneVisualizer = () => {
   const [str, setStr] = useState('0-1,0-3,1-2,2-3');
@@ -177,7 +167,15 @@ export const CloneVisualizer = () => {
           build(v);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(V+E)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_CLONE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [CLONE_LINE_MAP[lang][step.type]]}
+          meta="O(V+E)"
+        />
+      </div>
     </div>
   );
 };

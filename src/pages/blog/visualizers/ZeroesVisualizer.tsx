@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, ZEROES_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, GridBoard, type TreeNodeState,
+  ThinProgress, GridBoard, type TreeNodeState,
 } from './shared';
 
 interface Step {
@@ -109,25 +111,8 @@ const generateTrace = (init: number[][]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public void SetZeroes(int[][] m) {',
-  '    int R = m.Length, C = m[0].Length;',
-  '    bool fr = false, fc = false;',
-  '    for (int c = 0; c < C; c++) if (m[0][c] == 0) fr = true;',
-  '    for (int r = 0; r < R; r++) if (m[r][0] == 0) fc = true;',
-  '    for (int r = 1; r < R; r++)',
-  '        for (int c = 1; c < C; c++)',
-  '            if (m[r][c] == 0) {',
-  '                m[r][0] = 0;',
-  '                m[0][c] = 0;',
-  '            }',
-  '    for (int r = 1; r < R; r++)',
-  '        for (int c = 1; c < C; c++)',
-  '            if (m[r][0] == 0 || m[0][c] == 0) m[r][c] = 0;',
-  '    if (fr) for (int c = 0; c < C; c++) m[0][c] = 0;',
-  '    if (fc) for (int r = 0; r < R; r++) m[r][0] = 0;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_ZEROES = getSolutions('set-zeroes-73');
 
 export const ZeroesVisualizer = () => {
   const [str, setStr] = useState('1,1,1;1,0,1;1,1,1');
@@ -197,7 +182,14 @@ export const ZeroesVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(m·n) · O(1)" />
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_ZEROES}
+          defaultLang="csharp"
+          getHighlight={(lang) => [ZEROES_LINE_MAP[lang][step.type]]}
+          meta="O(m·n) · O(1)"
+        />
+      </div>
     </div>
   );
 };

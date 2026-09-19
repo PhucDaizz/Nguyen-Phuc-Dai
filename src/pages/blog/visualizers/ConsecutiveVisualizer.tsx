@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, CONSEC_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, ArrCell, parseNumList,
+  ThinProgress, ArrCell, parseNumList,
 } from './shared';
 
 interface Step {
@@ -59,19 +61,8 @@ const generateTrace = (nums: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int LongestConsecutive(int[] nums) {',
-  '    var set = new HashSet<int>(nums);',
-  '    int best = 0;',
-  '    foreach (int x in set) {',
-  '        if (set.Contains(x - 1)) continue;',
-  '        int cur = x, len = 1;',
-  '        while (set.Contains(cur + 1)) { cur++; len++; }',
-  '        best = Math.Max(best, len);',
-  '    }',
-  '    return best;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_CONSEC = getSolutions('longest-consecutive-128');
 
 export const ConsecutiveVisualizer = () => {
   const [str, setStr] = useState('100,4,200,1,3,2');
@@ -150,7 +141,15 @@ export const ConsecutiveVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_CONSEC}
+          defaultLang="csharp"
+          getHighlight={(lang) => [CONSEC_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(n)"
+        />
+      </div>
     </div>
   );
 };

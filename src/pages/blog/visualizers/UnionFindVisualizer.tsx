@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { getSolutions, VALIDTREE_LINE_MAP, COMPONENTS_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, GraphSvg, type TreeNodeState,
+  ThinProgress, GraphSvg, type TreeNodeState,
 } from './shared';
 
 interface Step {
@@ -109,28 +111,8 @@ const generateTrace = (n: number, edges: [number, number][], mode: 'tree' | 'cou
   return trace;
 };
 
-const CSHARP_TREE = [
-  'public bool ValidTree(int n, int[][] edges) {',
-  '    if (edges.Length != n - 1) return false;',
-  '    var parent = Enumerable.Range(0, n).ToArray();',
-  '    int Find(int x) => parent[x] == x ? x : (parent[x] = Find(parent[x]));',
-  '    foreach (var (a, b) in edges.Select(e => (e[0], e[1]))) {',
-  '        if (Find(a) == Find(b)) return false;',
-  '        parent[Find(a)] = Find(b);',
-  '    }',
-  '    return true;',
-  '}',
-];
-
-const CSHARP_COUNT = [
-  'public int CountComponents(int n, int[][] edges) {',
-  '    var parent = Enumerable.Range(0, n).ToArray();',
-  '    int Find(int x) => parent[x] == x ? x : (parent[x] = Find(parent[x]));',
-  '    foreach (var (a, b) in edges.Select(e => (e[0], e[1])))',
-  '        parent[Find(a)] = Find(b);',
-  '    return new HashSet<int>(Enumerable.Range(0, n).Select(Find)).Count;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+// UnionFindViz dùng chung cho 2 bài: solutions lấy theo cfg.slug, map chọn theo cfg.mode.
 
 const UnionFindViz = ({ cfg }: { cfg: Cfg }) => {
   const [nStr, setNStr] = useState(cfg.presets[0].value.split('|')[0]);
@@ -142,6 +124,7 @@ const UnionFindViz = ({ cfg }: { cfg: Cfg }) => {
   const trace = useMemo(() => generateTrace(n, edges, cfg.mode), [n, edges, cfg.mode]);
   const pb = usePlayback(trace.length);
   const step = trace[Math.min(pb.stepIdx, trace.length - 1)];
+  const SOLUTIONS_UF = getSolutions(cfg.slug);
 
   const build = (a: string, b: string) => {
     const nn = Number(a);
@@ -221,7 +204,24 @@ const UnionFindViz = ({ cfg }: { cfg: Cfg }) => {
           build(a, b ?? '');
         }}
       />
-      <CodePanel lines={cfg.mode === 'tree' ? CSHARP_TREE : CSHARP_COUNT} active={step.codeLine} stats="O(V+E)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) — 2 SolutionTabs riêng theo mode */}
+      <div style={{ marginTop: 14 }}>
+        {cfg.mode === 'tree' ? (
+          <SolutionTabs
+            solutions={SOLUTIONS_UF}
+            defaultLang="csharp"
+            getHighlight={(lang) => [VALIDTREE_LINE_MAP[lang][step.type]]}
+            meta="O(V+E)"
+          />
+        ) : (
+          <SolutionTabs
+            solutions={SOLUTIONS_UF}
+            defaultLang="csharp"
+            getHighlight={(lang) => [COMPONENTS_LINE_MAP[lang][step.type]]}
+            meta="O(V+E)"
+          />
+        )}
+      </div>
     </div>
   );
 };

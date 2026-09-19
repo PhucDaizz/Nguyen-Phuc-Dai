@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, TreeSvg, parseTreeList, type TreeNodeState,
+  TreeSvg, parseTreeList, type TreeNodeState,
 } from './shared';
+import { getSolutions, SAMETREE_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'compare' | 'done';
@@ -88,13 +90,8 @@ const generateTrace = (P: (number | null)[], Q: (number | null)[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public bool IsSameTree(TreeNode p, TreeNode q) {',
-  '    if (p == null && q == null) return true;',
-  '    if (p == null || q == null || p.val != q.val) return false;',
-  '    return IsSameTree(p.left, q.left) && IsSameTree(p.right, q.right);',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_SAMETREE = getSolutions('same-tree-100');
 
 export const SameTreeVisualizer = () => {
   const [pStr, setPStr] = useState('1,2,3');
@@ -166,7 +163,15 @@ export const SameTreeVisualizer = () => {
           build(a, b);
         }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(h)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_SAMETREE}
+          defaultLang="csharp"
+          getHighlight={(lang) => [SAMETREE_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(h)"
+        />
+      </div>
     </div>
   );
 };
