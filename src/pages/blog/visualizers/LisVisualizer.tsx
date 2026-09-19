@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, parseNumList,
+  ThinProgress, parseNumList,
 } from './shared';
+import { getSolutions, LIS_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'calc' | 'done';
@@ -50,20 +52,8 @@ const generateTrace = (nums: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int LengthOfLIS(int[] nums) {',
-  '    if (nums.Length == 0) return 0;',
-  '    var dp = new int[nums.Length];',
-  '    Array.Fill(dp, 1);',
-  '    int best = 1;',
-  '    for (int i = 0; i < nums.Length; i++) {',
-  '        for (int j = 0; j < i; j++)',
-  '            if (nums[j] < nums[i]) dp[i] = Math.Max(dp[i], dp[j] + 1);',
-  '        best = Math.Max(best, dp[i]);',
-  '    }',
-  '    return best;',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_LIS = getSolutions('lis-300');
 
 export const LisVisualizer = () => {
   const [str, setStr] = useState('10,9,2,5,3,7,101,18');
@@ -99,12 +89,17 @@ export const LisVisualizer = () => {
                   {step.dp[i] ?? '—'}
                 </span>
                 <div
+                  className="dsa-viz-bar"
                   style={{
                     width: '100%',
                     height: Math.max(8, (v / maxV) * 120),
                     borderRadius: '6px 6px 0 0',
-                    background: isCur ? 'rgba(255,181,71,.3)' : isPrev ? 'rgba(45,212,191,.3)' : 'rgba(255,255,255,.07)',
-                    border: `2px solid ${isCur ? 'var(--accent)' : isPrev ? 'var(--teal)' : 'transparent'}`,
+                    background: isCur
+                      ? 'rgba(255,181,71,.3)'
+                      : isPrev
+                        ? 'rgba(45,212,191,.3)'
+                        : 'var(--bar-default, rgba(255,255,255,.07))',
+                    border: `2px solid ${isCur ? 'var(--accent)' : isPrev ? 'var(--teal)' : 'var(--bar-border, transparent)'}`,
                     borderBottom: 'none',
                     transition: 'all .3s var(--ease)',
                   }}
@@ -132,7 +127,15 @@ export const LisVisualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n²) · O(n)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_LIS}
+          defaultLang="csharp"
+          getHighlight={(lang) => [LIS_LINE_MAP[lang][step.type]]}
+          meta="O(n²) · O(n)"
+        />
+      </div>
     </div>
   );
 };

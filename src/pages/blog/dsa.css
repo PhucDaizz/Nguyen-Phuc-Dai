@@ -15,6 +15,9 @@
   --card: rgba(255, 255, 255, 0.025);
   --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.15);
+  --bar-default: rgba(255, 255, 255, 0.08);
+  --bar-border: transparent;
+  --bar-cur-skip: rgba(255, 255, 255, 0.16);
   --radius-lg: 20px;
   --radius-md: 14px;
   --radius-sm: 8px;
@@ -49,6 +52,9 @@
   --card: rgba(255, 255, 255, 0.85);
   --border: rgba(0, 0, 0, 0.08);
   --border-strong: rgba(0, 0, 0, 0.16);
+  --bar-default: #e2e8f0;
+  --bar-border: rgba(0, 0, 0, 0.12);
+  --bar-cur-skip: #cbd5e1;
 
   background-image:
     radial-gradient(ellipse 80% 50% at 20% 0%, rgba(217,119,6,.06), transparent 50%),
@@ -422,3 +428,19 @@
   border-color: rgba(255, 181, 71, 0.7) !important;
   box-shadow: 0 0 16px var(--accent-glow) !important;
 }
+
+/* SolutionTabs */
+.sol-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px 0; }
+.sol-tab {
+  font-family: var(--mono, monospace);
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.sol-tab:hover { color: var(--ink); border-color: var(--accent); }
+.sol-tab.on { color: #0b0e14; background: var(--accent); border-color: var(--accent); font-weight: 700; }

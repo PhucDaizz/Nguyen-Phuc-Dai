@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   usePlayback, VizHeader, StepBar, ControlsCard, InputField, PresetsRow,
-  CodePanel, ThinProgress, parseNumList,
+  ThinProgress, parseNumList,
 } from './shared';
+import { getSolutions, ROBBER2_LINE_MAP } from '../../../data/solutions';
+import { SolutionTabs } from '../SolutionTabs';
 
 interface Step {
   type: 'init' | 'house' | 'runEnd' | 'done';
@@ -83,21 +85,8 @@ const generateTrace = (nums: number[]): Step[] => {
   return trace;
 };
 
-const CSHARP_LINES = [
-  'public int Rob2(int[] nums) {',
-  '    if (nums.Length == 1) return nums[0];',
-  '    int RobRange(int l, int r) {',
-  '        int prev2 = 0, prev1 = 0;',
-  '        for (int i = l; i <= r; i++) {',
-  '            int cur = Math.Max(prev1, prev2 + nums[i]);',
-  '            prev2 = prev1;',
-  '            prev1 = cur;',
-  '        }',
-  '        return prev1;',
-  '    }',
-  '    return Math.Max(RobRange(0, nums.Length - 2), RobRange(1, nums.Length - 1));',
-  '}',
-];
+// ===================== SOLUTIONS đa ngôn ngữ (C# mặc định, khớp dòng với trace) =====================
+const SOLUTIONS_ROBBER2 = getSolutions('house-robber-ii-213');
 
 export const Robber2Visualizer = () => {
   const [str, setStr] = useState('2,3,2');
@@ -142,13 +131,17 @@ export const Robber2Visualizer = () => {
                 <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1, minWidth: 38, opacity: out ? 0.3 : 1 }}>
                   <span className="mono" style={{ fontSize: 11, color: isCur ? 'var(--accent)' : 'var(--muted)' }}>{v}</span>
                   <div
+                    className="dsa-viz-bar"
                     style={{
                       width: '100%',
                       height: Math.max(8, (v / maxV) * 120),
                       borderRadius: '6px 6px 0 0',
-                      background: isCur ? (step.take ? 'rgba(45,212,191,.35)' : 'rgba(255,255,255,.14)') : 'rgba(255,255,255,.07)',
-                      border: `2px solid ${isCur ? (step.take ? 'var(--teal)' : 'var(--accent)') : 'transparent'}`,
+                      background: isCur
+                        ? (step.take ? 'rgba(45,212,191,.35)' : 'var(--bar-cur-skip, rgba(255,255,255,.14))')
+                        : 'var(--bar-default, rgba(255,255,255,.07))',
+                      border: `2px solid ${isCur ? (step.take ? 'var(--teal)' : 'var(--accent)') : 'var(--bar-border, transparent)'}`,
                       borderBottom: 'none',
+                      boxShadow: isCur ? (step.take ? '0 0 14px var(--teal-glow)' : '0 0 14px var(--accent-glow)') : 'none',
                       transition: 'all .3s var(--ease)',
                     }}
                   />
@@ -202,7 +195,15 @@ export const Robber2Visualizer = () => {
         ]}
         onPick={(v) => { setStr(v); build(v); }}
       />
-      <CodePanel lines={CSHARP_LINES} active={step.codeLine} stats="O(n) · O(1)" />
+      {/* 6. CODE PANEL đa ngôn ngữ (highlight dòng trace trên tab C#) */}
+      <div style={{ marginTop: 14 }}>
+        <SolutionTabs
+          solutions={SOLUTIONS_ROBBER2}
+          defaultLang="csharp"
+          getHighlight={(lang) => [ROBBER2_LINE_MAP[lang][step.type]]}
+          meta="O(n) · O(1)"
+        />
+      </div>
     </div>
   );
 };
