@@ -120,6 +120,7 @@ const loadDone = (): number[] => {
 export const Blind75Page = () => {
   const [done, setDone] = useState<number[]>(() => loadDone());
   const [selected, setSelected] = useState<string>('arrays');
+  const [hovered, setHovered] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const userZoomed = useRef(false); // user đã zoom tay thì không auto-fit nữa
@@ -180,6 +181,49 @@ export const Blind75Page = () => {
 
   const doneSet = useMemo(() => new Set(done), [done]);
   const nodeById = useMemo(() => Object.fromEntries(NODES.map((n) => [n.id, n])), []);
+
+  // Tính đường đi từ root ('arrays') đến target node (hovered hoặc selected)
+  const targetNodeId = hovered || selected;
+  const activePathEdges = useMemo(() => {
+    if (!targetNodeId) return new Set<string>();
+    if (targetNodeId === 'arrays') return new Set<string>();
+
+    // Map parent nodes từ EDGES
+    const parentMap: Record<string, string[]> = {};
+    for (const [from, to] of EDGES) {
+      if (!parentMap[to]) parentMap[to] = [];
+      parentMap[to].push(from);
+    }
+
+    // BFS/DFS tìm đường ngược từ targetNodeId về 'arrays'
+    const edgesSet = new Set<string>();
+    const queue: string[] = [targetNodeId];
+    const visited = new Set<string>([targetNodeId]);
+
+    while (queue.length > 0) {
+      const curr = queue.shift()!;
+      const parents = parentMap[curr] || [];
+      for (const p of parents) {
+        edgesSet.add(`${p}->${curr}`);
+        if (!visited.has(p)) {
+          visited.add(p);
+          queue.push(p);
+        }
+      }
+    }
+    return edgesSet;
+  }, [targetNodeId]);
+
+  const activeAncestorNodes = useMemo(() => {
+    if (!targetNodeId) return new Set<string>();
+    const ancestors = new Set<string>([targetNodeId]);
+    for (const edgeKey of activePathEdges) {
+      const [from, to] = edgeKey.split('->');
+      ancestors.add(from);
+      ancestors.add(to);
+    }
+    return ancestors;
+  }, [targetNodeId, activePathEdges]);
 
   const ratio = (n: TreeNode) =>
     n.problems.length === 0 ? 0 : n.problems.filter((p) => doneSet.has(p)).length / n.problems.length;
@@ -378,7 +422,7 @@ export const Blind75Page = () => {
       {/* ===== CÂY + SIDEBAR ===== */}
       <div className="blind-layout">
         {/* CÂY SVG (trái) */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, width: '100%' }}>
           <div className="btn-row" style={{ marginBottom: 10 }}>
             <button className="btn" onClick={() => zoomBy(-0.15)} title="Thu nhỏ">−</button>
             <span className="mono" style={{ alignSelf: 'center', fontSize: 12, color: 'var(--muted)', minWidth: 52, textAlign: 'center' }}>
@@ -390,7 +434,7 @@ export const Blind75Page = () => {
             <span style={{ alignSelf: 'center', fontSize: 12, color: 'var(--muted)' }}>Mẹo: giữ Ctrl + cuộn chuột để zoom</span>
           </div>
           <div className="blind-tree-scroll" ref={scrollRef}>
-          <div style={{ width: CANVAS_W * zoom, height: CANVAS_H * zoom, position: 'relative' }}>
+          <div className="blind-tree-viewport" style={{ width: CANVAS_W * zoom, height: CANVAS_H * zoom }}>
           <div
             style={{
               position: 'absolute',
@@ -406,25 +450,45 @@ export const Blind75Page = () => {
             }}
           >
           <svg width={CANVAS_W} height={CANVAS_H} style={{ position: 'absolute', inset: 0 }}>
-            {EDGES.map(([from, to]) => (
-              <path
-                key={`${from}-${to}`}
-                d={edgePath(nodeById[from], nodeById[to])}
-                fill="none"
-                stroke="rgba(255,255,255,.28)"
-                strokeWidth={3}
-              />
-            ))}
+            <defs>
+              <filter id="edgeGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="glow" />
+                <feMerge>
+                  <feMergeNode in="glow" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            {/* 1. Base edges */}
+            {EDGES.map(([from, to]) => {
+              const edgeKey = `${from}->${to}`;
+              const isActive = activePathEdges.has(edgeKey);
+              return (
+                <path
+                  key={`${from}-${to}`}
+                  d={edgePath(nodeById[from], nodeById[to])}
+                  fill="none"
+                  stroke={isActive ? 'var(--accent)' : 'rgba(255,255,255,.24)'}
+                  strokeWidth={isActive ? 3.5 : 2.5}
+                  className={isActive ? 'blind-edge-active' : undefined}
+                  filter={isActive ? 'url(#edgeGlow)' : undefined}
+                />
+              );
+            })}
           </svg>
           {NODES.map((n) => {
             const r = ratio(n);
             const complete = r === 1 && n.problems.length > 0;
             const isSel = selected === n.id;
+            const isHovered = hovered === n.id;
+            const isAncestor = activeAncestorNodes.has(n.id) && !isSel && !isHovered;
             const w = n.w ?? 190;
             return (
               <button
                 key={n.id}
                 onClick={() => setSelected(n.id)}
+                onMouseEnter={() => setHovered(n.id)}
+                onMouseLeave={() => setHovered(null)}
                 style={{
                   all: 'unset',
                   position: 'absolute',
@@ -448,12 +512,22 @@ export const Blind75Page = () => {
                   textAlign: 'center',
                   lineHeight: 1.2,
                   background: complete ? '#2f6b4f' : '#3d4560',
-                  border: isSel ? '2px solid var(--accent)' : '2px solid transparent',
+                  border: isSel || isHovered
+                    ? '2px solid var(--accent)'
+                    : isAncestor
+                      ? '2px solid rgba(255, 181, 71, 0.7)'
+                      : '2px solid transparent',
                   boxShadow: complete
-                    ? '0 0 18px rgba(46,204,113,.45)'
-                    : isSel
-                      ? '0 0 18px var(--accent-glow)'
-                      : 'none',
+                    ? (isSel || isHovered
+                        ? '0 0 22px rgba(46,204,113,.7), 0 0 12px var(--accent-glow)'
+                        : '0 0 18px rgba(46,204,113,.45)')
+                    : isSel || isHovered
+                      ? '0 0 20px var(--accent-glow)'
+                      : isAncestor
+                        ? '0 0 12px var(--accent-glow)'
+                        : 'none',
+                  transform: isHovered || isSel ? 'scale(1.04)' : 'scale(1)',
+                  zIndex: isHovered || isSel ? 10 : isAncestor ? 5 : 1,
                   transition: 'all .25s var(--ease)',
                 }}
               >

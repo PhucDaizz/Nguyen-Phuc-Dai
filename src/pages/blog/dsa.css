@@ -61,7 +61,13 @@
 .dsa-scope .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .dsa-scope .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 @media (max-width: 900px) {
-  .dsa-layout, .dsa-scope .grid-2, .dsa-scope .grid-3 { grid-template-columns: 1fr; }
+  .dsa-layout, .dsa-scope .grid-2, .dsa-scope .grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+  .dsa-scope .grid-2 > *, .dsa-scope .grid-3 > * {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
   .dsa-container { padding: 0 16px 64px; }
   .dsa-scope h1 { font-size: clamp(30px, 9vw, 44px); }
   .dsa-scope h2 { font-size: clamp(22px, 6vw, 30px); }
@@ -215,6 +221,10 @@
   touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
 }
+.blind-tree-viewport {
+  margin: 0 auto;
+  position: relative;
+}
 .blind-sidebar {
   width: 380px;
   flex-shrink: 0;
@@ -233,4 +243,37 @@
 @media (max-width: 1100px) {
   .blind-layout { flex-direction: column; }
   .blind-sidebar { width: 100%; position: static; max-height: none; }
+}
+
+@media (max-width: 768px) {
+  .dsa-scope {
+    padding: 5.5rem 0.75rem 3rem;
+  }
+  .dsa-container {
+    padding: 0 4px 48px;
+  }
+}
+
+/* Hiệu ứng vẽ đường khi active/hover path từ root tới node */
+@keyframes blindEdgeDraw {
+  from {
+    stroke-dashoffset: 60;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.blind-edge-active {
+  stroke: var(--accent);
+  stroke-width: 3.5px;
+  filter: drop-shadow(0 0 6px var(--accent-glow));
+  stroke-dasharray: 8 4;
+  animation: blindEdgeDraw 1s linear infinite;
+  transition: stroke 0.3s ease, stroke-width 0.3s ease;
+}
+
+.blind-node-active-ancestor {
+  border-color: rgba(255, 181, 71, 0.7) !important;
+  box-shadow: 0 0 16px var(--accent-glow) !important;
 }

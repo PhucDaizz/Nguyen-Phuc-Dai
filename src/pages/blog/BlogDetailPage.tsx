@@ -163,17 +163,17 @@ export const BlogDetailPage = () => {
       </h1>
       <p>{meta.summary}</p>
       {blind && <ProblemStatement p={blind} />}
-      <div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', margin: '16px 0' }}>
         <span className={diffPill(meta.difficulty)}>{meta.difficulty}</span>
         <span className="pill">TIME {guide.time}</span>
         <span className="pill">SPACE {guide.space}</span>
         {blind && (
-          <a href={leetcodeUrl(blind)} target="_blank" rel="noreferrer" className="btn ghost" style={{ padding: '4px 10px', fontSize: 12 }}>
+          <a href={leetcodeUrl(blind)} target="_blank" rel="noreferrer" className="btn ghost" style={{ padding: '6px 12px', fontSize: 12 }}>
             Đề gốc LeetCode ↗
           </a>
         )}
         {slug && hasVisualizer(slug) && (
-          <Link to={`/blog/${slug}/visualize`} className="btn primary" style={{ padding: '4px 10px', fontSize: 12 }}>
+          <Link to={`/blog/${slug}/visualize`} className="btn primary" style={{ padding: '6px 14px', fontSize: 12.5, whiteSpace: 'nowrap' }}>
             Mô phỏng trực quan →
           </Link>
         )}
