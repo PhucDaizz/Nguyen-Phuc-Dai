@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Code, FolderGit2, Mail, Copy, Check, BrainCircuit } from 'lucide-react';
+import { User, Code, FolderGit2, Mail, Copy, Check, BrainCircuit, X } from 'lucide-react';
 import portfolioData from '../data/portfolioData.json';
 
 export const HeaderNav: React.FC = () => {
@@ -10,6 +10,7 @@ export const HeaderNav: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const isBlog = location.pathname.startsWith('/blog');
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const sectionIds = ['hero', 'about', 'projects', 'skills', 'contact'];
@@ -35,6 +36,7 @@ export const HeaderNav: React.FC = () => {
 
     const scrollTo = (id: string) => {
         if (isBlog) {
+            setExpanded(false);
             navigate('/');
             // Đợi home mount rồi mới scroll
             setTimeout(() => {
@@ -54,12 +56,36 @@ export const HeaderNav: React.FC = () => {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // Route blog: header thu gọn, rê chuột vào (hoặc chạm) thì bung ra
+    // Route blog: header thu gọn, bấm MENU để bung ra. Nếu không ấn vào hoặc ấn ra ngoài / cuộn trang thì tự động thu nhỏ lại.
     const [expanded, setExpanded] = useState(false);
     useEffect(() => {
         if (isBlog) setExpanded(false);
         else setExpanded(true);
-    }, [isBlog]);
+    }, [isBlog, location.pathname]);
+
+    // Click outside & scroll listener để tự thu nhỏ lại ở route blog khi người dùng không tương tác
+    useEffect(() => {
+        if (!isBlog || !expanded) return;
+
+        const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setExpanded(false);
+            }
+        };
+
+        const handlePageScroll = () => {
+            setExpanded(false);
+        };
+
+        document.addEventListener('pointerdown', handleClickOutside);
+        window.addEventListener('scroll', handlePageScroll, { passive: true });
+
+        return () => {
+            document.removeEventListener('pointerdown', handleClickOutside);
+            window.removeEventListener('scroll', handlePageScroll);
+        };
+    }, [isBlog, expanded]);
+
     const collapsed = isBlog && !expanded;
 
     return (
@@ -81,9 +107,10 @@ export const HeaderNav: React.FC = () => {
             }}
         >
             <div
+                ref={containerRef}
                 className="header-nav-container"
-                onMouseEnter={() => { if (isBlog) setExpanded(true); }}
-                onMouseLeave={() => { if (isBlog) setExpanded(false); }}
+                onMouseEnter={() => { if (isBlog && window.innerWidth > 768) setExpanded(true); }}
+                onMouseLeave={() => { if (isBlog && window.innerWidth > 768) setExpanded(false); }}
                 style={{
                     pointerEvents: 'auto',
                     display: 'flex',
@@ -103,14 +130,14 @@ export const HeaderNav: React.FC = () => {
                 {collapsed ? (
                     <button
                         onClick={() => setExpanded(true)}
-                        className="nav-item-btn"
-                        title="Mở menu (rê chuột vào để bung)"
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                        className="nav-item-btn nav-menu-toggle"
+                        title="Mở menu điều hướng"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.4rem 0.6rem' }}
                     >
                         <span
                             style={{
-                                width: '8px',
-                                height: '8px',
+                                width: '9px',
+                                height: '9px',
                                 borderRadius: '50%',
                                 backgroundColor: '#22c55e',
                                 boxShadow: '0 0 10px #22c55e',
@@ -122,6 +149,17 @@ export const HeaderNav: React.FC = () => {
                     </button>
                 ) : (
                 <>
+                {/* Khi ở route blog, cho phép nút đóng X thu nhỏ lại ngay */}
+                {isBlog && (
+                    <button
+                        onClick={() => setExpanded(false)}
+                        className="nav-item-btn nav-close-btn"
+                        title="Thu nhỏ menu"
+                        style={{ display: 'flex', alignItems: 'center', padding: '0.4rem', borderRadius: '50%' }}
+                    >
+                        <X size={15} />
+                    </button>
+                )}
                 {/* Live Status Indicator */}
                 <div className="header-status-badge" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingRight: '0.8rem', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
                     <span

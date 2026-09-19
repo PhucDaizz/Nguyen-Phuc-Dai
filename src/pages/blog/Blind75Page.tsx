@@ -350,8 +350,8 @@ export const Blind75Page = () => {
           <span className="dot" style={{ background: 'var(--teal)', boxShadow: '0 0 8px var(--teal)' }}></span>
           TIẾN ĐỘ CHUNG {totalDone}/{uniqueNos.length} · {Math.round((totalDone / uniqueNos.length) * 100)}%
         </div>
-        <div style={{ height: 10, borderRadius: 100, background: 'rgba(255,255,255,.06)', overflow: 'hidden' }}>
-          <div style={{ width: `${(totalDone / uniqueNos.length) * 100}%`, height: '100%', background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', transition: 'width .4s var(--ease)' }} />
+        <div className="dsa-progress-track" style={{ height: 10, borderRadius: 100, overflow: 'hidden' }}>
+          <div className="dsa-progress-bar" style={{ width: `${(totalDone / uniqueNos.length) * 100}%`, height: '100%', background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', transition: 'width .4s var(--ease)' }} />
         </div>
         <div className="btn-row">
           <button className="btn ghost" onClick={() => { if (confirm('Xóa hết tiến độ Blind75?')) setDone([]); }}>Reset tiến độ</button>
@@ -556,12 +556,12 @@ export const Blind75Page = () => {
               return (
                 <div
                   key={p.no}
+                  className={`blind-problem-item ${checked ? 'is-checked' : ''}`}
                   style={{
                     display: 'flex', gap: 12, alignItems: 'flex-start',
                     padding: '12px 14px', borderRadius: 14,
                     border: '1px solid var(--border)',
-                    background: checked ? 'rgba(45,212,191,.05)' : 'rgba(0,0,0,.2)',
-                    opacity: checked ? 0.75 : 1,
+                    opacity: checked ? 0.8 : 1,
                   }}
                 >
                   <input
@@ -580,7 +580,7 @@ export const Blind75Page = () => {
                       <span className={diffPill(p.difficulty)}>{p.difficulty}</span>
                       {p.premium && <span className="pill premium">PREMIUM</span>}
                     </div>
-                    <p style={{ fontSize: 13, margin: '6px 0', color: 'rgba(240,233,216,.75)' }}>
+                    <p style={{ fontSize: 13, margin: '6px 0', color: 'var(--fg)', opacity: 0.85 }}>
                       <span style={{ color: 'var(--accent)' }}>{p.viTitle}</span> — {p.summary}
                     </p>
                     <ProblemStatement p={p} compact />

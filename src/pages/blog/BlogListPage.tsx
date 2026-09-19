@@ -68,7 +68,7 @@ export const BlogListPage = () => {
         </div>
         <h3 style={{ marginTop: 0 }}>Mở sơ đồ cây Blind 75 →</h3>
         <p style={{ fontSize: 13.5, margin: 0 }}>
-          10 nhánh thu/mở, tick để lưu tiến độ (localStorage), thanh progress từng nhánh.
+          10 nhánh chủ đề thu/mở trực quan, đánh dấu lưu tiến độ và thanh theo dõi chi tiết từng nhánh.
         </p>
       </Link>
 
